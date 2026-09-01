@@ -239,6 +239,7 @@ export type Database = {
           id: number
           na_prodaj: boolean
           nabavna_cena: number | null
+          oznaka: string | null
           prodajna_cena: number
           sirina: number | null
           ustvarjeno_at: string
@@ -250,6 +251,7 @@ export type Database = {
           id?: number
           na_prodaj?: boolean
           nabavna_cena?: number | null
+          oznaka?: string | null
           prodajna_cena: number
           sirina?: number | null
           ustvarjeno_at?: string
@@ -261,6 +263,7 @@ export type Database = {
           id?: number
           na_prodaj?: boolean
           nabavna_cena?: number | null
+          oznaka?: string | null
           prodajna_cena?: number
           sirina?: number | null
           ustvarjeno_at?: string
