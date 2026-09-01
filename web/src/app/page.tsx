@@ -80,23 +80,29 @@ export default async function ZacetnaStran() {
             </p>
           </Link>
 
-          <article className="rounded-2xl bg-white p-6 shadow-sm">
+          <Link
+            href="/dokumenti"
+            className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
             <h3 className="text-lg font-semibold text-slate-900">
               Ponudbe
             </h3>
             <p className="mt-2 text-sm text-slate-600">
               Priprava informativnih izračunov.
             </p>
-          </article>
+          </Link>
 
-          <article className="rounded-2xl bg-white p-6 shadow-sm">
+          <Link
+            href="/dokumenti"
+            className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
             <h3 className="text-lg font-semibold text-slate-900">
               Naročila
             </h3>
             <p className="mt-2 text-sm text-slate-600">
               Upravljanje naročil in njihovih statusov.
             </p>
-          </article>
+          </Link>
         </div>
       </section>
     </main>
