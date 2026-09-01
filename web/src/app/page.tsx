@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import { odjava } from "./actions";
 import { createClient } from "@/lib/supabase/server";
@@ -67,14 +68,17 @@ export default async function ZacetnaStran() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <article className="rounded-2xl bg-white p-6 shadow-sm">
+          <Link
+            href="/stranke"
+            className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+          >
             <h3 className="text-lg font-semibold text-slate-900">
               Stranke
             </h3>
             <p className="mt-2 text-sm text-slate-600">
               Dodajanje in pregled strank.
             </p>
-          </article>
+          </Link>
 
           <article className="rounded-2xl bg-white p-6 shadow-sm">
             <h3 className="text-lg font-semibold text-slate-900">
