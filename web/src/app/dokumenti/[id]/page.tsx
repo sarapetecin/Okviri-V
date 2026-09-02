@@ -4,9 +4,14 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
-import { odstraniOkvir, odstraniSteklo } from "./actions";
+import {
+  odstraniOkvir,
+  odstraniPaspartu,
+  odstraniSteklo,
+} from "./actions";
 import { GumbOdstraniOkvir } from "./gumb-odstrani-okvir";
 import { GumbOdstraniSteklo } from "./gumb-odstrani-steklo";
+import { GumbOdstraniPaspartu } from "./gumb-odstrani-paspartu";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -96,6 +101,14 @@ export default async function DokumentPage({
       id,
       naziv,
       cena_stekla
+    ),
+    postavka_paspartu (
+      id,
+      oznaka,
+      barva,
+      dodatni_opis,
+      cena_paspartuja,
+      vrstni_red
     )
   `,
     )
@@ -330,6 +343,42 @@ export default async function DokumentPage({
                             />
                           </div>
                         )}
+                        {postavka.postavka_paspartu.length > 0 && (
+                          <div className="mt-2 space-y-2">
+                            {postavka.postavka_paspartu
+                              .toSorted((a, b) => a.vrstni_red - b.vrstni_red)
+                              .map((paspartu) => (
+                                <div
+                                  key={paspartu.id}
+                                  className="flex min-w-72 items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 p-3"
+                                >
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                      Paspartu: {paspartu.oznaka ?? "Brez oznake"}
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-slate-600">
+                                      {paspartu.barva ?? "Brez barve"}
+                                      {paspartu.dodatni_opis
+                                        ? ` · ${paspartu.dodatni_opis}`
+                                        : ""}
+                                      {" · "}
+                                      {oblikujZnesek(paspartu.cena_paspartuja)}
+                                    </p>
+                                  </div>
+
+                                  <GumbOdstraniPaspartu
+                                    action={odstraniPaspartu.bind(
+                                      null,
+                                      dokument.id,
+                                      postavka.id,
+                                      paspartu.id,
+                                    )}
+                                  />
+                                </div>
+                              ))}
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
                         {postavka.dolzina} × {postavka.sirina}
@@ -352,6 +401,12 @@ export default async function DokumentPage({
                             Dodaj steklo
                           </Link>
                         )}
+                        <Link
+                          href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/paspartu`}
+                          className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Dodaj paspartu
+                        </Link>
                       </td>
                     </tr>
                   ))}

@@ -295,6 +295,7 @@ export type Database = {
           na_prodaj: boolean
           nabavna_cena: number | null
           naziv: string
+          oznaka: string | null
           prodajna_cena: number
           ustvarjeno_at: string
         }
@@ -306,6 +307,7 @@ export type Database = {
           na_prodaj?: boolean
           nabavna_cena?: number | null
           naziv: string
+          oznaka?: string | null
           prodajna_cena: number
           ustvarjeno_at?: string
         }
@@ -317,6 +319,7 @@ export type Database = {
           na_prodaj?: boolean
           nabavna_cena?: number | null
           naziv?: string
+          oznaka?: string | null
           prodajna_cena?: number
           ustvarjeno_at?: string
         }
@@ -458,7 +461,7 @@ export type Database = {
       }
       postavka_paspartu: {
         Row: {
-          barva: string
+          barva: string | null
           cena_paspartuja: number
           dodatni_opis: string | null
           id: number
@@ -469,7 +472,7 @@ export type Database = {
           vrstni_red: number
         }
         Insert: {
-          barva: string
+          barva?: string | null
           cena_paspartuja?: number
           dodatni_opis?: string | null
           id?: number
@@ -480,7 +483,7 @@ export type Database = {
           vrstni_red?: number
         }
         Update: {
-          barva?: string
+          barva?: string | null
           cena_paspartuja?: number
           dodatni_opis?: string | null
           id?: number
@@ -796,6 +799,10 @@ export type Database = {
         Args: { p_okvir_id: number; p_postavka_id: number }
         Returns: number
       }
+      dodaj_paspartu_postavki: {
+        Args: { p_paspartu_id: number; p_postavka_id: number }
+        Returns: number
+      }
       dodaj_steklo_postavki: {
         Args: { p_postavka_id: number; p_steklo_id: number }
         Returns: number
@@ -804,6 +811,10 @@ export type Database = {
       je_interni_uporabnik: { Args: never; Returns: boolean }
       odstrani_okvir_postavke: {
         Args: { p_postavka_okvir_id: number }
+        Returns: undefined
+      }
+      odstrani_paspartu_postavke: {
+        Args: { p_postavka_paspartu_id: number }
         Returns: undefined
       }
       odstrani_steklo_postavke: {

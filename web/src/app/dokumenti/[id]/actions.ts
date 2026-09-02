@@ -140,3 +140,73 @@ export async function odstraniSteklo(
     revalidatePath(`/dokumenti/${dokumentId}`);
     redirect(`/dokumenti/${dokumentId}`);
 }
+const odstraniPaspartuSchema = z.object({
+  dokumentId: z.number().int().positive(),
+  postavkaId: z.number().int().positive(),
+  postavkaPaspartuId: z.number().int().positive(),
+});
+
+export async function odstraniPaspartu(
+  dokumentId: number,
+  postavkaId: number,
+  postavkaPaspartuId: number,
+  formData: FormData,
+) {
+  void formData;
+
+  const supabase = await createClient();
+
+  const { data: podatkiZetona, error: napakaZetona } =
+    await supabase.auth.getClaims();
+
+  if (napakaZetona || !podatkiZetona?.claims?.sub) {
+    redirect("/prijava");
+  }
+
+  const rezultat = odstraniPaspartuSchema.safeParse({
+    dokumentId,
+    postavkaId,
+    postavkaPaspartuId,
+  });
+
+  if (!rezultat.success) {
+    redirect(`/dokumenti/${dokumentId}?napaka=neveljavni-podatki`);
+  }
+
+  const { data: postavka } = await supabase
+    .from("narocilo_postavka")
+    .select("id")
+    .eq("id", rezultat.data.postavkaId)
+    .eq("narocilo_id", rezultat.data.dokumentId)
+    .maybeSingle();
+
+  if (!postavka) {
+    redirect(`/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`);
+  }
+
+  const { data: povezavaPaspartuja } = await supabase
+    .from("postavka_paspartu")
+    .select("id")
+    .eq("id", rezultat.data.postavkaPaspartuId)
+    .eq("postavka_id", postavka.id)
+    .maybeSingle();
+
+  if (!povezavaPaspartuja) {
+    redirect(`/dokumenti/${dokumentId}?napaka=paspartu-ne-obstaja`);
+  }
+
+  const { error } = await supabase.rpc("odstrani_paspartu_postavke", {
+    p_postavka_paspartu_id: povezavaPaspartuja.id,
+  });
+
+  if (error) {
+    console.error("Napaka pri odstranjevanju paspartuja:", error);
+
+    redirect(
+      `/dokumenti/${dokumentId}?napaka=odstranjevanje-paspartuja`,
+    );
+  }
+
+  revalidatePath(`/dokumenti/${dokumentId}`);
+  redirect(`/dokumenti/${dokumentId}`);
+}
