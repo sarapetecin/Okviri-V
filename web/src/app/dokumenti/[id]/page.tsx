@@ -166,12 +166,21 @@ export default async function DokumentPage({
             </h1>
           </div>
 
-          <Link
-            href="/dokumenti"
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            Nazaj na dokumente
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/dokumenti/${dokument.id}/natisni`}
+              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
+            >
+              Natisni dokument
+            </Link>
+
+            <Link
+              href="/dokumenti"
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Nazaj na dokumente
+            </Link>
+          </div>
         </div>
       </header>
 
