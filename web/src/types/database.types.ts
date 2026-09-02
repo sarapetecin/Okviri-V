@@ -798,6 +798,10 @@ export type Database = {
       }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
+      odstrani_okvir_postavke: {
+        Args: { p_postavka_okvir_id: number }
+        Returns: undefined
+      }
       trenutna_uporabniska_vloga: { Args: never; Returns: string }
     }
     Enums: {

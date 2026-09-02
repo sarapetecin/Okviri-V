@@ -4,6 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
+import { odstraniOkvir } from "./actions";
+import { GumbOdstraniOkvir } from "./gumb-odstrani-okvir";
+
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
 
@@ -71,7 +74,24 @@ export default async function DokumentPage({
   const { data: postavke, error: napakaPostavk } = await supabase
     .from("narocilo_postavka")
     .select(
-      "id, kolicina, dolzina, sirina, opis_slike, ogledalo, cena_postavke, vrstni_red",
+      `
+    id,
+    kolicina,
+    dolzina,
+    sirina,
+    opis_slike,
+    ogledalo,
+    cena_postavke,
+    vrstni_red,
+    postavka_okvir (
+      id,
+      vzorec,
+      barva,
+      sirina_okvirja,
+      cena_okvirja,
+      vrstni_red
+    )
+  `,
     )
     .eq("narocilo_id", dokumentId)
     .order("vrstni_red");
@@ -239,8 +259,49 @@ export default async function DokumentPage({
                         {postavka.vrstni_red}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-900">
-                        {postavka.opis_slike ??
-                          (postavka.ogledalo ? "Ogledalo" : "Slika")}
+                        <p className="font-medium">
+                          {postavka.opis_slike ??
+                            (postavka.ogledalo ? "Ogledalo" : "Slika")}
+                        </p>
+
+                        {postavka.postavka_okvir.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            {postavka.postavka_okvir
+                              .toSorted((a, b) => a.vrstni_red - b.vrstni_red)
+                              .map((okvir) => (
+                                <div
+                                  key={okvir.id}
+                                  className="flex min-w-72 items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3"
+                                >
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                      {okvir.vzorec}
+                                    </p>
+
+                                    <p className="mt-1 text-xs text-slate-600">
+                                      {okvir.barva ?? "Brez barve"}
+                                      {" · "}
+                                      Širina:{" "}
+                                      {okvir.sirina_okvirja !== null
+                                        ? `${okvir.sirina_okvirja} cm`
+                                        : "ni vnesena"}
+                                      {" · "}
+                                      {oblikujZnesek(okvir.cena_okvirja)}
+                                    </p>
+                                  </div>
+
+                                  <GumbOdstraniOkvir
+                                    action={odstraniOkvir.bind(
+                                      null,
+                                      dokument.id,
+                                      postavka.id,
+                                      okvir.id,
+                                    )}
+                                  />
+                                </div>
+                              ))}
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
                         {postavka.dolzina} × {postavka.sirina}
