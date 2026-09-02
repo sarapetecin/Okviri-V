@@ -847,6 +847,10 @@ export type Database = {
         Args: { p_postavka_id: number; p_steklo_id: number }
         Returns: number
       }
+      izbrisi_celotno_postavko: {
+        Args: { p_postavka_id: number }
+        Returns: number
+      }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
       odstrani_dodatno_delo_postavke: {
@@ -869,6 +873,14 @@ export type Database = {
         Args: { p_postavka_steklo_id: number }
         Returns: undefined
       }
+      osvezi_ceno_postavke: {
+        Args: { p_postavka_id: number }
+        Returns: undefined
+      }
+      osvezi_skupni_znesek_dokumenta: {
+        Args: { p_narocilo_id: number }
+        Returns: undefined
+      }
       spremeni_status_dokumenta: {
         Args: {
           p_narocilo_id: number
@@ -877,6 +889,23 @@ export type Database = {
         Returns: undefined
       }
       trenutna_uporabniska_vloga: { Args: never; Returns: string }
+      ustvari_celotno_postavko: {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_narocilo_id: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       status_prodajnega_dokumenta:

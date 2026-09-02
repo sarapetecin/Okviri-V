@@ -19,6 +19,8 @@ import { GumbOdstraniPaspartu } from "./gumb-odstrani-paspartu";
 import { GumbOdstraniPodokvir } from "./gumb-odstrani-podokvir";
 import { GumbOdstraniDodatnoDelo } from "./gumb-odstrani-dodatno-delo";
 import { GumbiStatusa } from "./gumbi-statusa";
+import { izbrisiPostavko } from "./brisanje-postavke";
+import { GumbIzbrisiPostavko } from "./gumb-izbrisi-postavko";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -377,10 +379,13 @@ export default async function DokumentPage({
                       Količina
                     </th>
                     <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                      Dejanja
+                    </th>
+                    <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
                       Cena
                     </th>
                     <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
-                      Dejanja
+                      Izbriši
                     </th>
                   </tr>
                 </thead>
@@ -600,6 +605,21 @@ export default async function DokumentPage({
                         >
                           Dodatno delo
                         </Link>
+                      </td>
+                      <td className="px-5 py-4 text-right text-sm font-medium text-slate-900">
+                        {oblikujZnesek(postavka.cena_postavke)}
+                      </td>
+
+                      <td className="px-5 py-4">
+                        <div className="flex justify-end gap-2">
+                          <GumbIzbrisiPostavko
+                            action={izbrisiPostavko.bind(
+                              null,
+                              dokument.id,
+                              postavka.id,
+                            )}
+                          />
+                        </div>
                       </td>
                     </tr>
                   ))}
