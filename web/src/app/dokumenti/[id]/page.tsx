@@ -4,8 +4,9 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
-import { odstraniOkvir } from "./actions";
+import { odstraniOkvir, odstraniSteklo } from "./actions";
 import { GumbOdstraniOkvir } from "./gumb-odstrani-okvir";
+import { GumbOdstraniSteklo } from "./gumb-odstrani-steklo";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -90,6 +91,11 @@ export default async function DokumentPage({
       sirina_okvirja,
       cena_okvirja,
       vrstni_red
+    ),
+    postavka_steklo (
+      id,
+      naziv,
+      cena_stekla
     )
   `,
     )
@@ -302,6 +308,28 @@ export default async function DokumentPage({
                               ))}
                           </div>
                         )}
+                        {postavka.postavka_steklo && (
+                          <div className="mt-2 flex min-w-72 items-center justify-between gap-4 rounded-lg border border-sky-200 bg-sky-50 p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                Steklo: {postavka.postavka_steklo.naziv}
+                              </p>
+
+                              <p className="mt-1 text-xs text-slate-600">
+                                {oblikujZnesek(postavka.postavka_steklo.cena_stekla)}
+                              </p>
+                            </div>
+
+                            <GumbOdstraniSteklo
+                              action={odstraniSteklo.bind(
+                                null,
+                                dokument.id,
+                                postavka.id,
+                                postavka.postavka_steklo.id,
+                              )}
+                            />
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
                         {postavka.dolzina} × {postavka.sirina}
@@ -316,6 +344,14 @@ export default async function DokumentPage({
                         >
                           Dodaj okvir
                         </Link>
+                        {!postavka.postavka_steklo && (
+                          <Link
+                            href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/steklo`}
+                            className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Dodaj steklo
+                          </Link>
+                        )}
                       </td>
                     </tr>
                   ))}

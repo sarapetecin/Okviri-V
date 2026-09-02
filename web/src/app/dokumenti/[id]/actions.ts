@@ -73,3 +73,70 @@ export async function odstraniOkvir(
     revalidatePath(`/dokumenti/${dokumentId}`);
     redirect(`/dokumenti/${dokumentId}`);
 }
+const odstraniStekloSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    postavkaId: z.number().int().positive(),
+    postavkaStekloId: z.number().int().positive(),
+});
+
+export async function odstraniSteklo(
+    dokumentId: number,
+    postavkaId: number,
+    postavkaStekloId: number,
+    formData: FormData,
+) {
+    void formData;
+
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+        redirect("/prijava");
+    }
+
+    const rezultat = odstraniStekloSchema.safeParse({
+        dokumentId,
+        postavkaId,
+        postavkaStekloId,
+    });
+
+    if (!rezultat.success) {
+        redirect(`/dokumenti/${dokumentId}?napaka=neveljavni-podatki`);
+    }
+
+    const { data: postavka } = await supabase
+        .from("narocilo_postavka")
+        .select("id")
+        .eq("id", rezultat.data.postavkaId)
+        .eq("narocilo_id", rezultat.data.dokumentId)
+        .maybeSingle();
+
+    if (!postavka) {
+        redirect(`/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`);
+    }
+
+    const { data: povezavaStekla } = await supabase
+        .from("postavka_steklo")
+        .select("id")
+        .eq("id", rezultat.data.postavkaStekloId)
+        .eq("postavka_id", postavka.id)
+        .maybeSingle();
+
+    if (!povezavaStekla) {
+        redirect(`/dokumenti/${dokumentId}?napaka=steklo-ne-obstaja`);
+    }
+
+    const { error } = await supabase.rpc("odstrani_steklo_postavke", {
+        p_postavka_steklo_id: povezavaStekla.id,
+    });
+
+    if (error) {
+        console.error("Napaka pri odstranjevanju stekla:", error);
+        redirect(`/dokumenti/${dokumentId}?napaka=odstranjevanje-stekla`);
+    }
+
+    revalidatePath(`/dokumenti/${dokumentId}`);
+    redirect(`/dokumenti/${dokumentId}`);
+}
