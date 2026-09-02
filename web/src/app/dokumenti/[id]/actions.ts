@@ -435,3 +435,74 @@ export async function odstraniDodatnoDelo(
     revalidatePath(`/dokumenti/${dokumentId}`);
     redirect(`/dokumenti/${dokumentId}`);
 }
+const spremeniStatusSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    noviStatus: z.enum([
+        "osnutek",
+        "poslano_v_pregled",
+        "zavrnjeno",
+        "potrjeno",
+        "v_izdelavi",
+        "dokoncano",
+        "rocno_zaprto",
+        "preklicano",
+    ]),
+});
+
+export async function spremeniStatusDokumenta(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+        redirect("/prijava");
+    }
+
+    const rezultat = spremeniStatusSchema.safeParse({
+        dokumentId,
+        noviStatus: formData.get("noviStatus"),
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljaven-status`,
+        );
+    }
+
+    const { data: dokument } = await supabase
+        .from("narocilo")
+        .select("id")
+        .eq("id", rezultat.data.dokumentId)
+        .maybeSingle();
+
+    if (!dokument) {
+        redirect("/dokumenti");
+    }
+
+    const { error } = await supabase.rpc(
+        "spremeni_status_dokumenta",
+        {
+            p_narocilo_id: dokument.id,
+            p_novi_status: rezultat.data.noviStatus,
+        },
+    );
+
+    if (error) {
+        console.error("Napaka pri spremembi statusa:", error);
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
+        );
+    }
+
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+
+    redirect(
+        `/dokumenti/${dokumentId}?uspeh=status-spremenjen`,
+    );
+}

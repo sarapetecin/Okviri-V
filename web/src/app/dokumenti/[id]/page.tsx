@@ -11,12 +11,14 @@ import {
   dodajPodokvir,
   odstraniPodokvir,
   odstraniDodatnoDelo,
+  spremeniStatusDokumenta,
 } from "./actions";
 import { GumbOdstraniOkvir } from "./gumb-odstrani-okvir";
 import { GumbOdstraniSteklo } from "./gumb-odstrani-steklo";
 import { GumbOdstraniPaspartu } from "./gumb-odstrani-paspartu";
 import { GumbOdstraniPodokvir } from "./gumb-odstrani-podokvir";
 import { GumbOdstraniDodatnoDelo } from "./gumb-odstrani-dodatno-delo";
+import { GumbiStatusa } from "./gumbi-statusa";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -239,7 +241,37 @@ export default async function DokumentPage({
             </p>
           </article>
         </div>
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">
+                Potek dokumenta
+              </h2>
 
+              <p className="mt-1 text-sm text-slate-600">
+                Trenutni status:{" "}
+                <span className="font-semibold text-slate-900">
+                  {naziviStatusov[dokument.status]}
+                </span>
+              </p>
+
+              {dokument.vrsta === "ponudba" && (
+                <p className="mt-1 text-sm text-slate-500">
+                  Ob potrditvi se ponudba samodejno spremeni v naročilo.
+                </p>
+              )}
+            </div>
+
+            <GumbiStatusa
+              status={dokument.status}
+              vrsta={dokument.vrsta}
+              action={spremeniStatusDokumenta.bind(
+                null,
+                dokument.id,
+              )}
+            />
+          </div>
+        </section>
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col justify-between gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center">
             <div>
@@ -250,7 +282,6 @@ export default async function DokumentPage({
                 Slike, dimenzije in izbrani materiali.
               </p>
             </div>
-
             <Link
               href={`/dokumenti/${dokument.id}/postavke/nova`}
               className="rounded-lg bg-slate-900 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-slate-700"
