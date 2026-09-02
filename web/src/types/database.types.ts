@@ -792,6 +792,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      dodaj_okvir_postavki: {
+        Args: { p_okvir_id: number; p_postavka_id: number }
+        Returns: number
+      }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
       trenutna_uporabniska_vloga: { Args: never; Returns: string }

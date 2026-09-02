@@ -226,6 +226,9 @@ export default async function DokumentPage({
                     <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
                       Cena
                     </th>
+                    <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                      Dejanja
+                    </th>
                   </tr>
                 </thead>
 
@@ -245,8 +248,13 @@ export default async function DokumentPage({
                       <td className="px-5 py-4 text-sm text-slate-600">
                         {postavka.kolicina}
                       </td>
-                      <td className="px-5 py-4 text-right text-sm font-medium text-slate-900">
-                        {oblikujZnesek(postavka.cena_postavke)}
+                      <td className="px-5 py-4 text-right">
+                        <Link
+                          href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/okvir`}
+                          className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                        >
+                          Dodaj okvir
+                        </Link>
                       </td>
                     </tr>
                   ))}
