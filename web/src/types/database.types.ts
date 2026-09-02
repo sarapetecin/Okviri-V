@@ -337,25 +337,42 @@ export type Database = {
         Row: {
           cena_na_meter: number | null
           cena_na_podokvir: number | null
+          dobavitelj_id: number | null
           dolzina: number | null
           id: number
           na_prodaj: boolean
+          oznaka: string | null
+          zaloga: number
         }
         Insert: {
           cena_na_meter?: number | null
           cena_na_podokvir?: number | null
+          dobavitelj_id?: number | null
           dolzina?: number | null
           id?: number
           na_prodaj?: boolean
+          oznaka?: string | null
+          zaloga?: number
         }
         Update: {
           cena_na_meter?: number | null
           cena_na_podokvir?: number | null
+          dobavitelj_id?: number | null
           dolzina?: number | null
           id?: number
           na_prodaj?: boolean
+          oznaka?: string | null
+          zaloga?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "podokvir_dobavitelj_id_fkey"
+            columns: ["dobavitelj_id"]
+            isOneToOne: false
+            referencedRelation: "dobavitelj"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       postavka_dodatno_delo: {
         Row: {
@@ -803,6 +820,10 @@ export type Database = {
         Args: { p_paspartu_id: number; p_postavka_id: number }
         Returns: number
       }
+      dodaj_podokvir_postavki: {
+        Args: { p_postavka_id: number }
+        Returns: number
+      }
       dodaj_steklo_postavki: {
         Args: { p_postavka_id: number; p_steklo_id: number }
         Returns: number
@@ -815,6 +836,10 @@ export type Database = {
       }
       odstrani_paspartu_postavke: {
         Args: { p_postavka_paspartu_id: number }
+        Returns: undefined
+      }
+      odstrani_podokvir_postavke: {
+        Args: { p_postavka_podokvir_id: number }
         Returns: undefined
       }
       odstrani_steklo_postavke: {

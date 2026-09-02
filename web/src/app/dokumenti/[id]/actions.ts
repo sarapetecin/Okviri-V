@@ -141,72 +141,215 @@ export async function odstraniSteklo(
     redirect(`/dokumenti/${dokumentId}`);
 }
 const odstraniPaspartuSchema = z.object({
-  dokumentId: z.number().int().positive(),
-  postavkaId: z.number().int().positive(),
-  postavkaPaspartuId: z.number().int().positive(),
+    dokumentId: z.number().int().positive(),
+    postavkaId: z.number().int().positive(),
+    postavkaPaspartuId: z.number().int().positive(),
 });
 
 export async function odstraniPaspartu(
-  dokumentId: number,
-  postavkaId: number,
-  postavkaPaspartuId: number,
-  formData: FormData,
+    dokumentId: number,
+    postavkaId: number,
+    postavkaPaspartuId: number,
+    formData: FormData,
 ) {
-  void formData;
+    void formData;
 
-  const supabase = await createClient();
+    const supabase = await createClient();
 
-  const { data: podatkiZetona, error: napakaZetona } =
-    await supabase.auth.getClaims();
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
 
-  if (napakaZetona || !podatkiZetona?.claims?.sub) {
-    redirect("/prijava");
-  }
+    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+        redirect("/prijava");
+    }
 
-  const rezultat = odstraniPaspartuSchema.safeParse({
-    dokumentId,
-    postavkaId,
-    postavkaPaspartuId,
-  });
+    const rezultat = odstraniPaspartuSchema.safeParse({
+        dokumentId,
+        postavkaId,
+        postavkaPaspartuId,
+    });
 
-  if (!rezultat.success) {
-    redirect(`/dokumenti/${dokumentId}?napaka=neveljavni-podatki`);
-  }
+    if (!rezultat.success) {
+        redirect(`/dokumenti/${dokumentId}?napaka=neveljavni-podatki`);
+    }
 
-  const { data: postavka } = await supabase
-    .from("narocilo_postavka")
-    .select("id")
-    .eq("id", rezultat.data.postavkaId)
-    .eq("narocilo_id", rezultat.data.dokumentId)
-    .maybeSingle();
+    const { data: postavka } = await supabase
+        .from("narocilo_postavka")
+        .select("id")
+        .eq("id", rezultat.data.postavkaId)
+        .eq("narocilo_id", rezultat.data.dokumentId)
+        .maybeSingle();
 
-  if (!postavka) {
-    redirect(`/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`);
-  }
+    if (!postavka) {
+        redirect(`/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`);
+    }
 
-  const { data: povezavaPaspartuja } = await supabase
-    .from("postavka_paspartu")
-    .select("id")
-    .eq("id", rezultat.data.postavkaPaspartuId)
-    .eq("postavka_id", postavka.id)
-    .maybeSingle();
+    const { data: povezavaPaspartuja } = await supabase
+        .from("postavka_paspartu")
+        .select("id")
+        .eq("id", rezultat.data.postavkaPaspartuId)
+        .eq("postavka_id", postavka.id)
+        .maybeSingle();
 
-  if (!povezavaPaspartuja) {
-    redirect(`/dokumenti/${dokumentId}?napaka=paspartu-ne-obstaja`);
-  }
+    if (!povezavaPaspartuja) {
+        redirect(`/dokumenti/${dokumentId}?napaka=paspartu-ne-obstaja`);
+    }
 
-  const { error } = await supabase.rpc("odstrani_paspartu_postavke", {
-    p_postavka_paspartu_id: povezavaPaspartuja.id,
-  });
+    const { error } = await supabase.rpc("odstrani_paspartu_postavke", {
+        p_postavka_paspartu_id: povezavaPaspartuja.id,
+    });
 
-  if (error) {
-    console.error("Napaka pri odstranjevanju paspartuja:", error);
+    if (error) {
+        console.error("Napaka pri odstranjevanju paspartuja:", error);
 
-    redirect(
-      `/dokumenti/${dokumentId}?napaka=odstranjevanje-paspartuja`,
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=odstranjevanje-paspartuja`,
+        );
+    }
+
+    revalidatePath(`/dokumenti/${dokumentId}`);
+    redirect(`/dokumenti/${dokumentId}`);
+}
+const odstraniPodokvirSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    postavkaId: z.number().int().positive(),
+    postavkaPodokvirId: z.number().int().positive(),
+});
+
+const dodajPodokvirSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    postavkaId: z.number().int().positive(),
+});
+
+export async function dodajPodokvir(
+    dokumentId: number,
+    postavkaId: number,
+    formData: FormData,
+) {
+    void formData;
+
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+        redirect("/prijava");
+    }
+
+    const rezultat = dodajPodokvirSchema.safeParse({
+        dokumentId,
+        postavkaId,
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljavni-podatki`,
+        );
+    }
+
+    const { data: postavka } = await supabase
+        .from("narocilo_postavka")
+        .select("id")
+        .eq("id", rezultat.data.postavkaId)
+        .eq("narocilo_id", rezultat.data.dokumentId)
+        .maybeSingle();
+
+    if (!postavka) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`,
+        );
+    }
+
+    const { error } = await supabase.rpc(
+        "dodaj_podokvir_postavki",
+        {
+            p_postavka_id: postavka.id,
+        },
     );
-  }
 
-  revalidatePath(`/dokumenti/${dokumentId}`);
-  redirect(`/dokumenti/${dokumentId}`);
+    if (error) {
+        console.error("Napaka pri dodajanju podokvirja:", error);
+
+        const napaka = error.message.includes(
+            "že ima dodan podokvir",
+        )
+            ? "podokvir-ze-obstaja"
+            : error.message.includes("ni primernega podokvirja")
+                ? "podokvir-ni-na-voljo"
+                : "dodajanje-podokvirja";
+
+        redirect(`/dokumenti/${dokumentId}?napaka=${napaka}`);
+    }
+
+    revalidatePath(`/dokumenti/${dokumentId}`);
+    redirect(`/dokumenti/${dokumentId}`);
+}
+
+export async function odstraniPodokvir(
+    dokumentId: number,
+    postavkaId: number,
+    postavkaPodokvirId: number,
+    formData: FormData,
+) {
+    void formData;
+
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+        redirect("/prijava");
+    }
+
+    const rezultat = odstraniPodokvirSchema.safeParse({
+        dokumentId,
+        postavkaId,
+        postavkaPodokvirId,
+    });
+
+    if (!rezultat.success) {
+        redirect(`/dokumenti/${dokumentId}?napaka=neveljavni-podatki`);
+    }
+
+    const { data: postavka } = await supabase
+        .from("narocilo_postavka")
+        .select("id")
+        .eq("id", rezultat.data.postavkaId)
+        .eq("narocilo_id", rezultat.data.dokumentId)
+        .maybeSingle();
+
+    if (!postavka) {
+        redirect(`/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`);
+    }
+
+    const { data: povezava } = await supabase
+        .from("postavka_podokvir")
+        .select("id")
+        .eq("id", rezultat.data.postavkaPodokvirId)
+        .eq("postavka_id", postavka.id)
+        .maybeSingle();
+
+    if (!povezava) {
+        redirect(`/dokumenti/${dokumentId}?napaka=podokvir-ne-obstaja`);
+    }
+
+    const { error } = await supabase.rpc(
+        "odstrani_podokvir_postavke",
+        {
+            p_postavka_podokvir_id: povezava.id,
+        },
+    );
+
+    if (error) {
+        console.error("Napaka pri odstranjevanju podokvirja:", error);
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=odstranjevanje-podokvirja`,
+        );
+    }
+
+    revalidatePath(`/dokumenti/${dokumentId}`);
+    redirect(`/dokumenti/${dokumentId}`);
 }

@@ -8,10 +8,13 @@ import {
   odstraniOkvir,
   odstraniPaspartu,
   odstraniSteklo,
+  dodajPodokvir,
+  odstraniPodokvir,
 } from "./actions";
 import { GumbOdstraniOkvir } from "./gumb-odstrani-okvir";
 import { GumbOdstraniSteklo } from "./gumb-odstrani-steklo";
 import { GumbOdstraniPaspartu } from "./gumb-odstrani-paspartu";
+import { GumbOdstraniPodokvir } from "./gumb-odstrani-podokvir";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -109,6 +112,13 @@ export default async function DokumentPage({
       dodatni_opis,
       cena_paspartuja,
       vrstni_red
+    ),
+    postavka_podokvir (
+      id,
+      je_podokvir,
+      podokvir_dolzina,
+      podokvir_sirina,
+      cena_podokvirja
     )
   `,
     )
@@ -379,6 +389,32 @@ export default async function DokumentPage({
                               ))}
                           </div>
                         )}
+                        {postavka.postavka_podokvir && (
+                          <div className="mt-2 flex min-w-72 items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                Podokvir:{" "}
+                                {postavka.postavka_podokvir.podokvir_dolzina} ×{" "}
+                                {postavka.postavka_podokvir.podokvir_sirina} cm
+                              </p>
+
+                              <p className="mt-1 text-xs text-slate-600">
+                                {oblikujZnesek(
+                                  postavka.postavka_podokvir.cena_podokvirja,
+                                )}
+                              </p>
+                            </div>
+
+                            <GumbOdstraniPodokvir
+                              action={odstraniPodokvir.bind(
+                                null,
+                                dokument.id,
+                                postavka.id,
+                                postavka.postavka_podokvir.id,
+                              )}
+                            />
+                          </div>
+                        )}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
                         {postavka.dolzina} × {postavka.sirina}
@@ -407,6 +443,22 @@ export default async function DokumentPage({
                         >
                           Dodaj paspartu
                         </Link>
+                        {!postavka.postavka_podokvir && (
+                          <form
+                            action={dodajPodokvir.bind(
+                              null,
+                              dokument.id,
+                              postavka.id,
+                            )}
+                          >
+                            <button
+                              type="submit"
+                              className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100"
+                            >
+                              Dodaj podokvir
+                            </button>
+                          </form>
+                        )}
                       </td>
                     </tr>
                   ))}
