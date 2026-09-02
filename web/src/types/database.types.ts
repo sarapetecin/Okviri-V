@@ -377,37 +377,52 @@ export type Database = {
       postavka_dodatno_delo: {
         Row: {
           cena_enote: number
+          cena_na_m: number
+          cena_na_m2: number
           dodatno_delo_id: number | null
           id: number
+          izracunan_obseg: number
+          izracunana_povrsina: number
           kolicina: number
           nacin_obracuna: string
           naziv: string
           opis: string | null
+          osnovna_cena: number
           postavka_id: number
           skupna_cena: number
           vrstni_red: number
         }
         Insert: {
           cena_enote?: number
+          cena_na_m?: number
+          cena_na_m2?: number
           dodatno_delo_id?: number | null
           id?: number
+          izracunan_obseg?: number
+          izracunana_povrsina?: number
           kolicina?: number
           nacin_obracuna?: string
           naziv: string
           opis?: string | null
           postavka_id: number
+          osnovna_cena?: number
           skupna_cena?: number
           vrstni_red?: number
         }
         Update: {
           cena_enote?: number
+          cena_na_m?: number
+          cena_na_m2?: number
           dodatno_delo_id?: number | null
           id?: number
+          izracunan_obseg?: number
+          izracunana_povrsina?: number
           kolicina?: number
           nacin_obracuna?: string
           naziv?: string
           opis?: string | null
           postavka_id?: number
+          osnovna_cena?: number
           skupna_cena?: number
           vrstni_red?: number
         }
@@ -763,8 +778,8 @@ export type Database = {
           novi_status: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           opomba: string | null
           prejsnji_status:
-            | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
-            | null
+          | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
+          | null
           spremenil_uporabnik_id: number | null
           ustvarjeno_at: string
         }
@@ -774,8 +789,8 @@ export type Database = {
           novi_status: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           opomba?: string | null
           prejsnji_status?:
-            | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
-            | null
+          | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
+          | null
           spremenil_uporabnik_id?: number | null
           ustvarjeno_at?: string
         }
@@ -785,8 +800,8 @@ export type Database = {
           novi_status?: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           opomba?: string | null
           prejsnji_status?:
-            | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
-            | null
+          | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
+          | null
           spremenil_uporabnik_id?: number | null
           ustvarjeno_at?: string
         }
@@ -828,6 +843,13 @@ export type Database = {
         Args: { p_postavka_id: number; p_steklo_id: number }
         Returns: number
       }
+      dodaj_dodatno_delo_postavki: {
+        Args: {
+          p_dodatno_delo_id: number
+          p_postavka_id: number
+        }
+        Returns: number
+      }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
       odstrani_okvir_postavke: {
@@ -846,18 +868,24 @@ export type Database = {
         Args: { p_postavka_steklo_id: number }
         Returns: undefined
       }
+      odstrani_dodatno_delo_postavke: {
+        Args: {
+          p_postavka_dodatno_delo_id: number
+        }
+        Returns: undefined
+      }
       trenutna_uporabniska_vloga: { Args: never; Returns: string }
     }
     Enums: {
       status_prodajnega_dokumenta:
-        | "osnutek"
-        | "poslano_v_pregled"
-        | "zavrnjeno"
-        | "potrjeno"
-        | "v_izdelavi"
-        | "dokoncano"
-        | "rocno_zaprto"
-        | "preklicano"
+      | "osnutek"
+      | "poslano_v_pregled"
+      | "zavrnjeno"
+      | "potrjeno"
+      | "v_izdelavi"
+      | "dokoncano"
+      | "rocno_zaprto"
+      | "preklicano"
       status_sms_sporocila: "v_cakanju" | "poslano" | "napaka" | "preklicano"
       uporabniska_pravica: "administrator" | "zaposleni" | "partner"
       vrsta_prodajnega_dokumenta: "ponudba" | "narocilo"
@@ -874,37 +902,37 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -914,22 +942,22 @@ export type TablesInsert<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -939,22 +967,22 @@ export type TablesUpdate<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -965,13 +993,13 @@ export type Enums<
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -982,8 +1010,8 @@ export type CompositeTypes<
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {

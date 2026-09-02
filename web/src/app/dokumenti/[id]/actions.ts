@@ -353,3 +353,85 @@ export async function odstraniPodokvir(
     revalidatePath(`/dokumenti/${dokumentId}`);
     redirect(`/dokumenti/${dokumentId}`);
 }
+const odstraniDodatnoDeloSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    postavkaId: z.number().int().positive(),
+    postavkaDodatnoDeloId: z.number().int().positive(),
+});
+
+export async function odstraniDodatnoDelo(
+    dokumentId: number,
+    postavkaId: number,
+    postavkaDodatnoDeloId: number,
+    formData: FormData,
+) {
+    void formData;
+
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+        redirect("/prijava");
+    }
+
+    const rezultat = odstraniDodatnoDeloSchema.safeParse({
+        dokumentId,
+        postavkaId,
+        postavkaDodatnoDeloId,
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljavni-podatki`,
+        );
+    }
+
+    const { data: postavka } = await supabase
+        .from("narocilo_postavka")
+        .select("id")
+        .eq("id", rezultat.data.postavkaId)
+        .eq("narocilo_id", rezultat.data.dokumentId)
+        .maybeSingle();
+
+    if (!postavka) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=postavka-ne-obstaja`,
+        );
+    }
+
+    const { data: povezava } = await supabase
+        .from("postavka_dodatno_delo")
+        .select("id")
+        .eq("id", rezultat.data.postavkaDodatnoDeloId)
+        .eq("postavka_id", postavka.id)
+        .maybeSingle();
+
+    if (!povezava) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=dodatno-delo-ne-obstaja`,
+        );
+    }
+
+    const { error } = await supabase.rpc(
+        "odstrani_dodatno_delo_postavke",
+        {
+            p_postavka_dodatno_delo_id: povezava.id,
+        },
+    );
+
+    if (error) {
+        console.error(
+            "Napaka pri odstranjevanju dodatnega dela:",
+            error,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=odstranjevanje-dodatnega-dela`,
+        );
+    }
+
+    revalidatePath(`/dokumenti/${dokumentId}`);
+    redirect(`/dokumenti/${dokumentId}`);
+}

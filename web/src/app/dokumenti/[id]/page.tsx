@@ -10,11 +10,13 @@ import {
   odstraniSteklo,
   dodajPodokvir,
   odstraniPodokvir,
+  odstraniDodatnoDelo,
 } from "./actions";
 import { GumbOdstraniOkvir } from "./gumb-odstrani-okvir";
 import { GumbOdstraniSteklo } from "./gumb-odstrani-steklo";
 import { GumbOdstraniPaspartu } from "./gumb-odstrani-paspartu";
 import { GumbOdstraniPodokvir } from "./gumb-odstrani-podokvir";
+import { GumbOdstraniDodatnoDelo } from "./gumb-odstrani-dodatno-delo";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -119,6 +121,21 @@ export default async function DokumentPage({
       podokvir_dolzina,
       podokvir_sirina,
       cena_podokvirja
+    ),
+    postavka_dodatno_delo (
+      id,
+      dodatno_delo_id,
+      naziv,
+      nacin_obracuna,
+      kolicina,
+      cena_enote,
+      skupna_cena,
+      osnovna_cena,
+      cena_na_m2,
+      cena_na_m,
+      izracunana_povrsina,
+      izracunan_obseg,
+      vrstni_red
     )
   `,
     )
@@ -415,6 +432,37 @@ export default async function DokumentPage({
                             />
                           </div>
                         )}
+                        {postavka.postavka_dodatno_delo.map((delo) => (
+                          <div
+                            key={delo.id}
+                            className="mt-2 flex min-w-72 items-center justify-between gap-4 rounded-lg border border-violet-200 bg-violet-50 p-3"
+                          >
+                            <div>
+                              <p className="text-sm font-semibold text-slate-900">
+                                Dodatno delo: {delo.naziv}
+                              </p>
+
+                              <p className="mt-1 text-xs text-slate-600">
+                                {oblikujZnesek(delo.skupna_cena)}
+                              </p>
+
+                              {delo.nacin_obracuna === "kombinirano" && (
+                                <p className="mt-1 text-xs text-slate-500">
+                                  Osnovna cena in obračun po merah
+                                </p>
+                              )}
+                            </div>
+
+                            <GumbOdstraniDodatnoDelo
+                              action={odstraniDodatnoDelo.bind(
+                                null,
+                                dokument.id,
+                                postavka.id,
+                                delo.id,
+                              )}
+                            />
+                          </div>
+                        ))}
                       </td>
                       <td className="px-5 py-4 text-sm text-slate-600">
                         {postavka.dolzina} × {postavka.sirina}
@@ -459,6 +507,12 @@ export default async function DokumentPage({
                             </button>
                           </form>
                         )}
+                        <Link
+                          href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/dodatna-dela`}
+                          className="rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-center text-sm font-medium text-violet-800 transition hover:bg-violet-100"
+                        >
+                          Dodatno delo
+                        </Link>
                       </td>
                     </tr>
                   ))}
