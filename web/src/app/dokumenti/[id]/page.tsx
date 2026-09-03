@@ -117,6 +117,7 @@ export default async function DokumentPage({
       barva,
       dodatni_opis,
       cena_paspartuja,
+      nacin_paspartu,
       vrstni_red
     ),
     postavka_podokvir (
@@ -473,7 +474,18 @@ export default async function DokumentPage({
                                 >
                                   <div>
                                     <p className="text-sm font-semibold text-slate-900">
-                                      Paspartu: {paspartu.oznaka ?? "Brez oznake"}
+                                      Paspartu:{" "}
+                                      <span
+                                        className="text-lg"
+                                        title={
+                                          paspartu.nacin_paspartu === "polozen"
+                                            ? "Položen"
+                                            : "Vrezan"
+                                        }
+                                      >
+                                        {paspartu.nacin_paspartu === "polozen" ? "○" : "□"}
+                                      </span>{" "}
+                                      {paspartu.oznaka ?? "Brez oznake"}
                                     </p>
 
                                     <p className="mt-1 text-xs text-slate-600">

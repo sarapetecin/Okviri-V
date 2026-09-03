@@ -185,7 +185,7 @@ export default async function NovaPostavkaPage({
       .filter(Boolean)
       .join(" · "),
   }));
-  
+
   const dodatnaDela = rezultatDodatnihDel.data ?? [];
 
   const { napaka } = await searchParams;
@@ -450,19 +450,81 @@ export default async function NovaPostavkaPage({
                     moznosti={moznostiStekel}
                   />
 
-                  <IskalniIzbirnik
-                    name="paspartuId"
-                    label="Paspartu"
-                    placeholder="Poišči paspartu"
-                    moznosti={moznostiPaspartujev}
-                  />
+                  <div className="space-y-3">
+                    <IskalniIzbirnik
+                      name="paspartuId"
+                      label="Paspartu"
+                      placeholder="Poišči paspartu"
+                      moznosti={moznostiPaspartujev}
+                    />
 
-                  <IskalniIzbirnik
-                    name="paspartuId"
-                    label="Drugi paspartu"
-                    placeholder="Neobvezno"
-                    moznosti={moznostiPaspartujev}
-                  />
+                    <fieldset>
+                      <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                        Način paspartuja
+                      </legend>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                          <input
+                            name="nacinPaspartu1"
+                            type="radio"
+                            value="vrezan"
+                            defaultChecked
+                          />
+                          <span className="text-lg leading-none">□</span>
+                          <span>Vrezan</span>
+                        </label>
+
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                          <input
+                            name="nacinPaspartu1"
+                            type="radio"
+                            value="polozen"
+                          />
+                          <span className="text-lg leading-none">○</span>
+                          <span>Položen</span>
+                        </label>
+                      </div>
+                    </fieldset>
+                  </div>
+
+                  <div className="space-y-3">
+                    <IskalniIzbirnik
+                      name="paspartuId"
+                      label="Drugi paspartu"
+                      placeholder="Neobvezno"
+                      moznosti={moznostiPaspartujev}
+                    />
+
+                    <fieldset>
+                      <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                        Način drugega paspartuja
+                      </legend>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                          <input
+                            name="nacinPaspartu2"
+                            type="radio"
+                            value="vrezan"
+                            defaultChecked
+                          />
+                          <span className="text-lg leading-none">□</span>
+                          <span>Vrezan</span>
+                        </label>
+
+                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                          <input
+                            name="nacinPaspartu2"
+                            type="radio"
+                            value="polozen"
+                          />
+                          <span className="text-lg leading-none">○</span>
+                          <span>Položen</span>
+                        </label>
+                      </div>
+                    </fieldset>
+                  </div>
                 </div>
               </section>
 

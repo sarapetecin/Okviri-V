@@ -17,6 +17,7 @@ const urejenaPostavkaSchema = z.object({
     ogledalo: z.boolean(),
     okvirIds: z.array(z.number().int().positive()).max(3),
     paspartuIds: z.array(z.number().int().positive()).max(2),
+    naciniPaspartuja: z.array(z.enum(["vrezan", "polozen"])).max(2),
     stekloId: z.number().int().positive().nullable(),
     dodajPodokvir: z.boolean(),
     dodatnoDeloIds: z.array(z.number().int().positive()).max(50),
@@ -80,6 +81,15 @@ export async function urediPostavko(
         ogledalo: formData.get("ogledalo") === "on",
         okvirIds: preberiIdje(formData, "okvirId"),
         paspartuIds: preberiIdje(formData, "paspartuId"),
+        naciniPaspartuja: [
+            formData.get("nacinPaspartu1") === "polozen"
+                ? "polozen"
+                : "vrezan",
+
+            formData.get("nacinPaspartu2") === "polozen"
+                ? "polozen"
+                : "vrezan",
+        ],
         stekloId: preberiId(formData.get("stekloId")),
         dodajPodokvir: formData.get("dodajPodokvir") === "on",
         dodatnoDeloIds: preberiIdje(formData, "dodatnoDeloId"),
@@ -145,6 +155,30 @@ export async function urediPostavko(
         redirect(
             `/dokumenti/${dokumentId}/postavke/${postavkaId}/uredi?napaka=shranjevanje`,
         );
+    }
+
+    if (rezultat.data.paspartuIds.length > 0) {
+        const { error: napakaNacinaPaspartuja } = await supabase.rpc(
+            "nastavi_nacine_paspartuja",
+            {
+                p_postavka_id: postavka.id,
+                p_nacini: rezultat.data.naciniPaspartuja.slice(
+                    0,
+                    rezultat.data.paspartuIds.length,
+                ),
+            },
+        );
+
+        if (napakaNacinaPaspartuja) {
+            console.error(
+                "Napaka pri urejanju načina paspartuja:",
+                napakaNacinaPaspartuja,
+            );
+
+            redirect(
+                `/dokumenti/${dokumentId}/postavke/${postavkaId}/uredi?napaka=shranjevanje`,
+            );
+        }
     }
 
     revalidatePath(`/dokumenti/${dokumentId}`);

@@ -401,15 +401,17 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
-                                                {paspartuji.length > 0
-                                                    ? paspartuji.map((paspartu) => (
-                                                        <p key={paspartu.id}>
-                                                            {[paspartu.oznaka, paspartu.barva]
-                                                                .filter(Boolean)
-                                                                .join(" – ")}
-                                                        </p>
-                                                    ))
-                                                    : "—"}
+                                                {paspartuji.map((paspartu) => (
+                                                    <p key={paspartu.id}>
+                                                        <span className="mr-1 text-base font-semibold">
+                                                            {paspartu.nacin_paspartu === "polozen" ? "○" : "□"}
+                                                        </span>
+
+                                                        {[paspartu.oznaka, paspartu.barva]
+                                                            .filter(Boolean)
+                                                            .join(" – ")}
+                                                    </p>
+                                                ))}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">

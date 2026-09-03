@@ -853,6 +853,10 @@ export type Database = {
       }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
+      nastavi_nacine_paspartuja: {
+        Args: { p_nacini: string[]; p_postavka_id: number }
+        Returns: undefined
+      }
       odstrani_dodatno_delo_postavke: {
         Args: { p_postavka_dodatno_delo_id: number }
         Returns: undefined

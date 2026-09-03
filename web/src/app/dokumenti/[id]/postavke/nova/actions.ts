@@ -25,6 +25,8 @@ const novaPostavkaSchema = z.object({
 
   paspartuIds: z.array(z.number().int().positive()).max(2),
 
+  naciniPaspartuja: z.array(z.enum(["vrezan", "polozen"])).max(2),
+
   stekloId: z.number().int().positive().nullable(),
 
   dodajPodokvir: z.boolean(),
@@ -91,6 +93,16 @@ export async function ustvariPostavko(
 
     paspartuIds: preberiIdje(formData, "paspartuId"),
 
+    naciniPaspartuja: [
+      formData.get("nacinPaspartu1") === "polozen"
+        ? "polozen"
+        : "vrezan",
+
+      formData.get("nacinPaspartu2") === "polozen"
+        ? "polozen"
+        : "vrezan",
+    ],
+
     stekloId: preberiId(formData.get("stekloId")),
 
     dodajPodokvir: formData.get("dodajPodokvir") === "on",
@@ -143,7 +155,10 @@ export async function ustvariPostavko(
       : {}),
   };
 
-  const { error: napakaShranjevanja } = await supabase.rpc(
+  const {
+    data: novaPostavkaId,
+    error: napakaShranjevanja,
+  } = await supabase.rpc(
     "ustvari_celotno_postavko",
     parametri,
   );
@@ -157,6 +172,42 @@ export async function ustvariPostavko(
     redirect(
       `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
     );
+  }
+
+  if (!novaPostavkaId) {
+    console.error("Supabase ni vrnil ID-ja nove postavke.");
+
+    redirect(
+      `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
+    );
+  }
+
+  if (rezultat.data.paspartuIds.length > 0) {
+    const { error: napakaNacinaPaspartuja } = await supabase.rpc(
+      "nastavi_nacine_paspartuja",
+      {
+        p_postavka_id: novaPostavkaId,
+        p_nacini: rezultat.data.naciniPaspartuja.slice(
+          0,
+          rezultat.data.paspartuIds.length,
+        ),
+      },
+    );
+
+    if (napakaNacinaPaspartuja) {
+      console.error(
+        "Napaka pri shranjevanju načina paspartuja:",
+        napakaNacinaPaspartuja,
+      );
+
+      await supabase.rpc("izbrisi_celotno_postavko", {
+        p_postavka_id: novaPostavkaId,
+      });
+
+      redirect(
+        `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
+      );
+    }
   }
 
   revalidatePath(`/dokumenti/${dokumentId}`);
