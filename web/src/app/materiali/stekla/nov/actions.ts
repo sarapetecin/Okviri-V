@@ -6,17 +6,8 @@ import { z } from "zod";
 
 import { createClient } from "@/lib/supabase/server";
 
-const praznoStevilo = (vrednost: unknown) => {
-    if (
-        vrednost === "" ||
-        vrednost === null ||
-        vrednost === undefined
-    ) {
-        return null;
-    }
-
-    return vrednost;
-};
+const praznoVNull = (vrednost: unknown) =>
+    vrednost === "" || vrednost === null ? null : vrednost;
 
 const novoStekloSchema = z.object({
     oznaka: z
@@ -31,21 +22,16 @@ const novoStekloSchema = z.object({
         .min(1, "Naziv je obvezen.")
         .max(200),
 
-    prodajnaCena: z.coerce
-        .number()
-        .min(0, "Prodajna cena ne sme biti negativna."),
-
-    nabavnaCena: z.preprocess(
-        praznoStevilo,
-        z.coerce
-            .number()
-            .min(0, "Nabavna cena ne sme biti negativna.")
-            .nullable(),
+    dobaviteljId: z.preprocess(
+        praznoVNull,
+        z.coerce.number().int().positive().nullable(),
     ),
 
-    dobaviteljId: z.preprocess(
-        praznoStevilo,
-        z.coerce.number().int().positive().nullable(),
+    prodajnaCena: z.coerce.number().min(0),
+
+    nabavnaCena: z.preprocess(
+        praznoVNull,
+        z.coerce.number().min(0).nullable(),
     ),
 
     naProdaj: z.boolean(),
@@ -64,18 +50,13 @@ export async function ustvariSteklo(formData: FormData) {
     const rezultat = novoStekloSchema.safeParse({
         oznaka: formData.get("oznaka"),
         naziv: formData.get("naziv"),
+        dobaviteljId: formData.get("dobaviteljId"),
         prodajnaCena: formData.get("prodajnaCena"),
         nabavnaCena: formData.get("nabavnaCena"),
-        dobaviteljId: formData.get("dobaviteljId"),
         naProdaj: formData.get("naProdaj") === "on",
     });
 
     if (!rezultat.success) {
-        console.error(
-            "Neveljavni podatki stekla:",
-            rezultat.error.flatten(),
-        );
-
         redirect(
             "/materiali/stekla/novo?napaka=neveljavni-podatki",
         );
@@ -84,22 +65,20 @@ export async function ustvariSteklo(formData: FormData) {
     const { error } = await supabase.from("steklo").insert({
         oznaka: rezultat.data.oznaka,
         naziv: rezultat.data.naziv,
+        dobavitelj_id: rezultat.data.dobaviteljId,
         prodajna_cena: rezultat.data.prodajnaCena,
         nabavna_cena: rezultat.data.nabavnaCena,
-        dobavitelj_id: rezultat.data.dobaviteljId,
         na_prodaj: rezultat.data.naProdaj,
     });
 
     if (error) {
         console.error("Napaka pri ustvarjanju stekla:", error);
 
-        redirect(
-            "/materiali/stekla/novo?napaka=shranjevanje",
-        );
+        redirect("/materiali/stekla/novo?napaka=shranjevanje");
     }
 
     revalidatePath("/materiali");
     revalidatePath("/materiali/stekla");
 
     redirect("/materiali/stekla");
-}  
+}

@@ -18,7 +18,9 @@ const praznoStevilo = (vrednost: unknown) => {
     return vrednost;
 };
 
-const novoStekloSchema = z.object({
+const urediStekloSchema = z.object({
+    stekloId: z.coerce.number().int().positive(),
+
     oznaka: z
         .string()
         .trim()
@@ -51,7 +53,10 @@ const novoStekloSchema = z.object({
     naProdaj: z.boolean(),
 });
 
-export async function ustvariSteklo(formData: FormData) {
+export async function urediSteklo(
+    stekloId: number,
+    formData: FormData,
+) {
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -61,7 +66,8 @@ export async function ustvariSteklo(formData: FormData) {
         redirect("/prijava");
     }
 
-    const rezultat = novoStekloSchema.safeParse({
+    const rezultat = urediStekloSchema.safeParse({
+        stekloId,
         oznaka: formData.get("oznaka"),
         naziv: formData.get("naziv"),
         prodajnaCena: formData.get("prodajnaCena"),
@@ -77,29 +83,35 @@ export async function ustvariSteklo(formData: FormData) {
         );
 
         redirect(
-            "/materiali/stekla/novo?napaka=neveljavni-podatki",
+            `/materiali/stekla/${stekloId}/uredi?napaka=neveljavni-podatki`,
         );
     }
 
-    const { error } = await supabase.from("steklo").insert({
-        oznaka: rezultat.data.oznaka,
-        naziv: rezultat.data.naziv,
-        prodajna_cena: rezultat.data.prodajnaCena,
-        nabavna_cena: rezultat.data.nabavnaCena,
-        dobavitelj_id: rezultat.data.dobaviteljId,
-        na_prodaj: rezultat.data.naProdaj,
-    });
+    const { error } = await supabase
+        .from("steklo")
+        .update({
+            oznaka: rezultat.data.oznaka,
+            naziv: rezultat.data.naziv,
+            prodajna_cena: rezultat.data.prodajnaCena,
+            nabavna_cena: rezultat.data.nabavnaCena,
+            dobavitelj_id: rezultat.data.dobaviteljId,
+            na_prodaj: rezultat.data.naProdaj,
+        })
+        .eq("id", rezultat.data.stekloId);
 
     if (error) {
-        console.error("Napaka pri ustvarjanju stekla:", error);
+        console.error("Napaka pri urejanju stekla:", error);
 
         redirect(
-            "/materiali/stekla/novo?napaka=shranjevanje",
+            `/materiali/stekla/${stekloId}/uredi?napaka=shranjevanje`,
         );
     }
 
     revalidatePath("/materiali");
     revalidatePath("/materiali/stekla");
+    revalidatePath(
+        `/materiali/stekla/${stekloId}/uredi`,
+    );
 
     redirect("/materiali/stekla");
-}  
+}

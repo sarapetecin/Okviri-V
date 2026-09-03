@@ -98,7 +98,7 @@ export default async function SteklaPage({
                     </div>
 
                     <Link
-                        href="/materiali/stekla/novo"
+                        href="/materiali/stekla/nov"
                         className="rounded-lg bg-slate-900 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-slate-700"
                     >
                         Dodaj steklo

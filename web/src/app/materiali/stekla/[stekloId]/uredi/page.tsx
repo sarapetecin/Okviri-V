@@ -1,19 +1,33 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { ustvariSteklo } from "./actions";
+import { urediSteklo } from "./actions";
 
-type NovoStekloPageProps = {
+type UrediStekloPageProps = {
+    params: Promise<{
+        stekloId: string;
+    }>;
+
     searchParams: Promise<{
         napaka?: string;
     }>;
 };
 
-export default async function NovoStekloPage({
+export default async function UrediStekloPage({
+    params,
     searchParams,
-}: NovoStekloPageProps) {
+}: UrediStekloPageProps) {
+    const { stekloId: stekloIdBesedilo } = await params;
+    const { napaka } = await searchParams;
+
+    const stekloId = Number(stekloIdBesedilo);
+
+    if (!Number.isInteger(stekloId) || stekloId <= 0) {
+        notFound();
+    }
+
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -23,23 +37,48 @@ export default async function NovoStekloPage({
         redirect("/prijava");
     }
 
-    const { data: dobavitelji, error: napakaDobaviteljev } =
-        await supabase
+    const [
+        { data: steklo, error: napakaStekla },
+        { data: dobavitelji, error: napakaDobaviteljev },
+    ] = await Promise.all([
+        supabase
+            .from("steklo")
+            .select(`
+        id,
+        oznaka,
+        naziv,
+        prodajna_cena,
+        nabavna_cena,
+        dobavitelj_id,
+        na_prodaj
+      `)
+            .eq("id", stekloId)
+            .maybeSingle(),
+
+        supabase
             .from("dobavitelj")
             .select("id, naziv")
-            .order("naziv");
+            .order("naziv"),
+    ]);
 
-    const { napaka } = await searchParams;
+    if (napakaStekla || !steklo) {
+        notFound();
+    }
 
     const sporociloNapake =
         napaka === "neveljavni-podatki"
             ? "Preveri oznako, naziv in vnesene cene."
             : napaka === "shranjevanje"
-                ? "Stekla ni bilo mogoče shraniti."
+                ? "Sprememb stekla ni bilo mogoče shraniti."
                 : null;
 
     const inputClassName =
         "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-slate-700 focus:ring-2 focus:ring-slate-200";
+
+    const shraniSteklo = urediSteklo.bind(
+        null,
+        steklo.id,
+    );
 
     return (
         <main className="min-h-screen bg-slate-100">
@@ -51,7 +90,7 @@ export default async function NovoStekloPage({
                         </p>
 
                         <h1 className="text-xl font-bold text-slate-900">
-                            Novo steklo
+                            Uredi steklo
                         </h1>
                     </div>
 
@@ -66,7 +105,7 @@ export default async function NovoStekloPage({
 
             <section className="mx-auto max-w-4xl px-6 py-10">
                 <form
-                    action={ustvariSteklo}
+                    action={shraniSteklo}
                     className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm"
                 >
                     <div className="mb-7">
@@ -75,7 +114,7 @@ export default async function NovoStekloPage({
                         </h2>
 
                         <p className="mt-2 text-sm text-slate-600">
-                            Prodajna cena je cena na kvadratni meter.
+                            Spremeni podatke izbranega stekla.
                         </p>
                     </div>
 
@@ -112,8 +151,7 @@ export default async function NovoStekloPage({
                                 type="text"
                                 required
                                 maxLength={100}
-                                placeholder="Na primer: CC-UV80"
-                                autoFocus
+                                defaultValue={steklo.oznaka}
                                 className={inputClassName}
                             />
                         </div>
@@ -132,7 +170,7 @@ export default async function NovoStekloPage({
                                 type="text"
                                 required
                                 maxLength={200}
-                                placeholder="Naziv stekla"
+                                defaultValue={steklo.naziv}
                                 className={inputClassName}
                             />
                         </div>
@@ -152,6 +190,7 @@ export default async function NovoStekloPage({
                                 required
                                 min="0"
                                 step="0.01"
+                                defaultValue={steklo.prodajna_cena}
                                 className={inputClassName}
                             />
                         </div>
@@ -170,6 +209,7 @@ export default async function NovoStekloPage({
                                 type="number"
                                 min="0"
                                 step="0.01"
+                                defaultValue={steklo.nabavna_cena ?? ""}
                                 className={inputClassName}
                             />
                         </div>
@@ -185,7 +225,9 @@ export default async function NovoStekloPage({
                             <select
                                 id="dobaviteljId"
                                 name="dobaviteljId"
-                                defaultValue=""
+                                defaultValue={
+                                    steklo.dobavitelj_id?.toString() ?? ""
+                                }
                                 className={inputClassName}
                             >
                                 <option value="">Brez dobavitelja</option>
@@ -205,7 +247,7 @@ export default async function NovoStekloPage({
                             <input
                                 name="naProdaj"
                                 type="checkbox"
-                                defaultChecked
+                                defaultChecked={steklo.na_prodaj}
                                 className="mt-0.5 h-4 w-4 rounded border-slate-300"
                             />
 
@@ -233,7 +275,7 @@ export default async function NovoStekloPage({
                             type="submit"
                             className="rounded-lg bg-slate-900 px-5 py-2.5 font-semibold text-white hover:bg-slate-700"
                         >
-                            Shrani steklo
+                            Shrani spremembe
                         </button>
                     </div>
                 </form>
