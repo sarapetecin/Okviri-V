@@ -612,6 +612,13 @@ export default async function DokumentPage({
 
                       <td className="px-5 py-4">
                         <div className="flex justify-end gap-2">
+                          <Link
+                            href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/uredi`}
+                            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                          >
+                            Uredi
+                          </Link>
+
                           <GumbIzbrisiPostavko
                             action={izbrisiPostavko.bind(
                               null,

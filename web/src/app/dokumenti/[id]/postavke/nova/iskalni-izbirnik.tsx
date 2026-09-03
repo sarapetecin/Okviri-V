@@ -14,6 +14,7 @@ type IskalniIzbirnikProps = {
     placeholder: string;
     moznosti: Moznost[];
     required?: boolean;
+    privzetiId?: number | null;
 };
 
 export function IskalniIzbirnik({
@@ -22,10 +23,17 @@ export function IskalniIzbirnik({
     placeholder,
     moznosti,
     required = false,
+    privzetiId = null,
 }: IskalniIzbirnikProps) {
-    const [iskanje, setIskanje] = useState("");
+    const privzetaMoznost =
+        moznosti.find((moznost) => moznost.id === privzetiId) ?? null;
+
+    const [iskanje, setIskanje] = useState(
+        privzetaMoznost?.naziv ?? "",);
+
     const [izbranaMoznost, setIzbranaMoznost] =
-        useState<Moznost | null>(null);
+        useState<Moznost | null>(privzetaMoznost);
+
     const [odprto, setOdprto] = useState(false);
 
     const filtriraneMoznosti = useMemo(() => {
