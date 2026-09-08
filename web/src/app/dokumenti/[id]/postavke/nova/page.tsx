@@ -4,6 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 import { ustvariPostavko } from "./actions";
+import { urediPostavko } from "../[postavkaId]/uredi/actions";
 import {
   IzbiraDodatnihDel,
   IzbiraMaterialov,
@@ -17,6 +18,7 @@ type NovaPostavkaPageProps = {
   searchParams: Promise<{
     napaka?: string;
     _vdelano?: string;
+    urediPostavko?: string;
   }>;
 };
 
@@ -268,8 +270,63 @@ export default async function NovaPostavkaPage({
     },
   );
 
-  const { napaka, _vdelano } = await searchParams;
+  const { napaka, _vdelano, urediPostavko: urediPostavkoBesedilo } =
+    await searchParams;
   const vdelano = _vdelano === "da";
+  const urejanaPostavkaId = Number(urediPostavkoBesedilo);
+  const imaVeljavenIdZaUrejanje =
+    Number.isInteger(urejanaPostavkaId) && urejanaPostavkaId > 0;
+
+  const { data: urejanaPostavka } = imaVeljavenIdZaUrejanje
+    ? await supabase
+      .from("narocilo_postavka")
+      .select(
+        `
+          id,
+          kolicina,
+          dolzina,
+          sirina,
+          opis_slike,
+          opombe,
+          ogledalo,
+          postavka_okvir (okvir_id, vrstni_red),
+          postavka_paspartu (paspartu_id, nacin_paspartu, vrstni_red),
+          postavka_steklo (steklo_id),
+          postavka_podokvir (je_podokvir),
+          postavka_dodatno_delo (dodatno_delo_id)
+        `,
+      )
+      .eq("id", urejanaPostavkaId)
+      .eq("narocilo_id", dokumentId)
+      .maybeSingle()
+    : { data: null };
+
+  const izbraniOkvirji = urejanaPostavka
+    ? [...urejanaPostavka.postavka_okvir]
+      .sort((a, b) => a.vrstni_red - b.vrstni_red)
+      .map((okvir) => okvir.okvir_id)
+      .filter((id): id is number => id !== null)
+    : [];
+
+  const urejeniPaspartuji = urejanaPostavka
+    ? [...urejanaPostavka.postavka_paspartu].sort(
+      (a, b) => a.vrstni_red - b.vrstni_red,
+    )
+    : [];
+
+  const izbraniPaspartuji = urejeniPaspartuji
+    .map((paspartu) => paspartu.paspartu_id)
+    .filter((id): id is number => id !== null);
+
+  const izbraniNaciniPaspartuja = urejeniPaspartuji.map((paspartu) =>
+    paspartu.nacin_paspartu === "polozen" ? "polozen" as const : "vrezan" as const,
+  );
+
+  const izbranaDodatnaDela = urejanaPostavka
+    ? urejanaPostavka.postavka_dodatno_delo
+      .map((delo) => delo.dodatno_delo_id)
+      .filter((id): id is number => id !== null)
+    : [];
 
   const sporociloNapake =
     napaka === "neveljavni-podatki"
@@ -278,10 +335,9 @@ export default async function NovaPostavkaPage({
         ? "Celotne postavke ni bilo mogoče shraniti."
         : null;
 
-  const shraniPostavko = ustvariPostavko.bind(
-    null,
-    dokumentId,
-  );
+  const shraniPostavko = urejanaPostavka
+    ? urediPostavko.bind(null, dokumentId, urejanaPostavka.id)
+    : ustvariPostavko.bind(null, dokumentId);
 
   const inputClassName =
     "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-slate-700 focus:ring-2 focus:ring-slate-200";
@@ -297,7 +353,7 @@ export default async function NovaPostavkaPage({
               </p>
 
               <h1 className="text-xl font-bold text-slate-900">
-                Nova postavka
+                {urejanaPostavka ? "Uredi postavko" : "Nova postavka"}
               </h1>
             </div>
 
@@ -316,7 +372,9 @@ export default async function NovaPostavkaPage({
         }
       >        <div className={vdelano ? "mb-5" : "mb-7"}>
           <h2 className="text-2xl font-bold text-slate-900">
-            Dodajanje celotne postavke
+            {urejanaPostavka
+              ? `Urejanje postavke #${urejanaPostavka.id}`
+              : "Dodajanje celotne postavke"}
           </h2>
 
           <p className="mt-2 text-sm text-slate-600">
@@ -380,6 +438,7 @@ export default async function NovaPostavkaPage({
                       name="opisSlike"
                       type="text"
                       placeholder="Na primer: družinska fotografija"
+                      defaultValue={urejanaPostavka?.opis_slike ?? ""}
                       className={inputClassName}
                     />
                   </div>
@@ -400,6 +459,7 @@ export default async function NovaPostavkaPage({
                         min="0.1"
                         max="10000"
                         step="0.1"
+                        defaultValue={urejanaPostavka?.dolzina}
                         required
                         className={inputClassName}
                       />
@@ -420,6 +480,7 @@ export default async function NovaPostavkaPage({
                         min="0.1"
                         max="10000"
                         step="0.1"
+                        defaultValue={urejanaPostavka?.sirina}
                         required
                         className={inputClassName}
                       />
@@ -440,7 +501,7 @@ export default async function NovaPostavkaPage({
                         min="1"
                         max="100"
                         step="1"
-                        defaultValue="1"
+                        defaultValue={urejanaPostavka?.kolicina ?? 1}
                         required
                         className={inputClassName}
                       />
@@ -460,6 +521,7 @@ export default async function NovaPostavkaPage({
                       name="opombe"
                       rows={3}
                       placeholder="Navodila za izdelavo"
+                      defaultValue={urejanaPostavka?.opombe ?? ""}
                       className={inputClassName}
                     />
                   </div>
@@ -468,6 +530,7 @@ export default async function NovaPostavkaPage({
                     <input
                       name="ogledalo"
                       type="checkbox"
+                      defaultChecked={urejanaPostavka?.ogledalo ?? false}
                       className="mt-0.5 h-4 w-4 rounded border-slate-300"
                     />
 
@@ -501,9 +564,16 @@ export default async function NovaPostavkaPage({
                 </div>
 
                 <IzbiraMaterialov
+                  key={`materiali-${urejanaPostavka?.id ?? "nova"}`}
                   moznostiOkvirjev={moznostiOkvirjev}
                   moznostiPaspartujev={moznostiPaspartujev}
                   moznostiStekel={moznostiStekel}
+                  privzetiOkvirIds={izbraniOkvirji}
+                  privzetiPaspartuIds={izbraniPaspartuji}
+                  privzetiNaciniPaspartuja={izbraniNaciniPaspartuja}
+                  privzetoStekloId={
+                    urejanaPostavka?.postavka_steklo?.steklo_id ?? null
+                  }
                 />
               </section>
 
@@ -522,6 +592,9 @@ export default async function NovaPostavkaPage({
                   <input
                     name="dodajPodokvir"
                     type="checkbox"
+                    defaultChecked={
+                      urejanaPostavka?.postavka_podokvir?.je_podokvir ?? false
+                    }
                     className="mt-0.5 h-4 w-4 rounded border-slate-300"
                   />
 
@@ -543,7 +616,9 @@ export default async function NovaPostavkaPage({
                     </p>
                   ) : (
                     <IzbiraDodatnihDel
+                      key={`dela-${urejanaPostavka?.id ?? "nova"}`}
                       moznosti={moznostiDodatnihDel}
+                      privzetiIds={izbranaDodatnaDela}
                     />
                   )}
                 </div>
@@ -588,8 +663,19 @@ export default async function NovaPostavkaPage({
                   type="submit"
                   className="mt-6 w-full rounded-lg bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-700"
                 >
-                  Shrani celotno postavko
+                  {urejanaPostavka
+                    ? "Shrani spremembe"
+                    : "Shrani celotno postavko"}
                 </button>
+
+                {vdelano && urejanaPostavka && (
+                  <Link
+                    href={`/dokumenti/${dokument.id}#nova-postavka`}
+                    className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Prekliči urejanje
+                  </Link>
+                )}
 
                 {!vdelano && (
                   <Link

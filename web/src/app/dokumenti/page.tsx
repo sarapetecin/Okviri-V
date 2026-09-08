@@ -4,8 +4,16 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
+import { KlikabilnaVrstica } from "./klikabilna-vrstica";
+
 type StatusDokumenta =
     Database["public"]["Enums"]["status_prodajnega_dokumenta"];
+
+type DokumentiPageProps = {
+    searchParams: Promise<{
+        vrsta?: string;
+    }>;
+};
 
 const naziviStatusov: Record<StatusDokumenta, string> = {
     osnutek: "Osnutek",
@@ -31,7 +39,16 @@ function oblikujZnesek(znesek: number) {
     }).format(znesek);
 }
 
-export default async function DokumentiPage() {
+export default async function DokumentiPage({
+    searchParams,
+}: DokumentiPageProps) {
+    const { vrsta } = await searchParams;
+
+    const izbranaVrsta =
+        vrsta === "ponudba" || vrsta === "narocilo"
+            ? vrsta
+            : null;
+
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -41,12 +58,24 @@ export default async function DokumentiPage() {
         redirect("/prijava");
     }
 
-    const { data: dokumenti, error } = await supabase
+    let poizvedba = supabase
         .from("narocilo")
         .select(
             "id, datum_sprejema, rok_izdelave, stranka_naziv, vrsta, status, skupni_znesek",
         )
-        .order("ustvarjeno_at", { ascending: false });
+        .order("ustvarjeno_at", {
+            ascending: false,
+        });
+
+    if (izbranaVrsta) {
+        poizvedba = poizvedba.eq(
+            "vrsta",
+            izbranaVrsta,
+        );
+    }
+
+    const { data: dokumenti, error } =
+        await poizvedba;
 
     return (
         <main className="min-h-screen bg-slate-100">
@@ -57,7 +86,11 @@ export default async function DokumentiPage() {
                             Okviri V
                         </p>
                         <h1 className="text-xl font-bold text-slate-900">
-                            Ponudbe in naročila
+                            {izbranaVrsta === "ponudba"
+                                ? "Ponudbe"
+                                : izbranaVrsta === "narocilo"
+                                    ? "Naročila"
+                                    : "Ponudbe in naročila"}
                         </h1>
                     </div>
 
@@ -69,6 +102,41 @@ export default async function DokumentiPage() {
                     </Link>
                 </div>
             </header>
+
+            <div className="mb-5 flex flex-wrap gap-2">
+                <Link
+                    href="/dokumenti?vrsta=ponudba"
+                    className={
+                        izbranaVrsta === "ponudba"
+                            ? "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                            : "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                    }
+                >
+                    Ponudbe
+                </Link>
+
+                <Link
+                    href="/dokumenti?vrsta=narocilo"
+                    className={
+                        izbranaVrsta === "narocilo"
+                            ? "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                            : "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                    }
+                >
+                    Naročila
+                </Link>
+
+                <Link
+                    href="/dokumenti"
+                    className={
+                        izbranaVrsta === null
+                            ? "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+                            : "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
+                    }
+                >
+                    Vsi dokumenti
+                </Link>
+            </div>
 
             <section className="mx-auto max-w-7xl px-6 py-10">
                 <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -137,8 +205,12 @@ export default async function DokumentiPage() {
 
                                 <tbody className="divide-y divide-slate-200">
                                     {dokumenti.map((dokument) => (
-                                        <tr key={dokument.id} className="hover:bg-slate-50">
-                                            <td className="px-5 py-4 font-medium text-slate-900">
+                                        <KlikabilnaVrstica
+                                            key={dokument.id}
+                                            href={`/dokumenti/${dokument.id}`}
+                                            oznaka={`Odpri dokument ${dokument.id}`}
+                                        >
+                                            <td className="px-5 py-4 text-sm text-slate-900">
                                                 {dokument.id}
                                             </td>
                                             <td className="px-5 py-4 text-sm capitalize text-slate-700">
@@ -161,7 +233,7 @@ export default async function DokumentiPage() {
                                             <td className="px-5 py-4 text-right text-sm font-medium text-slate-900">
                                                 {oblikujZnesek(dokument.skupni_znesek)}
                                             </td>
-                                        </tr>
+                                        </KlikabilnaVrstica>
                                     ))}
                                 </tbody>
                             </table>

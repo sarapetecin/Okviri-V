@@ -49,6 +49,11 @@ export async function urediPostavko(
     postavkaId: number,
     formData: FormData,
 ) {
+    const potNapake = (napaka: string) =>
+        formData.get("vdelano") === "da"
+            ? `/dokumenti/${dokumentId}?urediPostavko=${postavkaId}&napaka=${napaka}#nova-postavka`
+            : `/dokumenti/${dokumentId}/postavke/${postavkaId}/uredi?napaka=${napaka}`;
+
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -57,6 +62,23 @@ export async function urediPostavko(
     if (napakaZetona || !podatkiZetona?.claims?.sub) {
         redirect("/prijava");
     }
+
+    const {
+        data: uporabniskaVloga,
+        error: napakaUporabniskeVloge,
+    } = await supabase.rpc(
+        "trenutna_uporabniska_vloga",
+    );
+
+    if (
+        napakaUporabniskeVloge ||
+        !uporabniskaVloga
+    ) {
+        redirect("/");
+    }
+
+    const jePartner =
+        uporabniskaVloga === "partner";
 
     const opisSlikeVrednost = formData.get("opisSlike");
     const opombeVrednost = formData.get("opombe");
@@ -101,9 +123,7 @@ export async function urediPostavko(
             rezultat.error.flatten(),
         );
 
-        redirect(
-            `/dokumenti/${dokumentId}/postavke/${postavkaId}/uredi?napaka=neveljavni-podatki`,
-        );
+        redirect(potNapake("neveljavni-podatki"));
     }
 
     const { data: postavka, error: napakaPostavke } = await supabase
@@ -141,10 +161,18 @@ export async function urediPostavko(
             : {}),
     };
 
-    const { error: napakaShranjevanja } = await supabase.rpc(
-        "uredi_celotno_postavko",
-        parametri,
-    );
+    const rezultatShranjevanja = jePartner
+        ? await supabase.rpc(
+            "partner_uredi_celotno_postavko",
+            parametri,
+        )
+        : await supabase.rpc(
+            "uredi_celotno_postavko",
+            parametri,
+        );
+
+    const napakaShranjevanja =
+        rezultatShranjevanja.error;
 
     if (napakaShranjevanja) {
         console.error(
@@ -152,9 +180,7 @@ export async function urediPostavko(
             napakaShranjevanja,
         );
 
-        redirect(
-            `/dokumenti/${dokumentId}/postavke/${postavkaId}/uredi?napaka=shranjevanje`,
-        );
+        redirect(potNapake("shranjevanje"));
     }
 
     if (rezultat.data.paspartuIds.length > 0) {
@@ -175,9 +201,7 @@ export async function urediPostavko(
                 napakaNacinaPaspartuja,
             );
 
-            redirect(
-                `/dokumenti/${dokumentId}/postavke/${postavkaId}/uredi?napaka=shranjevanje`,
-            );
+            redirect(potNapake("shranjevanje"));
         }
     }
 

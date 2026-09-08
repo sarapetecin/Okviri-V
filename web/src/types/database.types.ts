@@ -1067,6 +1067,23 @@ export type Database = {
         Args: { p_narocilo_id: number }
         Returns: undefined
       }
+      partner_uredi_celotno_postavko: {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_postavka_id: number
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
       partner_ustvari_celotno_postavko: {
         Args: {
           p_dodaj_podokvir?: boolean

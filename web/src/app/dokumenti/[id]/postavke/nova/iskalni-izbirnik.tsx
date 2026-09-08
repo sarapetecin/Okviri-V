@@ -19,12 +19,17 @@ type IskalniIzbirnikProps = {
 
 type IzbiraDodatnihDelProps = {
     moznosti: Moznost[];
+    privzetiIds?: number[];
 };
 
 type IzbiraMaterialovProps = {
     moznostiOkvirjev: Moznost[];
     moznostiPaspartujev: Moznost[];
     moznostiStekel: Moznost[];
+    privzetiOkvirIds?: number[];
+    privzetiPaspartuIds?: number[];
+    privzetiNaciniPaspartuja?: Array<"vrezan" | "polozen">;
+    privzetoStekloId?: number | null;
 };
 
 export function IskalniIzbirnik({
@@ -163,8 +168,11 @@ export function IskalniIzbirnik({
 
 export function IzbiraDodatnihDel({
     moznosti,
+    privzetiIds = [],
 }: IzbiraDodatnihDelProps) {
-    const [steviloDel, setSteviloDel] = useState(1);
+    const [steviloDel, setSteviloDel] = useState(
+        Math.max(1, privzetiIds.length),
+    );
 
     return (
         <div className="space-y-4">
@@ -182,6 +190,7 @@ export function IzbiraDodatnihDel({
                                 }
                                 placeholder="Poišči dodatno delo"
                                 moznosti={moznosti}
+                                privzetiId={privzetiIds[indeks]}
                             />
 
                             {indeks === steviloDel - 1 &&
@@ -231,14 +240,18 @@ export function IzbiraMaterialov({
     moznostiOkvirjev,
     moznostiPaspartujev,
     moznostiStekel,
+    privzetiOkvirIds = [],
+    privzetiPaspartuIds = [],
+    privzetiNaciniPaspartuja = [],
+    privzetoStekloId = null,
 }: IzbiraMaterialovProps) {
     const [steviloOkvirjev, setSteviloOkvirjev] =
-        useState(1);
+        useState(Math.max(1, privzetiOkvirIds.length));
 
     const [
         steviloPaspartujev,
         setSteviloPaspartujev,
-    ] = useState(1);
+    ] = useState(Math.max(1, privzetiPaspartuIds.length));
 
     return (
         <div className="grid items-start gap-6 lg:grid-cols-3">
@@ -257,6 +270,7 @@ export function IzbiraMaterialov({
                                 }
                                 placeholder="Poišči okvir"
                                 moznosti={moznostiOkvirjev}
+                                privzetiId={privzetiOkvirIds[indeks]}
                             />
 
                             {indeks === steviloOkvirjev - 1 &&
@@ -313,6 +327,7 @@ export function IzbiraMaterialov({
                                 }
                                 placeholder="Poišči paspartu"
                                 moznosti={moznostiPaspartujev}
+                                privzetiId={privzetiPaspartuIds[indeks]}
                             />
 
                             <fieldset>
@@ -326,7 +341,10 @@ export function IzbiraMaterialov({
                                             name={`nacinPaspartu${indeks + 1}`}
                                             type="radio"
                                             value="vrezan"
-                                            defaultChecked
+                                            defaultChecked={
+                                                privzetiNaciniPaspartuja[indeks] !==
+                                                "polozen"
+                                            }
                                             className="h-4 w-4 accent-slate-900"
                                         />
                                         <span
@@ -343,6 +361,10 @@ export function IzbiraMaterialov({
                                             name={`nacinPaspartu${indeks + 1}`}
                                             type="radio"
                                             value="polozen"
+                                            defaultChecked={
+                                                privzetiNaciniPaspartuja[indeks] ===
+                                                "polozen"
+                                            }
                                             className="h-4 w-4 accent-slate-900"
                                         />
                                         <span
@@ -396,6 +418,7 @@ export function IzbiraMaterialov({
                 label="Steklo"
                 placeholder="Poišči steklo"
                 moznosti={moznostiStekel}
+                privzetiId={privzetoStekloId}
             />
         </div>
     );

@@ -102,7 +102,7 @@ export default async function ZacetnaStran() {
           )}
 
           <Link
-            href="/dokumenti"
+            href="/dokumenti?vrsta=ponudba"
             className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
           >
             <h3 className="text-lg font-semibold text-slate-900">
@@ -116,7 +116,7 @@ export default async function ZacetnaStran() {
 
           {!jePartner && (
             <Link
-              href="/dokumenti"
+              href="/dokumenti?vrsta=narocilo"
               className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
               <h3 className="text-lg font-semibold text-slate-900">
