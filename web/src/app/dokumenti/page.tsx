@@ -12,6 +12,7 @@ type StatusDokumenta =
 type DokumentiPageProps = {
     searchParams: Promise<{
         vrsta?: string;
+        avtor?: string;
     }>;
 };
 
@@ -42,12 +43,18 @@ function oblikujZnesek(znesek: number) {
 export default async function DokumentiPage({
     searchParams,
 }: DokumentiPageProps) {
-    const { vrsta } = await searchParams;
+    const { vrsta, avtor } = await searchParams;
 
     const izbranaVrsta =
         vrsta === "ponudba" || vrsta === "narocilo"
             ? vrsta
             : null;
+
+    const izbraniAvtorId = Number(avtor);
+    const imaIzbranegaAvtorja =
+        izbranaVrsta === "ponudba" &&
+        Number.isInteger(izbraniAvtorId) &&
+        izbraniAvtorId > 0;
 
     const supabase = await createClient();
 
@@ -58,10 +65,34 @@ export default async function DokumentiPage({
         redirect("/prijava");
     }
 
+    const { data: zapisiAvtorjev } =
+        izbranaVrsta === "ponudba"
+            ? await supabase
+                .from("narocilo")
+                .select("izdal_uporabnik_id, izdal_ime")
+                .eq("vrsta", "ponudba")
+            : { data: [] };
+
+    const avtorjiPonudb = Array.from(
+        new Map(
+            (zapisiAvtorjev ?? [])
+                .filter(
+                    (zapis) => zapis.izdal_uporabnik_id !== null,
+                )
+                .map((zapis) => [
+                    zapis.izdal_uporabnik_id as number,
+                    {
+                        id: zapis.izdal_uporabnik_id as number,
+                        ime: zapis.izdal_ime,
+                    },
+                ]),
+        ).values(),
+    ).sort((a, b) => a.ime.localeCompare(b.ime, "sl"));
+
     let poizvedba = supabase
         .from("narocilo")
         .select(
-            "id, datum_sprejema, rok_izdelave, stranka_naziv, vrsta, status, skupni_znesek",
+            "id, datum_sprejema, rok_izdelave, stranka_naziv, vrsta, status, skupni_znesek, izdal_uporabnik_id, izdal_ime",
         )
         .order("ustvarjeno_at", {
             ascending: false,
@@ -71,6 +102,13 @@ export default async function DokumentiPage({
         poizvedba = poizvedba.eq(
             "vrsta",
             izbranaVrsta,
+        );
+    }
+
+    if (imaIzbranegaAvtorja) {
+        poizvedba = poizvedba.eq(
+            "izdal_uporabnik_id",
+            izbraniAvtorId,
         );
     }
 
@@ -139,6 +177,57 @@ export default async function DokumentiPage({
             </div>
 
             <section className="mx-auto max-w-7xl px-6 py-10">
+                {izbranaVrsta === "ponudba" && avtorjiPonudb.length > 0 && (
+                    <form
+                        method="get"
+                        className="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row sm:items-end"
+                    >
+                        <input type="hidden" name="vrsta" value="ponudba" />
+
+                        <div className="min-w-0 flex-1 sm:max-w-sm">
+                            <label
+                                htmlFor="avtor"
+                                className="mb-2 block text-sm font-semibold text-slate-700"
+                            >
+                                Avtor ponudbe
+                            </label>
+
+                            <select
+                                id="avtor"
+                                name="avtor"
+                                defaultValue={imaIzbranegaAvtorja ? String(izbraniAvtorId) : ""}
+                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-slate-600 focus:ring-2 focus:ring-slate-200"
+                            >
+                                <option value="">Vsi avtorji</option>
+                                {avtorjiPonudb.map((avtorPonudbe) => (
+                                    <option
+                                        key={avtorPonudbe.id}
+                                        value={avtorPonudbe.id}
+                                    >
+                                        {avtorPonudbe.ime}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-700"
+                        >
+                            Filtriraj
+                        </button>
+
+                        {imaIzbranegaAvtorja && (
+                            <Link
+                                href="/dokumenti?vrsta=ponudba"
+                                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                                Počisti filter
+                            </Link>
+                        )}
+                    </form>
+                )}
+
                 <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                     <div>
                         <h2 className="text-3xl font-bold text-slate-900">
@@ -188,6 +277,11 @@ export default async function DokumentiPage({
                                         <th className="px-5 py-3 text-sm font-semibold text-slate-700">
                                             Stranka
                                         </th>
+                                        {izbranaVrsta === "ponudba" && (
+                                            <th className="px-5 py-3 text-sm font-semibold text-slate-700">
+                                                Avtor
+                                            </th>
+                                        )}
                                         <th className="px-5 py-3 text-sm font-semibold text-slate-700">
                                             Datum
                                         </th>
@@ -219,6 +313,11 @@ export default async function DokumentiPage({
                                             <td className="px-5 py-4 text-sm text-slate-700">
                                                 {dokument.stranka_naziv}
                                             </td>
+                                            {izbranaVrsta === "ponudba" && (
+                                                <td className="px-5 py-4 text-sm font-medium text-slate-700">
+                                                    {dokument.izdal_ime}
+                                                </td>
+                                            )}
                                             <td className="px-5 py-4 text-sm text-slate-600">
                                                 {oblikujDatum(dokument.datum_sprejema)}
                                             </td>

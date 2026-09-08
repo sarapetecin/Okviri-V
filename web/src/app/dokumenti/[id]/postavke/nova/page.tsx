@@ -401,6 +401,11 @@ export default async function NovaPostavkaPage({
           </div>
         ) : (
           <form
+            key={
+              urejanaPostavka
+                ? `urejanje-${urejanaPostavka.id}`
+                : "nova-postavka"
+            }
             action={shraniPostavko}
             className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"
           >
@@ -593,7 +598,8 @@ export default async function NovaPostavkaPage({
                     name="dodajPodokvir"
                     type="checkbox"
                     defaultChecked={
-                      urejanaPostavka?.postavka_podokvir?.je_podokvir ?? false
+                      urejanaPostavka?.postavka_podokvir
+                        ?.je_podokvir === true
                     }
                     className="mt-0.5 h-4 w-4 rounded border-slate-300"
                   />
@@ -676,7 +682,6 @@ export default async function NovaPostavkaPage({
                     Prekliči urejanje
                   </Link>
                 )}
-
                 {!vdelano && (
                   <Link
                     href={`/dokumenti/${dokument.id}`}

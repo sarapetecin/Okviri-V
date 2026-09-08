@@ -303,28 +303,31 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                         <table className="w-full table-fixed border-collapse text-left">
                             <thead>
                                 <tr className="bg-slate-100">
-                                    <th className="w-[5%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[4%] border border-slate-300 px-2 py-2">
                                         ID
                                     </th>
-                                    <th className="w-[5%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[4%] border border-slate-300 px-2 py-2">
                                         Kol.
                                     </th>
-                                    <th className="w-[7%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[6%] border border-slate-300 px-2 py-2">
                                         Dolžina
                                     </th>
-                                    <th className="w-[7%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[6%] border border-slate-300 px-2 py-2">
                                         Širina
                                     </th>
-                                    <th className="w-[22%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[18%] border border-slate-300 px-2 py-2">
                                         Okvir + zunanji okvirji
                                     </th>
-                                    <th className="w-[13%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[9%] border border-slate-300 px-2 py-2">
+                                        Podokvir
+                                    </th>
+                                    <th className="w-[12%] border border-slate-300 px-2 py-2">
                                         Paspartu
                                     </th>
-                                    <th className="w-[14%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[12%] border border-slate-300 px-2 py-2">
                                         Steklo
                                     </th>
-                                    <th className="w-[10%] border border-slate-300 px-2 py-2">
+                                    <th className="w-[9%] border border-slate-300 px-2 py-2">
                                         Opis slike
                                     </th>
                                     <th className="w-[10%] border border-slate-300 px-2 py-2">
@@ -350,6 +353,20 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                         ...postavka.postavka_dodatno_delo,
                                     ].sort((a, b) => a.vrstni_red - b.vrstni_red);
 
+                                    const imaPodokvir =
+                                        postavka.postavka_podokvir?.je_podokvir ===
+                                        true;
+
+                                    const prikazanaDolzina = imaPodokvir
+                                        ? postavka.postavka_podokvir
+                                            ?.podokvir_dolzina ?? postavka.dolzina
+                                        : postavka.dolzina;
+
+                                    const prikazanaSirina = imaPodokvir
+                                        ? postavka.postavka_podokvir
+                                            ?.podokvir_sirina ?? postavka.sirina
+                                        : postavka.sirina;
+
                                     return (
                                         <tr key={postavka.id} className="break-inside-avoid">
                                             <td className="border border-slate-300 px-2 py-3 align-top">
@@ -361,11 +378,11 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
-                                                {oblikujMero(postavka.dolzina)}
+                                                {oblikujMero(prikazanaDolzina)}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
-                                                {oblikujMero(postavka.sirina)}
+                                                {oblikujMero(prikazanaSirina)}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
@@ -378,26 +395,24 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                             </p>
                                                         ))}
 
-                                                        {postavka.postavka_podokvir?.je_podokvir && (
-                                                            <p>
-                                                                Podokvir{" "}
-                                                                {oblikujMero(
-                                                                    postavka.postavka_podokvir
-                                                                        .podokvir_dolzina ?? 0,
-                                                                )}{" "}
-                                                                ×{" "}
-                                                                {oblikujMero(
-                                                                    postavka.postavka_podokvir
-                                                                        .podokvir_sirina ?? 0,
-                                                                )}
-                                                            </p>
-                                                        )}
                                                     </div>
                                                 ) : postavka.ogledalo ? (
                                                     "Ogledalo"
                                                 ) : (
                                                     "—"
                                                 )}
+                                            </td>
+
+                                            <td className="border border-slate-300 px-2 py-3 align-top">
+                                                {postavka.postavka_podokvir?.je_podokvir
+                                                    ? `${oblikujMero(
+                                                        postavka.postavka_podokvir
+                                                            .podokvir_dolzina ?? 0,
+                                                    )} × ${oblikujMero(
+                                                        postavka.postavka_podokvir
+                                                            .podokvir_sirina ?? 0,
+                                                    )}`
+                                                    : "—"}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">

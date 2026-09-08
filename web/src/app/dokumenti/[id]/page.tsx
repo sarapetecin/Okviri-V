@@ -426,19 +426,23 @@ export default async function DokumentPage({
                       Širina
                     </th>
 
-                    <th className="w-[19%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
+                    <th className="w-[16%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
                       Okvirji
                     </th>
 
-                    <th className="w-[13%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
+                    <th className="w-[9%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
+                      Podokvir
+                    </th>
+
+                    <th className="w-[12%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
                       Paspartu
                     </th>
 
-                    <th className="w-[10%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
+                    <th className="w-[9%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
                       Steklo
                     </th>
 
-                    <th className="w-[9%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
+                    <th className="w-[8%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2">
                       Opis
                     </th>
 
@@ -450,7 +454,7 @@ export default async function DokumentPage({
                       Cena
                     </th>
 
-                    <th className="w-[10%] border-b border-slate-200 px-3 py-3 text-right">
+                    <th className="w-[9%] border-b border-slate-200 px-3 py-3 text-right">
                       Dejanja
                     </th>
                   </tr>
@@ -479,6 +483,19 @@ export default async function DokumentPage({
                         prvo.vrstni_red - drugo.vrstni_red,
                     );
 
+                    const imaPodokvir =
+                      postavka.postavka_podokvir?.je_podokvir === true;
+
+                    const prikazanaDolzina = imaPodokvir
+                      ? postavka.postavka_podokvir?.podokvir_dolzina ??
+                      postavka.dolzina
+                      : postavka.dolzina;
+
+                    const prikazanaSirina = imaPodokvir
+                      ? postavka.postavka_podokvir?.podokvir_sirina ??
+                      postavka.sirina
+                      : postavka.sirina;
+
                     return (
                       <tr
                         key={postavka.id}
@@ -493,11 +510,11 @@ export default async function DokumentPage({
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
-                          {postavka.dolzina}
+                          {prikazanaDolzina}
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
-                          {postavka.sirina}
+                          {prikazanaSirina}
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
@@ -512,23 +529,22 @@ export default async function DokumentPage({
                                 </p>
                               ))}
 
-                              {postavka.postavka_podokvir && (
-                                <p className="border-t border-slate-200 pt-2">
-                                  Podokvir{" "}
-                                  {
-                                    postavka.postavka_podokvir
-                                      .podokvir_dolzina
-                                  }{" "}
-                                  ×{" "}
-                                  {
-                                    postavka.postavka_podokvir
-                                      .podokvir_sirina
-                                  }
-                                </p>
-                              )}
                             </div>
                           ) : postavka.ogledalo ? (
                             "Ogledalo"
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+
+                        <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
+                          {postavka.postavka_podokvir?.je_podokvir ? (
+                            <span>
+                              {postavka.postavka_podokvir.podokvir_dolzina ?? "—"}
+                              {" × "}
+                              {postavka.postavka_podokvir.podokvir_sirina ?? "—"}
+                              {" cm"}
+                            </span>
                           ) : (
                             "—"
                           )}
