@@ -74,6 +74,16 @@ export default async function DokumentPage({
     redirect("/prijava");
   }
 
+  const { data: uporabniskaVloga, error: napakaVloge } =
+    await supabase.rpc("trenutna_uporabniska_vloga");
+
+  if (napakaVloge || !uporabniskaVloga) {
+    redirect("/");
+  }
+
+  const jePartner = uporabniskaVloga === "partner";
+  const jeAdministrator = uporabniskaVloga === "administrator";
+
   const { data: dokument, error: napakaDokumenta } = await supabase
     .from("narocilo")
     .select(
@@ -147,13 +157,17 @@ export default async function DokumentPage({
     .eq("narocilo_id", dokumentId)
     .order("vrstni_red");
 
-  const { data: zgodovinaStatusov } = await supabase
-    .from("zgodovina_statusa_narocila")
-    .select(
-      "id, prejsnji_status, novi_status, ustvarjeno_at",
-    )
-    .eq("narocilo_id", dokumentId)
-    .order("ustvarjeno_at", { ascending: false });
+  const zgodovinaStatusov = jeAdministrator
+    ? (
+      await supabase
+        .from("zgodovina_statusa_narocila")
+        .select(
+          "id, prejsnji_status, novi_status, ustvarjeno_at",
+        )
+        .eq("narocilo_id", dokumentId)
+        .order("ustvarjeno_at", { ascending: false })
+    ).data
+    : [];
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -285,6 +299,7 @@ export default async function DokumentPage({
             <GumbiStatusa
               status={dokument.status}
               vrsta={dokument.vrsta}
+              jePartner={jePartner}
               action={spremeniStatusDokumenta.bind(
                 null,
                 dokument.id,
@@ -293,43 +308,46 @@ export default async function DokumentPage({
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-bold text-slate-900">
-            Zgodovina statusov
-          </h2>
+        {jeAdministrator && (
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <h2 className="text-xl font-bold text-slate-900">
+              Zgodovina statusov
+            </h2>
 
-          {!zgodovinaStatusov || zgodovinaStatusov.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-500">
-              Status dokumenta še ni bil spremenjen.
-            </p>
-          ) : (
-            <div className="mt-5 space-y-4">
-              {zgodovinaStatusov.map((zapis) => (
-                <div
-                  key={zapis.id}
-                  className="flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center"
-                >
-                  <p className="text-sm text-slate-700">
-                    {zapis.prejsnji_status
-                      ? naziviStatusov[zapis.prejsnji_status]
-                      : "Začetek"}
-                    {" → "}
-                    <span className="font-semibold text-slate-900">
-                      {naziviStatusov[zapis.novi_status]}
-                    </span>
-                  </p>
+            {!zgodovinaStatusov ||
+              zgodovinaStatusov.length === 0 ? (
+              <p className="mt-4 text-sm text-slate-500">
+                Status dokumenta še ni bil spremenjen.
+              </p>
+            ) : (
+              <div className="mt-5 space-y-4">
+                {zgodovinaStatusov.map((zapis) => (
+                  <div
+                    key={zapis.id}
+                    className="flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center"
+                  >
+                    <p className="text-sm text-slate-700">
+                      {zapis.prejsnji_status
+                        ? naziviStatusov[zapis.prejsnji_status]
+                        : "Začetek"}
+                      {" → "}
+                      <span className="font-semibold text-slate-900">
+                        {naziviStatusov[zapis.novi_status]}
+                      </span>
+                    </p>
 
-                  <time className="text-xs text-slate-500">
-                    {new Intl.DateTimeFormat("sl-SI", {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    }).format(new Date(zapis.ustvarjeno_at))}
-                  </time>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                    <time className="text-xs text-slate-500">
+                      {new Intl.DateTimeFormat("sl-SI", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      }).format(new Date(zapis.ustvarjeno_at))}
+                    </time>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col justify-between gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center">

@@ -435,6 +435,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "postavka_dodatno_delo_dodatno_delo_id_fkey"
+            columns: ["dodatno_delo_id"]
+            isOneToOne: false
+            referencedRelation: "partner_katalog_dodatnih_del"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "postavka_dodatno_delo_postavka_id_fkey"
             columns: ["postavka_id"]
             isOneToOne: false
@@ -480,6 +487,13 @@ export type Database = {
             columns: ["okvir_id"]
             isOneToOne: false
             referencedRelation: "okvir"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "postavka_okvir_okvir_id_fkey"
+            columns: ["okvir_id"]
+            isOneToOne: false
+            referencedRelation: "partner_katalog_okvirjev"
             referencedColumns: ["id"]
           },
           {
@@ -530,6 +544,13 @@ export type Database = {
             foreignKeyName: "postavka_paspartu_paspartu_id_fkey"
             columns: ["paspartu_id"]
             isOneToOne: false
+            referencedRelation: "partner_katalog_paspartujev"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "postavka_paspartu_paspartu_id_fkey"
+            columns: ["paspartu_id"]
+            isOneToOne: false
             referencedRelation: "paspartu"
             referencedColumns: ["id"]
           },
@@ -575,6 +596,13 @@ export type Database = {
             foreignKeyName: "postavka_podokvir_podokvir_id_fkey"
             columns: ["podokvir_id"]
             isOneToOne: false
+            referencedRelation: "partner_katalog_podokvirjev"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "postavka_podokvir_podokvir_id_fkey"
+            columns: ["podokvir_id"]
+            isOneToOne: false
             referencedRelation: "podokvir"
             referencedColumns: ["id"]
           },
@@ -615,6 +643,13 @@ export type Database = {
             columns: ["postavka_id"]
             isOneToOne: true
             referencedRelation: "narocilo_postavka"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "postavka_steklo_steklo_id_fkey"
+            columns: ["steklo_id"]
+            isOneToOne: false
+            referencedRelation: "partner_katalog_stekel"
             referencedColumns: ["id"]
           },
           {
@@ -830,7 +865,110 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      partner_katalog_dodatnih_del: {
+        Row: {
+          cena: number | null
+          cena_na_m: number | null
+          cena_na_m2: number | null
+          id: number | null
+          naziv: string | null
+        }
+        Insert: {
+          cena?: number | null
+          cena_na_m?: number | null
+          cena_na_m2?: number | null
+          id?: number | null
+          naziv?: string | null
+        }
+        Update: {
+          cena?: number | null
+          cena_na_m?: number | null
+          cena_na_m2?: number | null
+          id?: number | null
+          naziv?: string | null
+        }
+        Relationships: []
+      }
+      partner_katalog_okvirjev: {
+        Row: {
+          barva: string | null
+          id: number | null
+          oznaka: string | null
+          prodajna_cena: number | null
+          sirina: number | null
+          vzorec: string | null
+        }
+        Relationships: []
+      }
+      partner_katalog_paspartujev: {
+        Row: {
+          barva: string | null
+          dodatni_opis: string | null
+          id: number | null
+          naziv: string | null
+          oznaka: string | null
+          prodajna_cena: number | null
+        }
+        Insert: {
+          barva?: string | null
+          dodatni_opis?: string | null
+          id?: number | null
+          naziv?: string | null
+          oznaka?: string | null
+          prodajna_cena?: number | null
+        }
+        Update: {
+          barva?: string | null
+          dodatni_opis?: string | null
+          id?: number | null
+          naziv?: string | null
+          oznaka?: string | null
+          prodajna_cena?: number | null
+        }
+        Relationships: []
+      }
+      partner_katalog_podokvirjev: {
+        Row: {
+          cena_na_meter: number | null
+          cena_na_podokvir: number | null
+          dolzina: number | null
+          id: number | null
+        }
+        Insert: {
+          cena_na_meter?: number | null
+          cena_na_podokvir?: number | null
+          dolzina?: number | null
+          id?: number | null
+        }
+        Update: {
+          cena_na_meter?: number | null
+          cena_na_podokvir?: number | null
+          dolzina?: number | null
+          id?: number | null
+        }
+        Relationships: []
+      }
+      partner_katalog_stekel: {
+        Row: {
+          id: number | null
+          naziv: string | null
+          oznaka: string | null
+          prodajna_cena: number | null
+        }
+        Insert: {
+          id?: number | null
+          naziv?: string | null
+          oznaka?: string | null
+          prodajna_cena?: number | null
+        }
+        Update: {
+          id?: number | null
+          naziv?: string | null
+          oznaka?: string | null
+          prodajna_cena?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_posodobi_uporabnika: {
@@ -880,6 +1018,7 @@ export type Database = {
       }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
+      je_partner: { Args: never; Returns: boolean }
       nastavi_nacine_paspartuja: {
         Args: { p_nacini: string[]; p_postavka_id: number }
         Returns: undefined
@@ -912,6 +1051,39 @@ export type Database = {
         Args: { p_narocilo_id: number }
         Returns: undefined
       }
+      partner_lahko_bere_postavko: {
+        Args: { p_postavka_id: number }
+        Returns: boolean
+      }
+      partner_lahko_ureja_ponudbo: {
+        Args: { p_narocilo_id: number }
+        Returns: boolean
+      }
+      partner_lahko_ureja_postavko: {
+        Args: { p_postavka_id: number }
+        Returns: boolean
+      }
+      partner_umakni_ponudbo_iz_pregleda: {
+        Args: { p_narocilo_id: number }
+        Returns: undefined
+      }
+      partner_ustvari_celotno_postavko: {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_narocilo_id: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
       spremeni_status_dokumenta: {
         Args: {
           p_narocilo_id: number
@@ -920,6 +1092,7 @@ export type Database = {
         Returns: undefined
       }
       trenutna_uporabniska_vloga: { Args: never; Returns: string }
+      trenutni_uporabnik_id: { Args: never; Returns: number }
       uredi_celotno_postavko: {
         Args: {
           p_dodaj_podokvir?: boolean

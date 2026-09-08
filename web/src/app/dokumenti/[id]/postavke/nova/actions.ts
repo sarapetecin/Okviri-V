@@ -25,30 +25,44 @@ const novaPostavkaSchema = z.object({
 
   paspartuIds: z.array(z.number().int().positive()).max(2),
 
-  naciniPaspartuja: z.array(z.enum(["vrezan", "polozen"])).max(2),
+  naciniPaspartuja: z
+    .array(z.enum(["vrezan", "polozen"]))
+    .max(2),
 
   stekloId: z.number().int().positive().nullable(),
 
   dodajPodokvir: z.boolean(),
 
-  dodatnoDeloIds: z.array(z.number().int().positive()).max(50),
+  dodatnoDeloIds: z
+    .array(z.number().int().positive())
+    .max(50),
 });
 
-function preberiStevilo(vrednost: FormDataEntryValue | null) {
-  if (typeof vrednost !== "string" || vrednost.trim() === "") {
+function preberiStevilo(
+  vrednost: FormDataEntryValue | null,
+) {
+  if (
+    typeof vrednost !== "string" ||
+    vrednost.trim() === ""
+  ) {
     return Number.NaN;
   }
 
   return Number(vrednost);
 }
 
-function preberiId(vrednost: FormDataEntryValue | null) {
+function preberiId(
+  vrednost: FormDataEntryValue | null,
+) {
   const id = preberiStevilo(vrednost);
 
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-function preberiIdje(formData: FormData, imePolja: string) {
+function preberiIdje(
+  formData: FormData,
+  imePolja: string,
+) {
   return formData
     .getAll(imePolja)
     .map((vrednost) => preberiId(vrednost))
@@ -67,6 +81,20 @@ export async function ustvariPostavko(
   if (napakaZetona || !podatkiZetona?.claims?.sub) {
     redirect("/prijava");
   }
+
+  const {
+    data: uporabniskaVloga,
+    error: napakaUporabniskeVloge,
+  } = await supabase.rpc("trenutna_uporabniska_vloga");
+
+  if (
+    napakaUporabniskeVloge ||
+    !uporabniskaVloga
+  ) {
+    redirect("/");
+  }
+
+  const jePartner = uporabniskaVloga === "partner";
 
   const opisSlikeVrednost = formData.get("opisSlike");
   const opombeVrednost = formData.get("opombe");
@@ -105,9 +133,13 @@ export async function ustvariPostavko(
 
     stekloId: preberiId(formData.get("stekloId")),
 
-    dodajPodokvir: formData.get("dodajPodokvir") === "on",
+    dodajPodokvir:
+      formData.get("dodajPodokvir") === "on",
 
-    dodatnoDeloIds: preberiIdje(formData, "dodatnoDeloId"),
+    dodatnoDeloIds: preberiIdje(
+      formData,
+      "dodatnoDeloId",
+    ),
   });
 
   if (!rezultat.success) {
@@ -121,14 +153,27 @@ export async function ustvariPostavko(
     );
   }
 
-  const { data: dokument, error: napakaDokumenta } = await supabase
-    .from("narocilo")
-    .select("id")
-    .eq("id", rezultat.data.dokumentId)
-    .maybeSingle();
+  const { data: dokument, error: napakaDokumenta } =
+    await supabase
+      .from("narocilo")
+      .select("id, vrsta, status")
+      .eq("id", rezultat.data.dokumentId)
+      .maybeSingle();
 
   if (napakaDokumenta || !dokument) {
     redirect("/dokumenti");
+  }
+
+  if (
+    jePartner &&
+    (
+      dokument.vrsta !== "ponudba" ||
+      !["osnutek", "zavrnjeno"].includes(dokument.status)
+    )
+  ) {
+    redirect(
+      `/dokumenti/${dokumentId}?napaka=ni-dovoljenja`,
+    );
   }
 
   const parametri = {
@@ -139,8 +184,10 @@ export async function ustvariPostavko(
     p_ogledalo: rezultat.data.ogledalo,
     p_okvir_ids: rezultat.data.okvirIds,
     p_paspartu_ids: rezultat.data.paspartuIds,
-    p_dodaj_podokvir: rezultat.data.dodajPodokvir,
-    p_dodatno_delo_ids: rezultat.data.dodatnoDeloIds,
+    p_dodaj_podokvir:
+      rezultat.data.dodajPodokvir,
+    p_dodatno_delo_ids:
+      rezultat.data.dodatnoDeloIds,
 
     ...(rezultat.data.opisSlike
       ? { p_opis_slike: rezultat.data.opisSlike }
@@ -155,13 +202,21 @@ export async function ustvariPostavko(
       : {}),
   };
 
-  const {
-    data: novaPostavkaId,
-    error: napakaShranjevanja,
-  } = await supabase.rpc(
-    "ustvari_celotno_postavko",
-    parametri,
-  );
+  const rezultatShranjevanja = jePartner
+    ? await supabase.rpc(
+      "partner_ustvari_celotno_postavko",
+      parametri,
+    )
+    : await supabase.rpc(
+      "ustvari_celotno_postavko",
+      parametri,
+    );
+
+  const novaPostavkaId =
+    rezultatShranjevanja.data;
+
+  const napakaShranjevanja =
+    rezultatShranjevanja.error;
 
   if (napakaShranjevanja) {
     console.error(
@@ -175,7 +230,9 @@ export async function ustvariPostavko(
   }
 
   if (!novaPostavkaId) {
-    console.error("Supabase ni vrnil ID-ja nove postavke.");
+    console.error(
+      "Supabase ni vrnil ID-ja nove postavke.",
+    );
 
     redirect(
       `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
@@ -183,16 +240,18 @@ export async function ustvariPostavko(
   }
 
   if (rezultat.data.paspartuIds.length > 0) {
-    const { error: napakaNacinaPaspartuja } = await supabase.rpc(
-      "nastavi_nacine_paspartuja",
-      {
-        p_postavka_id: novaPostavkaId,
-        p_nacini: rezultat.data.naciniPaspartuja.slice(
-          0,
-          rezultat.data.paspartuIds.length,
-        ),
-      },
-    );
+    const { error: napakaNacinaPaspartuja } =
+      await supabase.rpc(
+        "nastavi_nacine_paspartuja",
+        {
+          p_postavka_id: novaPostavkaId,
+          p_nacini:
+            rezultat.data.naciniPaspartuja.slice(
+              0,
+              rezultat.data.paspartuIds.length,
+            ),
+        },
+      );
 
     if (napakaNacinaPaspartuja) {
       console.error(
@@ -200,9 +259,12 @@ export async function ustvariPostavko(
         napakaNacinaPaspartuja,
       );
 
-      await supabase.rpc("izbrisi_celotno_postavko", {
-        p_postavka_id: novaPostavkaId,
-      });
+      await supabase.rpc(
+        "izbrisi_celotno_postavko",
+        {
+          p_postavka_id: novaPostavkaId,
+        },
+      );
 
       redirect(
         `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
@@ -211,7 +273,9 @@ export async function ustvariPostavko(
   }
 
   revalidatePath(`/dokumenti/${dokumentId}`);
-  revalidatePath(`/dokumenti/${dokumentId}/natisni`);
+  revalidatePath(
+    `/dokumenti/${dokumentId}/natisni`,
+  );
 
   redirect(`/dokumenti/${dokumentId}`);
 }

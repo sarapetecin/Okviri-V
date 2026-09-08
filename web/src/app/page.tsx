@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
 
 import { odjava } from "./actions";
-import { createClient } from "@/lib/supabase/server";
 
 export default async function ZacetnaStran() {
   const supabase = await createClient();
@@ -16,11 +17,19 @@ export default async function ZacetnaStran() {
     redirect("/prijava");
   }
 
-  const { data: uporabnik } = await supabase
-    .from("uporabnik")
-    .select("uporabnisko_ime, uporabniske_pravice")
-    .eq("auth_user_id", authUserId)
-    .maybeSingle();
+  const { data: uporabnik, error: napakaUporabnika } =
+    await supabase
+      .from("uporabnik")
+      .select("uporabnisko_ime, uporabniske_pravice")
+      .eq("auth_user_id", authUserId)
+      .maybeSingle();
+
+  if (napakaUporabnika || !uporabnik) {
+    redirect("/prijava");
+  }
+
+  const jePartner =
+    uporabnik.uporabniske_pravice === "partner";
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -30,6 +39,7 @@ export default async function ZacetnaStran() {
             <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
               Okviri V
             </p>
+
             <h1 className="text-xl font-bold text-slate-900">
               Sistem naročil
             </h1>
@@ -38,10 +48,11 @@ export default async function ZacetnaStran() {
           <div className="flex items-center gap-4">
             <div className="text-right">
               <p className="text-sm font-medium text-slate-900">
-                {uporabnik?.uporabnisko_ime ?? "Uporabnik"}
+                {uporabnik.uporabnisko_ime}
               </p>
+
               <p className="text-xs capitalize text-slate-500">
-                {uporabnik?.uporabniske_pravice ?? "Brez vloge"}
+                {uporabnik.uporabniske_pravice}
               </p>
             </div>
 
@@ -62,23 +73,33 @@ export default async function ZacetnaStran() {
           <h2 className="text-3xl font-bold text-slate-900">
             Nadzorna plošča
           </h2>
+
           <p className="mt-2 text-slate-600">
             Izberi del sistema, ki ga želiš uporabljati.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Link
-            href="/stranke"
-            className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <h3 className="text-lg font-semibold text-slate-900">
-              Stranke
-            </h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Dodajanje in pregled strank.
-            </p>
-          </Link>
+        <div
+          className={
+            jePartner
+              ? "grid max-w-md gap-6"
+              : "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          }
+        >
+          {!jePartner && (
+            <Link
+              href="/stranke"
+              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <h3 className="text-lg font-semibold text-slate-900">
+                Stranke
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-600">
+                Dodajanje in pregled strank.
+              </p>
+            </Link>
+          )}
 
           <Link
             href="/dokumenti"
@@ -87,22 +108,26 @@ export default async function ZacetnaStran() {
             <h3 className="text-lg font-semibold text-slate-900">
               Ponudbe
             </h3>
+
             <p className="mt-2 text-sm text-slate-600">
               Priprava informativnih izračunov.
             </p>
           </Link>
 
-          <Link
-            href="/dokumenti"
-            className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <h3 className="text-lg font-semibold text-slate-900">
-              Naročila
-            </h3>
-            <p className="mt-2 text-sm text-slate-600">
-              Upravljanje naročil in njihovih statusov.
-            </p>
-          </Link>
+          {!jePartner && (
+            <Link
+              href="/dokumenti"
+              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <h3 className="text-lg font-semibold text-slate-900">
+                Naročila
+              </h3>
+
+              <p className="mt-2 text-sm text-slate-600">
+                Upravljanje naročil in njihovih statusov.
+              </p>
+            </Link>
+          )}
         </div>
       </section>
     </main>

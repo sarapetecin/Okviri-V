@@ -458,7 +458,9 @@ export async function spremeniStatusDokumenta(
     const { data: podatkiZetona, error: napakaZetona } =
         await supabase.auth.getClaims();
 
-    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+    const authUserId = podatkiZetona?.claims?.sub;
+
+    if (napakaZetona || !authUserId) {
         redirect("/prijava");
     }
 
@@ -473,23 +475,89 @@ export async function spremeniStatusDokumenta(
         );
     }
 
-    const { data: dokument } = await supabase
-        .from("narocilo")
-        .select("id")
-        .eq("id", rezultat.data.dokumentId)
-        .maybeSingle();
+    const { data: uporabnik, error: napakaUporabnika } =
+        await supabase
+            .from("uporabnik")
+            .select(
+                "id, uporabniske_pravice, aktiven, mora_spremeniti_geslo",
+            )
+            .eq("auth_user_id", authUserId)
+            .maybeSingle();
 
-    if (!dokument) {
+    if (
+        napakaUporabnika ||
+        !uporabnik ||
+        !uporabnik.aktiven ||
+        uporabnik.mora_spremeniti_geslo
+    ) {
+        redirect("/");
+    }
+
+    const { data: dokument, error: napakaDokumenta } =
+        await supabase
+            .from("narocilo")
+            .select(
+                "id, vrsta, status, izdal_uporabnik_id",
+            )
+            .eq("id", rezultat.data.dokumentId)
+            .maybeSingle();
+
+    if (napakaDokumenta || !dokument) {
         redirect("/dokumenti");
     }
 
-    const { error } = await supabase.rpc(
-        "spremeni_status_dokumenta",
-        {
-            p_narocilo_id: dokument.id,
-            p_novi_status: rezultat.data.noviStatus,
-        },
-    );
+    const jePartner =
+        uporabnik.uporabniske_pravice === "partner";
+
+    if (jePartner) {
+        const jeLastnaPonudba =
+            dokument.vrsta === "ponudba" &&
+            dokument.izdal_uporabnik_id === uporabnik.id;
+
+        const partnerLahkoPoslje =
+            jeLastnaPonudba &&
+            (
+                dokument.status === "osnutek" ||
+                dokument.status === "zavrnjeno"
+            ) &&
+            rezultat.data.noviStatus === "poslano_v_pregled";
+
+        const partnerLahkoUmakne =
+            jeLastnaPonudba &&
+            dokument.status === "poslano_v_pregled" &&
+            rezultat.data.noviStatus === "osnutek";
+
+        if (!partnerLahkoPoslje && !partnerLahkoUmakne) {
+            redirect(
+                `/dokumenti/${dokumentId}?napaka=ni-dovoljenja`,
+            );
+        }
+    } else {
+        const jeInterniUporabnik =
+            uporabnik.uporabniske_pravice === "administrator" ||
+            uporabnik.uporabniske_pravice === "zaposleni";
+
+        if (!jeInterniUporabnik) {
+            redirect("/");
+        }
+    }
+
+    const { error } =
+        jePartner &&
+            rezultat.data.noviStatus === "osnutek"
+            ? await supabase.rpc(
+                "partner_umakni_ponudbo_iz_pregleda",
+                {
+                    p_narocilo_id: dokument.id,
+                },
+            )
+            : await supabase.rpc(
+                "spremeni_status_dokumenta",
+                {
+                    p_narocilo_id: dokument.id,
+                    p_novi_status: rezultat.data.noviStatus,
+                },
+            );
 
     if (error) {
         console.error("Napaka pri spremembi statusa:", error);

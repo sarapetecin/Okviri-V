@@ -53,6 +53,42 @@ export default async function NovaPostavkaPage({
     notFound();
   }
 
+  const { data: uporabniskaVloga, error: napakaVloge } =
+    await supabase.rpc("trenutna_uporabniska_vloga");
+
+  if (napakaVloge || !uporabniskaVloga) {
+    redirect("/");
+  }
+
+  const jePartner = uporabniskaVloga === "partner";
+
+  const poizvedbaOkvirjev = (od: number, doVkljucno: number) =>
+    jePartner
+      ? supabase
+        .from("partner_katalog_okvirjev")
+        .select(
+          "id, vzorec, oznaka, sirina, prodajna_cena, barva",
+        )
+        .order("vzorec")
+        .range(od, doVkljucno)
+      : supabase
+        .from("okvir")
+        .select(
+          `
+            id,
+            vzorec,
+            oznaka,
+            sirina,
+            prodajna_cena,
+            barva:barva_id (
+              naziv
+            )
+          `,
+        )
+        .eq("na_prodaj", true)
+        .order("vzorec")
+        .range(od, doVkljucno);
+
   const [
     rezultatOkvirjev1,
     rezultatOkvirjev2,
@@ -61,79 +97,46 @@ export default async function NovaPostavkaPage({
     rezultatPaspartujev,
     rezultatDodatnihDel,
   ] = await Promise.all([
-    supabase
-      .from("okvir")
-      .select(
-        `
-          id,
-          vzorec,
-          oznaka,
-          sirina,
-          prodajna_cena,
-          barva:barva_id (
-            naziv
-          )
-        `,
-      )
-      .eq("na_prodaj", true)
-      .order("vzorec")
-      .range(0, 999),
+    poizvedbaOkvirjev(0, 999),
+    poizvedbaOkvirjev(1000, 1999),
+    poizvedbaOkvirjev(2000, 2999),
 
-    supabase
-      .from("okvir")
-      .select(
-        `
-          id,
-          vzorec,
-          oznaka,
-          sirina,
-          prodajna_cena,
-          barva:barva_id (
-            naziv
-          )
-        `,
-      )
-      .eq("na_prodaj", true)
-      .order("vzorec")
-      .range(1000, 1999),
+    jePartner
+      ? supabase
+        .from("partner_katalog_stekel")
+        .select("id, oznaka, naziv, prodajna_cena")
+        .order("naziv")
+      : supabase
+        .from("steklo")
+        .select("id, oznaka, naziv, prodajna_cena")
+        .eq("na_prodaj", true)
+        .order("naziv"),
 
-    supabase
-      .from("okvir")
-      .select(
-        `
-          id,
-          vzorec,
-          oznaka,
-          sirina,
-          prodajna_cena,
-          barva:barva_id (
-            naziv
-          )
-        `,
-      )
-      .eq("na_prodaj", true)
-      .order("vzorec")
-      .range(2000, 2999),
+    jePartner
+      ? supabase
+        .from("partner_katalog_paspartujev")
+        .select(
+          "id, oznaka, naziv, barva, dodatni_opis, prodajna_cena",
+        )
+        .order("oznaka")
+      : supabase
+        .from("paspartu")
+        .select(
+          "id, oznaka, naziv, barva, dodatni_opis, prodajna_cena",
+        )
+        .eq("na_prodaj", true)
+        .order("oznaka"),
 
-    supabase
-      .from("steklo")
-      .select("id, oznaka, naziv, prodajna_cena")
-      .eq("na_prodaj", true)
-      .order("naziv"),
-
-    supabase
-      .from("paspartu")
-      .select(
-        "id, oznaka, naziv, barva, dodatni_opis, prodajna_cena",
-      )
-      .eq("na_prodaj", true)
-      .order("oznaka"),
-
-    supabase
-      .from("dodatna_dela")
-      .select("id, naziv, cena, cena_na_m2, cena_na_m")
-      .eq("na_prodaj", true)
-      .order("naziv"),
+    jePartner
+      ? supabase
+        .from("partner_katalog_dodatnih_del")
+        .select("id, naziv, cena, cena_na_m2, cena_na_m")
+        .order("naziv")
+      : supabase
+        .from("dodatna_dela")
+        .select("id, naziv, cena, cena_na_m2, cena_na_m")
+        .eq("na_prodaj", true)
+        .order("naziv"),
   ]);
 
   const napakaKatalogov =
@@ -150,43 +153,92 @@ export default async function NovaPostavkaPage({
     ...(rezultatOkvirjev3.data ?? []),
   ];
 
-  const moznostiOkvirjev = okviri.map((okvir) => ({
-    id: okvir.id,
-    naziv: okvir.vzorec,
+  const moznostiOkvirjev = okviri.flatMap((okvir) => {
+    if (
+      okvir.id === null ||
+      okvir.vzorec === null ||
+      okvir.prodajna_cena === null
+    ) {
+      return [];
+    }
 
-    opis: [
-      okvir.sirina !== null
-        ? `Širina ${okvir.sirina} cm`
-        : null,
-      `${oblikujCeno(okvir.prodajna_cena)}/m`,
-    ]
-      .filter(Boolean)
-      .join(" · "),
-  }));
+    return [
+      {
+        id: okvir.id,
+        naziv: okvir.vzorec,
+        opis: [
+          okvir.sirina !== null
+            ? `Širina ${okvir.sirina} cm`
+            : null,
+          `${oblikujCeno(okvir.prodajna_cena)}/m`,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      },
+    ];
+  });
 
-  const moznostiStekel = (rezultatStekel.data ?? []).map(
-    (steklo) => ({
-      id: steklo.id,
-      naziv: `${steklo.oznaka} – ${steklo.naziv}`,
-      opis: `${oblikujCeno(steklo.prodajna_cena)}/m²`,
-    }),
+  const moznostiStekel = (rezultatStekel.data ?? []).flatMap(
+    (steklo) => {
+      if (
+        steklo.id === null ||
+        steklo.oznaka === null ||
+        steklo.naziv === null ||
+        steklo.prodajna_cena === null
+      ) {
+        return [];
+      }
+
+      return [
+        {
+          id: steklo.id,
+          naziv: `${steklo.oznaka} – ${steklo.naziv}`,
+          opis: `${oblikujCeno(steklo.prodajna_cena)}/m²`,
+        },
+      ];
+    },
   );
 
   const moznostiPaspartujev = (
     rezultatPaspartujev.data ?? []
-  ).map((paspartu) => ({
-    id: paspartu.id,
-    naziv: paspartu.naziv,
+  ).flatMap((paspartu) => {
+    if (
+      paspartu.id === null ||
+      paspartu.naziv === null ||
+      paspartu.prodajna_cena === null
+    ) {
+      return [];
+    }
 
-    opis: [
-      paspartu.dodatni_opis,
-      `${oblikujCeno(paspartu.prodajna_cena)}/m²`,
-    ]
-      .filter(Boolean)
-      .join(" · "),
-  }));
+    return [
+      {
+        id: paspartu.id,
+        naziv: paspartu.naziv,
+        opis: [
+          paspartu.dodatni_opis,
+          `${oblikujCeno(paspartu.prodajna_cena)}/m²`,
+        ]
+          .filter(Boolean)
+          .join(" · "),
+      },
+    ];
+  });
 
-  const dodatnaDela = rezultatDodatnihDel.data ?? [];
+  const dodatnaDela = (rezultatDodatnihDel.data ?? []).flatMap(
+    (delo) => {
+      if (delo.id === null || delo.naziv === null) {
+        return [];
+      }
+
+      return [
+        {
+          ...delo,
+          id: delo.id,
+          naziv: delo.naziv,
+        },
+      ];
+    },
+  );
 
   const { napaka } = await searchParams;
 
