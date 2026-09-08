@@ -4,7 +4,10 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 import { ustvariPostavko } from "./actions";
-import { IskalniIzbirnik } from "./iskalni-izbirnik";
+import {
+  IzbiraDodatnihDel,
+  IzbiraMaterialov,
+} from "./iskalni-izbirnik";
 
 type NovaPostavkaPageProps = {
   params: Promise<{
@@ -13,6 +16,7 @@ type NovaPostavkaPageProps = {
 
   searchParams: Promise<{
     napaka?: string;
+    _vdelano?: string;
   }>;
 };
 
@@ -240,7 +244,32 @@ export default async function NovaPostavkaPage({
     },
   );
 
-  const { napaka } = await searchParams;
+  const moznostiDodatnihDel = dodatnaDela.map(
+    (delo) => {
+      const deliCene = [
+        delo.cena
+          ? `${oblikujCeno(delo.cena)}/kos`
+          : null,
+
+        delo.cena_na_m2
+          ? `${oblikujCeno(delo.cena_na_m2)}/m²`
+          : null,
+
+        delo.cena_na_m
+          ? `${oblikujCeno(delo.cena_na_m)}/m`
+          : null,
+      ].filter(Boolean);
+
+      return {
+        id: delo.id,
+        naziv: delo.naziv,
+        opis: deliCene.join(" + "),
+      };
+    },
+  );
+
+  const { napaka, _vdelano } = await searchParams;
+  const vdelano = _vdelano === "da";
 
   const sporociloNapake =
     napaka === "neveljavni-podatki"
@@ -257,31 +286,35 @@ export default async function NovaPostavkaPage({
   const inputClassName =
     "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-slate-700 focus:ring-2 focus:ring-slate-200";
   return (
-    <main className="min-h-screen bg-slate-100">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-              {dokument.vrsta === "ponudba" ? "Ponudba" : "Naročilo"} #
-              {dokument.id}
-            </p>
+    <div className={vdelano ? "" : "min-h-screen bg-slate-100"}>
+      {!vdelano && (
+        <header className="border-b border-slate-200 bg-white">
+          <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
+                {dokument.vrsta === "ponudba" ? "Ponudba" : "Naročilo"} #
+                {dokument.id}
+              </p>
 
-            <h1 className="text-xl font-bold text-slate-900">
-              Nova postavka
-            </h1>
+              <h1 className="text-xl font-bold text-slate-900">
+                Nova postavka
+              </h1>
+            </div>
+
+            <Link
+              href={`/dokumenti/${dokument.id}`}
+              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+            >
+              Prekliči
+            </Link>
           </div>
-
-          <Link
-            href={`/dokumenti/${dokument.id}`}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-          >
-            Prekliči
-          </Link>
-        </div>
-      </header>
-
-      <section className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-7">
+        </header>
+      )}
+      <section
+        className={
+          vdelano ? "" : "mx-auto max-w-7xl px-6 py-8"
+        }
+      >        <div className={vdelano ? "mb-5" : "mb-7"}>
           <h2 className="text-2xl font-bold text-slate-900">
             Dodajanje celotne postavke
           </h2>
@@ -313,6 +346,14 @@ export default async function NovaPostavkaPage({
             action={shraniPostavko}
             className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"
           >
+            {vdelano && (
+              <input
+                type="hidden"
+                name="vdelano"
+                value="da"
+              />
+            )}
+
             <div className="space-y-6">
               <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-6">
@@ -443,147 +484,33 @@ export default async function NovaPostavkaPage({
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="mb-6">
+              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="mb-4">
                   <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                    2. Okvirji
+                    2. Materiali
                   </p>
 
                   <h3 className="mt-1 text-xl font-bold text-slate-900">
-                    Glavni in zunanji okvirji
+                    Okvir, paspartu in steklo
                   </h3>
 
                   <p className="mt-2 text-sm text-slate-600">
-                    Začni vpisovati vzorec, oznako ali barvo. Drugi in
-                    tretji okvir sta neobvezna.
+                    Dodatni okvir ali paspartu se odpre pod
+                    prvim izborom.
                   </p>
                 </div>
 
-                <div className="grid gap-5 lg:grid-cols-3">
-                  <IskalniIzbirnik
-                    name="okvirId"
-                    label="Glavni okvir"
-                    placeholder="Poišči okvir"
-                    moznosti={moznostiOkvirjev}
-                  />
-
-                  <IskalniIzbirnik
-                    name="okvirId"
-                    label="Zunanji okvir 2"
-                    placeholder="Neobvezno"
-                    moznosti={moznostiOkvirjev}
-                  />
-
-                  <IskalniIzbirnik
-                    name="okvirId"
-                    label="Zunanji okvir 3"
-                    placeholder="Neobvezno"
-                    moznosti={moznostiOkvirjev}
-                  />
-                </div>
+                <IzbiraMaterialov
+                  moznostiOkvirjev={moznostiOkvirjev}
+                  moznostiPaspartujev={moznostiPaspartujev}
+                  moznostiStekel={moznostiStekel}
+                />
               </section>
 
               <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div className="mb-6">
                   <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                    3. Steklo in paspartu
-                  </p>
-
-                  <h3 className="mt-1 text-xl font-bold text-slate-900">
-                    Zaščita in notranja obroba
-                  </h3>
-                </div>
-
-                <div className="grid gap-5 lg:grid-cols-3">
-                  <IskalniIzbirnik
-                    name="stekloId"
-                    label="Steklo"
-                    placeholder="Poišči steklo"
-                    moznosti={moznostiStekel}
-                  />
-
-                  <div className="space-y-3">
-                    <IskalniIzbirnik
-                      name="paspartuId"
-                      label="Paspartu"
-                      placeholder="Poišči paspartu"
-                      moznosti={moznostiPaspartujev}
-                    />
-
-                    <fieldset>
-                      <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Način paspartuja
-                      </legend>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                          <input
-                            name="nacinPaspartu1"
-                            type="radio"
-                            value="vrezan"
-                            defaultChecked
-                          />
-                          <span className="text-lg leading-none">□</span>
-                          <span>Vrezan</span>
-                        </label>
-
-                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                          <input
-                            name="nacinPaspartu1"
-                            type="radio"
-                            value="polozen"
-                          />
-                          <span className="text-lg leading-none">○</span>
-                          <span>Položen</span>
-                        </label>
-                      </div>
-                    </fieldset>
-                  </div>
-
-                  <div className="space-y-3">
-                    <IskalniIzbirnik
-                      name="paspartuId"
-                      label="Drugi paspartu"
-                      placeholder="Neobvezno"
-                      moznosti={moznostiPaspartujev}
-                    />
-
-                    <fieldset>
-                      <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
-                        Način drugega paspartuja
-                      </legend>
-
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                          <input
-                            name="nacinPaspartu2"
-                            type="radio"
-                            value="vrezan"
-                            defaultChecked
-                          />
-                          <span className="text-lg leading-none">□</span>
-                          <span>Vrezan</span>
-                        </label>
-
-                        <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
-                          <input
-                            name="nacinPaspartu2"
-                            type="radio"
-                            value="polozen"
-                          />
-                          <span className="text-lg leading-none">○</span>
-                          <span>Položen</span>
-                        </label>
-                      </div>
-                    </fieldset>
-                  </div>
-                </div>
-              </section>
-
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <div className="mb-6">
-                  <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                    4. Podokvir in dodatna dela
+                    3. Podokvir in dodatna dela
                   </p>
 
                   <h3 className="mt-1 text-xl font-bold text-slate-900">
@@ -609,61 +536,17 @@ export default async function NovaPostavkaPage({
                   </span>
                 </label>
 
-                <fieldset className="mt-6">
-                  <legend className="mb-3 text-sm font-semibold text-slate-900">
-                    Dodatna dela
-                  </legend>
-
-                  {dodatnaDela.length === 0 ? (
+                <div className="mt-5">
+                  {moznostiDodatnihDel.length === 0 ? (
                     <p className="text-sm text-slate-500">
                       Dodatna dela niso na voljo.
                     </p>
                   ) : (
-                    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                      {dodatnaDela.map((delo) => {
-                        const deliCene = [
-                          delo.cena
-                            ? `${oblikujCeno(delo.cena)}/kos`
-                            : null,
-
-                          delo.cena_na_m2
-                            ? `${oblikujCeno(delo.cena_na_m2)}/m²`
-                            : null,
-
-                          delo.cena_na_m
-                            ? `${oblikujCeno(delo.cena_na_m)}/m`
-                            : null,
-                        ].filter(Boolean);
-
-                        return (
-                          <label
-                            key={delo.id}
-                            className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50"
-                          >
-                            <input
-                              name="dodatnoDeloId"
-                              type="checkbox"
-                              value={delo.id}
-                              className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                            />
-
-                            <span>
-                              <span className="block text-sm font-medium text-slate-900">
-                                {delo.naziv}
-                              </span>
-
-                              {deliCene.length > 0 && (
-                                <span className="mt-1 block text-xs text-slate-500">
-                                  {deliCene.join(" + ")}
-                                </span>
-                              )}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
+                    <IzbiraDodatnihDel
+                      moznosti={moznostiDodatnihDel}
+                    />
                   )}
-                </fieldset>
+                </div>
               </section>
             </div>
 
@@ -708,12 +591,14 @@ export default async function NovaPostavkaPage({
                   Shrani celotno postavko
                 </button>
 
-                <Link
-                  href={`/dokumenti/${dokument.id}`}
-                  className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
-                >
-                  Prekliči
-                </Link>
+                {!vdelano && (
+                  <Link
+                    href={`/dokumenti/${dokument.id}`}
+                    className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Prekliči
+                  </Link>
+                )}
               </div>
 
               <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
@@ -724,6 +609,6 @@ export default async function NovaPostavkaPage({
           </form>
         )}
       </section>
-    </main>
+    </div>
   );
 }

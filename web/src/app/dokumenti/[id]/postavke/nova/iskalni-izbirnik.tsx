@@ -17,6 +17,16 @@ type IskalniIzbirnikProps = {
     privzetiId?: number | null;
 };
 
+type IzbiraDodatnihDelProps = {
+    moznosti: Moznost[];
+};
+
+type IzbiraMaterialovProps = {
+    moznostiOkvirjev: Moznost[];
+    moznostiPaspartujev: Moznost[];
+    moznostiStekel: Moznost[];
+};
+
 export function IskalniIzbirnik({
     name,
     label,
@@ -147,6 +157,246 @@ export function IskalniIzbirnik({
                     )}
                 </div>
             )}
+        </div>
+    );
+}
+
+export function IzbiraDodatnihDel({
+    moznosti,
+}: IzbiraDodatnihDelProps) {
+    const [steviloDel, setSteviloDel] = useState(1);
+
+    return (
+        <div className="space-y-4">
+            <div className="grid gap-4 lg:grid-cols-2">
+                {Array.from(
+                    { length: steviloDel },
+                    (_, indeks) => (
+                        <div key={indeks}>
+                            <IskalniIzbirnik
+                                name="dodatnoDeloId"
+                                label={
+                                    indeks === 0
+                                        ? "Dodatno delo"
+                                        : `Dodatno delo ${indeks + 1}`
+                                }
+                                placeholder="Poišči dodatno delo"
+                                moznosti={moznosti}
+                            />
+
+                            {indeks === steviloDel - 1 &&
+                                indeks > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setSteviloDel(
+                                                (trenutno) => trenutno - 1,
+                                            )
+                                        }
+                                        className="mt-2 text-sm font-medium text-red-600 transition hover:text-red-800"
+                                    >
+                                        Odstrani dodatno delo
+                                    </button>
+                                )}
+                        </div>
+                    ),
+                )}
+            </div>
+
+            {steviloDel <
+                Math.min(moznosti.length, 50) && (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setSteviloDel(
+                                (trenutno) => trenutno + 1,
+                            )
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-500 hover:bg-slate-50"
+                    >
+                        <span
+                            aria-hidden="true"
+                            className="text-lg leading-none"
+                        >
+                            +
+                        </span>
+                        Dodaj dodatno delo
+                    </button>
+                )}
+        </div>
+    );
+}
+
+export function IzbiraMaterialov({
+    moznostiOkvirjev,
+    moznostiPaspartujev,
+    moznostiStekel,
+}: IzbiraMaterialovProps) {
+    const [steviloOkvirjev, setSteviloOkvirjev] =
+        useState(1);
+
+    const [
+        steviloPaspartujev,
+        setSteviloPaspartujev,
+    ] = useState(1);
+
+    return (
+        <div className="grid items-start gap-6 lg:grid-cols-3">
+            {/* OKVIRJI */}
+            <div className="space-y-4">
+                {Array.from(
+                    { length: steviloOkvirjev },
+                    (_, indeks) => (
+                        <div key={indeks}>
+                            <IskalniIzbirnik
+                                name="okvirId"
+                                label={
+                                    indeks === 0
+                                        ? "Okvir"
+                                        : `Okvir ${indeks + 1}`
+                                }
+                                placeholder="Poišči okvir"
+                                moznosti={moznostiOkvirjev}
+                            />
+
+                            {indeks === steviloOkvirjev - 1 &&
+                                indeks > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setSteviloOkvirjev(
+                                                (trenutno) => trenutno - 1,
+                                            )
+                                        }
+                                        className="mt-2 text-sm font-medium text-red-600 hover:text-red-800"
+                                    >
+                                        Odstrani okvir
+                                    </button>
+                                )}
+                        </div>
+                    ),
+                )}
+
+                {steviloOkvirjev < 3 && (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setSteviloOkvirjev(
+                                (trenutno) => trenutno + 1,
+                            )
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-500 hover:bg-slate-50"
+                    >
+                        <span
+                            aria-hidden="true"
+                            className="text-lg leading-none"
+                        >
+                            +
+                        </span>
+                        Dodaj okvir
+                    </button>
+                )}
+            </div>
+
+            {/* PASPARTUJI */}
+            <div className="space-y-4">
+                {Array.from(
+                    { length: steviloPaspartujev },
+                    (_, indeks) => (
+                        <div key={indeks} className="space-y-3">
+                            <IskalniIzbirnik
+                                name="paspartuId"
+                                label={
+                                    indeks === 0
+                                        ? "Paspartu"
+                                        : "Paspartu 2"
+                                }
+                                placeholder="Poišči paspartu"
+                                moznosti={moznostiPaspartujev}
+                            />
+
+                            <fieldset>
+                                <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                                    Način paspartuja
+                                </legend>
+
+                                <div className="grid grid-cols-2 gap-2">
+                                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                                        <input
+                                            name={`nacinPaspartu${indeks + 1}`}
+                                            type="radio"
+                                            value="vrezan"
+                                            defaultChecked
+                                            className="h-4 w-4 accent-slate-900"
+                                        />
+                                        <span
+                                            aria-hidden="true"
+                                            className="text-xl font-bold leading-none text-slate-900"
+                                        >
+                                            □
+                                        </span>
+                                        <span className="text-slate-900">Vrezan</span>
+                                    </label>
+
+                                    <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                                        <input
+                                            name={`nacinPaspartu${indeks + 1}`}
+                                            type="radio"
+                                            value="polozen"
+                                            className="h-4 w-4 accent-slate-900"
+                                        />
+                                        <span
+                                            aria-hidden="true"
+                                            className="text-xl font-bold leading-none text-slate-900"
+                                        >
+                                            ○
+                                        </span>
+                                        <span className="text-slate-900">Položen</span>
+                                    </label>
+                                </div>
+                            </fieldset>
+
+                            {indeks === 1 && (
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setSteviloPaspartujev(1)
+                                    }
+                                    className="text-sm font-medium text-red-600 hover:text-red-800"
+                                >
+                                    Odstrani paspartu
+                                </button>
+                            )}
+                        </div>
+                    ),
+                )}
+
+                {steviloPaspartujev < 2 && (
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setSteviloPaspartujev(2)
+                        }
+                        className="inline-flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:border-slate-500 hover:bg-slate-50"
+                    >
+                        <span
+                            aria-hidden="true"
+                            className="text-lg leading-none"
+                        >
+                            +
+                        </span>
+                        Dodaj paspartu
+                    </button>
+                )}
+            </div>
+
+            {/* STEKLO */}
+            <IskalniIzbirnik
+                name="stekloId"
+                label="Steklo"
+                placeholder="Poišči steklo"
+                moznosti={moznostiStekel}
+            />
         </div>
     );
 }

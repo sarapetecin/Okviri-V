@@ -22,6 +22,8 @@ import { GumbiStatusa } from "./gumbi-statusa";
 import { izbrisiPostavko } from "./brisanje-postavke";
 import { GumbIzbrisiPostavko } from "./gumb-izbrisi-postavko";
 
+import NovaPostavkaPage from "./postavke/nova/page";
+
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
 
@@ -53,10 +55,14 @@ type DokumentPageProps = {
   params: Promise<{
     id: string;
   }>;
+  searchParams: Promise<{
+    napaka?: string;
+  }>;
 };
 
 export default async function DokumentPage({
   params,
+  searchParams,
 }: DokumentPageProps) {
   const { id } = await params;
   const dokumentId = Number(id);
@@ -96,6 +102,17 @@ export default async function DokumentPage({
     notFound();
   }
 
+  const jeDokumentZakljucen = [
+    "dokoncano",
+    "rocno_zaprto",
+    "preklicano",
+  ].includes(dokument.status);
+
+  const lahkoUrejaPostavke = jePartner
+    ? dokument.vrsta === "ponudba" &&
+    ["osnutek", "zavrnjeno"].includes(dokument.status)
+    : !jeDokumentZakljucen;
+
   const { data: postavke, error: napakaPostavk } = await supabase
     .from("narocilo_postavka")
     .select(
@@ -106,6 +123,7 @@ export default async function DokumentPage({
     sirina,
     opis_slike,
     ogledalo,
+    opombe,
     cena_postavke,
     vrstni_red,
     postavka_okvir (
@@ -349,6 +367,23 @@ export default async function DokumentPage({
           </section>
         )}
 
+        {lahkoUrejaPostavke && (
+          <section
+            id="nova-postavka"
+            className="rounded-2xl border border-slate-200 bg-slate-50 p-5 shadow-sm sm:p-6"
+          >
+            <NovaPostavkaPage
+              params={Promise.resolve({
+                id: String(dokument.id),
+              })}
+              searchParams={searchParams.then((vrednosti) => ({
+                ...vrednosti,
+                _vdelano: "da",
+              }))}
+            />
+          </section>
+        )}
+
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="flex flex-col justify-between gap-4 border-b border-slate-200 p-6 sm:flex-row sm:items-center">
             <div>
@@ -359,12 +394,14 @@ export default async function DokumentPage({
                 Slike, dimenzije in izbrani materiali.
               </p>
             </div>
-            <Link
-              href={`/dokumenti/${dokument.id}/postavke/nova`}
-              className="rounded-lg bg-slate-900 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-slate-700"
-            >
-              Nova postavka
-            </Link>
+            {lahkoUrejaPostavke && (
+              <a
+                href="#nova-postavka"
+                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-center font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Dodaj postavko zgoraj
+              </a>
+            )}
           </div>
 
           {napakaPostavk ? (
@@ -382,70 +419,103 @@ export default async function DokumentPage({
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50">
-                  <tr>
-                    <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                      #
+              <table className="w-full min-w-[1250px] table-fixed border-collapse text-left text-sm">
+                <thead>
+                  <tr className="bg-slate-100 text-slate-700">
+                    <th className="w-[5%] border border-slate-300 px-2 py-2">
+                      ID
                     </th>
-                    <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                      Opis
+                    <th className="w-[5%] border border-slate-300 px-2 py-2">
+                      Kol.
                     </th>
-                    <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                      Dimenzije
+                    <th className="w-[7%] border border-slate-300 px-2 py-2">
+                      Dolžina
                     </th>
-                    <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                      Količina
+                    <th className="w-[7%] border border-slate-300 px-2 py-2">
+                      Širina
                     </th>
-                    <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
-                      Dejanja
+                    <th className="w-[18%] border border-slate-300 px-2 py-2">
+                      Okvirji
                     </th>
-                    <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                    <th className="w-[13%] border border-slate-300 px-2 py-2">
+                      Paspartu
+                    </th>
+                    <th className="w-[11%] border border-slate-300 px-2 py-2">
+                      Steklo
+                    </th>
+                    <th className="w-[9%] border border-slate-300 px-2 py-2">
+                      Opis slike
+                    </th>
+                    <th className="w-[11%] border border-slate-300 px-2 py-2">
+                      Opombe
+                    </th>
+                    <th className="w-[8%] border border-slate-300 px-2 py-2 text-right">
                       Cena
                     </th>
-                    <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
-                      Izbriši
+                    <th className="w-[12%] border border-slate-300 px-2 py-2 text-right">
+                      Dejanja
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-200">
-                  {postavke.map((postavka) => (
-                    <tr key={postavka.id}>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {postavka.vrstni_red}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-900">
-                        <p className="font-medium">
-                          {postavka.opis_slike ??
-                            (postavka.ogledalo ? "Ogledalo" : "Slika")}
-                        </p>
+                <tbody>
+                  {postavke.map((postavka) => {
+                    const okvirji = [
+                      ...postavka.postavka_okvir,
+                    ].sort(
+                      (prvi, drugi) =>
+                        prvi.vrstni_red - drugi.vrstni_red,
+                    );
 
-                        {postavka.postavka_okvir.length > 0 && (
-                          <div className="mt-3 space-y-2">
-                            {postavka.postavka_okvir
-                              .toSorted((a, b) => a.vrstni_red - b.vrstni_red)
-                              .map((okvir) => (
+                    const paspartuji = [
+                      ...postavka.postavka_paspartu,
+                    ].sort(
+                      (prvi, drugi) =>
+                        prvi.vrstni_red - drugi.vrstni_red,
+                    );
+
+                    const dodatnaDela = [
+                      ...postavka.postavka_dodatno_delo,
+                    ].sort(
+                      (prvo, drugo) =>
+                        prvo.vrstni_red - drugo.vrstni_red,
+                    );
+
+                    return (
+                      <tr
+                        key={postavka.id}
+                        className="align-top hover:bg-slate-50"
+                      >
+                        <td className="border border-slate-300 px-2 py-3">
+                          {postavka.id}
+                        </td>
+
+                        <td className="border border-slate-300 px-2 py-3">
+                          {postavka.kolicina}
+                        </td>
+
+                        <td className="border border-slate-300 px-2 py-3">
+                          {postavka.dolzina}
+                        </td>
+
+                        <td className="border border-slate-300 px-2 py-3">
+                          {postavka.sirina}
+                        </td>
+
+                        <td className="border border-slate-300 px-2 py-3">
+                          {okvirji.length > 0 ? (
+                            <div className="space-y-2">
+                              {okvirji.map((okvir) => (
                                 <div
                                   key={okvir.id}
-                                  className="flex min-w-72 items-center justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3"
+                                  className="flex items-start justify-between gap-2"
                                 >
-                                  <div>
-                                    <p className="text-sm font-semibold text-slate-900">
-                                      {okvir.vzorec}
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-slate-600">
-                                      {okvir.barva ?? "Brez barve"}
-                                      {" · "}
-                                      Širina:{" "}
-                                      {okvir.sirina_okvirja !== null
-                                        ? `${okvir.sirina_okvirja} cm`
-                                        : "ni vnesena"}
-                                      {" · "}
-                                      {oblikujZnesek(okvir.cena_okvirja)}
-                                    </p>
-                                  </div>
+                                  <span>
+                                    {okvir.vzorec}
+                                    {okvir.barva
+                                      ? ` – ${okvir.barva}`
+                                      : ""}
+                                  </span>
 
                                   <GumbOdstraniOkvir
                                     action={odstraniOkvir.bind(
@@ -457,64 +527,63 @@ export default async function DokumentPage({
                                   />
                                 </div>
                               ))}
-                          </div>
-                        )}
-                        {postavka.postavka_steklo && (
-                          <div className="mt-2 flex min-w-72 items-center justify-between gap-4 rounded-lg border border-sky-200 bg-sky-50 p-3">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900">
-                                Steklo: {postavka.postavka_steklo.naziv}
-                              </p>
 
-                              <p className="mt-1 text-xs text-slate-600">
-                                {oblikujZnesek(postavka.postavka_steklo.cena_stekla)}
-                              </p>
-                            </div>
+                              {postavka.postavka_podokvir && (
+                                <div className="flex items-start justify-between gap-2 border-t border-slate-200 pt-2">
+                                  <span>
+                                    Podokvir{" "}
+                                    {
+                                      postavka.postavka_podokvir
+                                        .podokvir_dolzina
+                                    }{" "}
+                                    ×{" "}
+                                    {
+                                      postavka.postavka_podokvir
+                                        .podokvir_sirina
+                                    }
+                                  </span>
 
-                            <GumbOdstraniSteklo
-                              action={odstraniSteklo.bind(
-                                null,
-                                dokument.id,
-                                postavka.id,
-                                postavka.postavka_steklo.id,
+                                  <GumbOdstraniPodokvir
+                                    action={odstraniPodokvir.bind(
+                                      null,
+                                      dokument.id,
+                                      postavka.id,
+                                      postavka.postavka_podokvir.id,
+                                    )}
+                                  />
+                                </div>
                               )}
-                            />
-                          </div>
-                        )}
-                        {postavka.postavka_paspartu.length > 0 && (
-                          <div className="mt-2 space-y-2">
-                            {postavka.postavka_paspartu
-                              .toSorted((a, b) => a.vrstni_red - b.vrstni_red)
-                              .map((paspartu) => (
+                            </div>
+                          ) : postavka.ogledalo ? (
+                            "Ogledalo"
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+
+                        <td className="border border-slate-300 px-2 py-3">
+                          {paspartuji.length > 0 ? (
+                            <div className="space-y-2">
+                              {paspartuji.map((paspartu) => (
                                 <div
                                   key={paspartu.id}
-                                  className="flex min-w-72 items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 p-3"
+                                  className="flex items-start justify-between gap-2"
                                 >
-                                  <div>
-                                    <p className="text-sm font-semibold text-slate-900">
-                                      Paspartu:{" "}
-                                      <span
-                                        className="text-lg"
-                                        title={
-                                          paspartu.nacin_paspartu === "polozen"
-                                            ? "Položen"
-                                            : "Vrezan"
-                                        }
-                                      >
-                                        {paspartu.nacin_paspartu === "polozen" ? "○" : "□"}
-                                      </span>{" "}
-                                      {paspartu.oznaka ?? "Brez oznake"}
-                                    </p>
+                                  <span>
+                                    <span className="mr-1 font-bold text-slate-900">
+                                      {paspartu.nacin_paspartu ===
+                                        "polozen"
+                                        ? "○"
+                                        : "□"}
+                                    </span>
 
-                                    <p className="mt-1 text-xs text-slate-600">
-                                      {paspartu.barva ?? "Brez barve"}
-                                      {paspartu.dodatni_opis
-                                        ? ` · ${paspartu.dodatni_opis}`
-                                        : ""}
-                                      {" · "}
-                                      {oblikujZnesek(paspartu.cena_paspartuja)}
-                                    </p>
-                                  </div>
+                                    {[
+                                      paspartu.oznaka,
+                                      paspartu.barva,
+                                    ]
+                                      .filter(Boolean)
+                                      .join(" – ")}
+                                  </span>
 
                                   <GumbOdstraniPaspartu
                                     action={odstraniPaspartu.bind(
@@ -526,146 +595,103 @@ export default async function DokumentPage({
                                   />
                                 </div>
                               ))}
-                          </div>
-                        )}
-                        {postavka.postavka_podokvir && (
-                          <div className="mt-2 flex min-w-72 items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900">
-                                Podokvir:{" "}
-                                {postavka.postavka_podokvir.podokvir_dolzina} ×{" "}
-                                {postavka.postavka_podokvir.podokvir_sirina} cm
-                              </p>
+                            </div>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
 
-                              <p className="mt-1 text-xs text-slate-600">
-                                {oblikujZnesek(
-                                  postavka.postavka_podokvir.cena_podokvirja,
+                        <td className="border border-slate-300 px-2 py-3">
+                          {postavka.postavka_steklo ? (
+                            <div className="flex items-start justify-between gap-2">
+                              <span>
+                                {postavka.postavka_steklo.naziv}
+                              </span>
+
+                              <GumbOdstraniSteklo
+                                action={odstraniSteklo.bind(
+                                  null,
+                                  dokument.id,
+                                  postavka.id,
+                                  postavka.postavka_steklo.id,
                                 )}
-                              </p>
+                              />
                             </div>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
 
-                            <GumbOdstraniPodokvir
-                              action={odstraniPodokvir.bind(
-                                null,
-                                dokument.id,
-                                postavka.id,
-                                postavka.postavka_podokvir.id,
-                              )}
-                            />
-                          </div>
-                        )}
-                        {postavka.postavka_dodatno_delo.map((delo) => (
-                          <div
-                            key={delo.id}
-                            className="mt-2 flex min-w-72 items-center justify-between gap-4 rounded-lg border border-violet-200 bg-violet-50 p-3"
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-slate-900">
-                                Dodatno delo: {delo.naziv}
-                              </p>
+                        <td className="border border-slate-300 px-2 py-3">
+                          {postavka.opis_slike ?? "—"}
+                        </td>
 
-                              <p className="mt-1 text-xs text-slate-600">
-                                {oblikujZnesek(delo.skupna_cena)}
-                              </p>
+                        <td className="border border-slate-300 px-2 py-3">
+                          <p>{postavka.opombe ?? "—"}</p>
 
-                              {delo.nacin_obracuna === "kombinirano" && (
-                                <p className="mt-1 text-xs text-slate-500">
-                                  Osnovna cena in obračun po merah
-                                </p>
-                              )}
+                          {dodatnaDela.length > 0 && (
+                            <div className="mt-2 space-y-2 border-t border-slate-200 pt-2">
+                              {dodatnaDela.map((delo) => (
+                                <div
+                                  key={delo.id}
+                                  className="flex items-start justify-between gap-2"
+                                >
+                                  <span>{delo.naziv}</span>
+
+                                  <GumbOdstraniDodatnoDelo
+                                    action={odstraniDodatnoDelo.bind(
+                                      null,
+                                      dokument.id,
+                                      postavka.id,
+                                      delo.id,
+                                    )}
+                                  />
+                                </div>
+                              ))}
                             </div>
+                          )}
+                        </td>
 
-                            <GumbOdstraniDodatnoDelo
-                              action={odstraniDodatnoDelo.bind(
-                                null,
-                                dokument.id,
-                                postavka.id,
-                                delo.id,
-                              )}
-                            />
-                          </div>
-                        ))}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {postavka.dolzina} × {postavka.sirina}
-                      </td>
-                      <td className="px-5 py-4 text-sm text-slate-600">
-                        {postavka.kolicina}
-                      </td>
-                      <td className="px-5 py-4 text-right">
-                        <Link
-                          href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/okvir`}
-                          className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                        >
-                          Dodaj okvir
-                        </Link>
-                        {!postavka.postavka_steklo && (
-                          <Link
-                            href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/steklo`}
-                            className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            Dodaj steklo
-                          </Link>
-                        )}
-                        <Link
-                          href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/paspartu`}
-                          className="inline-block rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                        >
-                          Dodaj paspartu
-                        </Link>
-                        {!postavka.postavka_podokvir && (
-                          <form
-                            action={dodajPodokvir.bind(
-                              null,
-                              dokument.id,
-                              postavka.id,
-                            )}
-                          >
-                            <button
-                              type="submit"
-                              className="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100"
+                        <td className="border border-slate-300 px-2 py-3 text-right font-semibold whitespace-nowrap">
+                          {oblikujZnesek(
+                            postavka.cena_postavke,
+                          )}
+                        </td>
+
+                        <td className="border border-slate-300 px-2 py-3">
+                          <div className="flex flex-col items-stretch gap-2">
+                            <Link
+                              href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/uredi`}
+                              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-center text-xs font-medium text-slate-700 hover:bg-slate-50"
                             >
-                              Dodaj podokvir
-                            </button>
-                          </form>
-                        )}
-                        <Link
-                          href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/dodatna-dela`}
-                          className="rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-center text-sm font-medium text-violet-800 transition hover:bg-violet-100"
-                        >
-                          Dodatno delo
-                        </Link>
-                      </td>
-                      <td className="px-5 py-4 text-right text-sm font-medium text-slate-900">
-                        {oblikujZnesek(postavka.cena_postavke)}
-                      </td>
+                              Uredi
+                            </Link>
 
-                      <td className="px-5 py-4">
-                        <div className="flex justify-end gap-2">
-                          <Link
-                            href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/uredi`}
-                            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                          >
-                            Uredi
-                          </Link>
+                            <Link
+                              href={`/dokumenti/${dokument.id}/postavke/${postavka.id}/okvir`}
+                              className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-center text-xs font-medium text-slate-700 hover:bg-slate-50"
+                            >
+                              Dodaj material
+                            </Link>
 
-                          <GumbIzbrisiPostavko
-                            action={izbrisiPostavko.bind(
-                              null,
-                              dokument.id,
-                              postavka.id,
-                            )}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <GumbIzbrisiPostavko
+                              action={izbrisiPostavko.bind(
+                                null,
+                                dokument.id,
+                                postavka.id,
+                              )}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           )}
         </section>
       </section>
-    </main>
+    </main >
   );
 }
