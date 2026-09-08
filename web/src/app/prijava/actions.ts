@@ -21,6 +21,12 @@ export async function prijava(formData: FormData) {
   });
 
   if (error) {
+    console.error("Napaka pri prijavi:", {
+      code: error.code,
+      message: error.message,
+      status: error.status,
+    });
+
     redirect("/prijava?napaka=napacna-prijava");
   }
 

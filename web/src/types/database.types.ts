@@ -749,22 +749,28 @@ export type Database = {
       }
       uporabnik: {
         Row: {
+          aktiven: boolean
           auth_user_id: string
           id: number
+          mora_spremeniti_geslo: boolean
           uporabniske_pravice: Database["public"]["Enums"]["uporabniska_pravica"]
           uporabnisko_ime: string
           ustvarjeno_at: string
         }
         Insert: {
+          aktiven?: boolean
           auth_user_id: string
           id?: number
+          mora_spremeniti_geslo?: boolean
           uporabniske_pravice?: Database["public"]["Enums"]["uporabniska_pravica"]
           uporabnisko_ime: string
           ustvarjeno_at?: string
         }
         Update: {
+          aktiven?: boolean
           auth_user_id?: string
           id?: number
+          mora_spremeniti_geslo?: boolean
           uporabniske_pravice?: Database["public"]["Enums"]["uporabniska_pravica"]
           uporabnisko_ime?: string
           ustvarjeno_at?: string
@@ -827,6 +833,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_posodobi_uporabnika: {
+        Args: {
+          p_aktiven: boolean
+          p_auth_user_id: string
+          p_uporabniske_pravice: string
+        }
+        Returns: undefined
+      }
+      admin_seznam_uporabnikov: {
+        Args: never
+        Returns: {
+          aktiven: boolean
+          auth_user_id: string
+          email: string
+          uporabnik_id: number
+          uporabniske_pravice: string
+          uporabnisko_ime: string
+          ustvarjeno_at: string
+          zadnja_prijava_at: string
+        }[]
+      }
       dodaj_dodatno_delo_postavki: {
         Args: { p_dodatno_delo_id: number; p_postavka_id: number }
         Returns: number
@@ -927,6 +954,7 @@ export type Database = {
         }
         Returns: number
       }
+      zakljuci_prvo_spremembo_gesla: { Args: never; Returns: undefined }
     }
     Enums: {
       status_prodajnega_dokumenta:
