@@ -574,3 +574,507 @@ export async function spremeniStatusDokumenta(
         `/dokumenti/${dokumentId}?uspeh=status-spremenjen`,
     );
 }
+
+const spremeniPlacanoSchema = z.object({
+    dokumentId: z.number().int().positive(),
+});
+
+export async function spremeniPlacano(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    const authUserId = podatkiZetona?.claims?.sub;
+
+    if (napakaZetona || !authUserId) {
+        redirect("/prijava");
+    }
+
+    const rezultat = spremeniPlacanoSchema.safeParse({
+        dokumentId,
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljavni-podatki`,
+        );
+    }
+
+    const { data: uporabnik, error: napakaUporabnika } =
+        await supabase
+            .from("uporabnik")
+            .select(
+                "uporabniske_pravice, aktiven, mora_spremeniti_geslo",
+            )
+            .eq("auth_user_id", authUserId)
+            .maybeSingle();
+
+    if (
+        napakaUporabnika ||
+        !uporabnik ||
+        !uporabnik.aktiven ||
+        uporabnik.mora_spremeniti_geslo
+    ) {
+        redirect("/");
+    }
+
+    const jeInterniUporabnik =
+        uporabnik.uporabniske_pravice === "administrator" ||
+        uporabnik.uporabniske_pravice === "zaposleni";
+
+    if (!jeInterniUporabnik) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=ni-dovoljenja`,
+        );
+    }
+
+    const placano = formData.get("placano") === "on";
+
+    const { error } = await supabase
+        .from("narocilo")
+        .update({ placano })
+        .eq("id", rezultat.data.dokumentId)
+        .eq("vrsta", "narocilo");
+
+    if (error) {
+        console.error(
+            "Napaka pri spremembi plačila:",
+            error,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=sprememba-placila`,
+        );
+    }
+
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+}
+const spremeniPopustSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    popust: z.number().min(0).max(100),
+});
+
+export async function spremeniPopust(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    const authUserId = podatkiZetona?.claims?.sub;
+
+    if (napakaZetona || !authUserId) {
+        redirect("/prijava");
+    }
+
+    const rezultat = spremeniPopustSchema.safeParse({
+        dokumentId,
+        popust: Number(formData.get("popust")),
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljaven-popust`,
+        );
+    }
+
+    const { data: uporabnik, error: napakaUporabnika } =
+        await supabase
+            .from("uporabnik")
+            .select(
+                "uporabniske_pravice, aktiven, mora_spremeniti_geslo",
+            )
+            .eq("auth_user_id", authUserId)
+            .maybeSingle();
+
+    if (
+        napakaUporabnika ||
+        !uporabnik ||
+        !uporabnik.aktiven ||
+        uporabnik.mora_spremeniti_geslo
+    ) {
+        redirect("/");
+    }
+
+    const jeInterniUporabnik =
+        uporabnik.uporabniske_pravice === "administrator" ||
+        uporabnik.uporabniske_pravice === "zaposleni";
+
+    if (!jeInterniUporabnik) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=ni-dovoljenja`,
+        );
+    }
+
+    const { error: napakaPopusta } = await supabase
+        .from("narocilo")
+        .update({
+            popust: rezultat.data.popust,
+        })
+        .eq("id", rezultat.data.dokumentId)
+        .eq("vrsta", "narocilo");
+
+    if (napakaPopusta) {
+        console.error(
+            "Napaka pri shranjevanju popusta:",
+            napakaPopusta,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=sprememba-popusta`,
+        );
+    }
+
+    const { error: napakaIzracuna } = await supabase.rpc(
+        "osvezi_skupni_znesek_dokumenta",
+        {
+            p_narocilo_id: rezultat.data.dokumentId,
+        },
+    );
+
+    if (napakaIzracuna) {
+        console.error(
+            "Napaka pri preračunu skupnega zneska:",
+            napakaIzracuna,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=izracun-zneska`,
+        );
+    }
+
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+}
+async function preveriPravicoZaStranko(
+    dokumentId: number,
+) {
+    const supabase = await createClient();
+
+    const { data: podatkiZetona, error: napakaZetona } =
+        await supabase.auth.getClaims();
+
+    const authUserId = podatkiZetona?.claims?.sub;
+
+    if (napakaZetona || !authUserId) {
+        redirect("/prijava");
+    }
+
+    const { data: uporabnik, error: napakaUporabnika } =
+        await supabase
+            .from("uporabnik")
+            .select(
+                "uporabniske_pravice, aktiven, mora_spremeniti_geslo",
+            )
+            .eq("auth_user_id", authUserId)
+            .maybeSingle();
+
+    if (
+        napakaUporabnika ||
+        !uporabnik ||
+        !uporabnik.aktiven ||
+        uporabnik.mora_spremeniti_geslo
+    ) {
+        redirect("/");
+    }
+
+    const jeInterniUporabnik =
+        uporabnik.uporabniske_pravice === "administrator" ||
+        uporabnik.uporabniske_pravice === "zaposleni";
+
+    if (!jeInterniUporabnik) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=ni-dovoljenja`,
+        );
+    }
+
+    return supabase;
+}
+
+async function nastaviStrankoNaNarocilo(
+    dokumentId: number,
+    stranka: {
+        id: number;
+        naziv: string;
+        telefonska_stevilka: string | null;
+        email: string | null;
+        hisni_naslov: string | null;
+        naziv_podjetja: string | null;
+        davcna_stevilka: string | null;
+        davcni_zavezanec: boolean;
+    },
+) {
+    const supabase =
+        await preveriPravicoZaStranko(dokumentId);
+
+    const { error } = await supabase
+        .from("narocilo")
+        .update({
+            stranka_id: stranka.id,
+            stranka_naziv: stranka.naziv,
+            stranka_telefonska_stevilka:
+                stranka.telefonska_stevilka,
+            stranka_email: stranka.email,
+            stranka_hisni_naslov: stranka.hisni_naslov,
+            stranka_naziv_podjetja:
+                stranka.naziv_podjetja,
+            stranka_davcna_stevilka:
+                stranka.davcna_stevilka,
+            stranka_davcni_zavezanec:
+                stranka.davcni_zavezanec,
+        })
+        .eq("id", dokumentId)
+        .eq("vrsta", "narocilo");
+
+    if (error) {
+        console.error(
+            "Napaka pri nastavitvi stranke:",
+            error,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=sprememba-stranke`,
+        );
+    }
+}
+
+const izbiraStrankeSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    strankaIzbira: z.string().trim().min(1),
+});
+
+export async function spremeniStranko(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const rezultat = izbiraStrankeSchema.safeParse({
+        dokumentId,
+        strankaIzbira: formData.get("strankaIzbira"),
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljavna-stranka`,
+        );
+    }
+
+    const najdenId =
+        rezultat.data.strankaIzbira.match(/^(\d+)\s*\|/);
+
+    const strankaId = najdenId
+        ? Number(najdenId[1])
+        : Number.NaN;
+
+    if (!Number.isInteger(strankaId) || strankaId <= 0) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=izberi-stranko-iz-seznama`,
+        );
+    }
+
+    const supabase =
+        await preveriPravicoZaStranko(dokumentId);
+
+    const { data: stranka, error } = await supabase
+        .from("stranka")
+        .select(
+            "id, naziv, naziv_podjetja, telefonska_stevilka, email, hisni_naslov, davcna_stevilka, davcni_zavezanec",
+        )
+        .eq("id", strankaId)
+        .maybeSingle();
+
+    if (error || !stranka) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=stranka-ne-obstaja`,
+        );
+    }
+
+    await nastaviStrankoNaNarocilo(
+        dokumentId,
+        stranka,
+    );
+
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+}
+
+const novaStrankaNarocilaSchema = z
+    .object({
+        dokumentId: z.number().int().positive(),
+
+        naziv: z
+            .string()
+            .trim()
+            .min(1)
+            .max(200),
+
+        telefonskaStevilka: z.string().trim(),
+
+        email: z.union([
+            z.literal(""),
+            z.string().trim().email(),
+        ]),
+
+        hisniNaslov: z.string().trim(),
+
+        davcniZavezanec: z.boolean(),
+
+        nazivPodjetja: z.string().trim().max(200),
+
+        davcnaStevilka: z.string().trim(),
+    })
+    .superRefine((podatki, kontekst) => {
+        if (
+            podatki.davcniZavezanec &&
+            !podatki.nazivPodjetja
+        ) {
+            kontekst.addIssue({
+                code: "custom",
+                path: ["nazivPodjetja"],
+                message: "Naziv podjetja je obvezen.",
+            });
+        }
+
+        if (
+            podatki.davcniZavezanec &&
+            !podatki.davcnaStevilka
+        ) {
+            kontekst.addIssue({
+                code: "custom",
+                path: ["davcnaStevilka"],
+                message: "Davčna številka je obvezna.",
+            });
+        }
+    });
+
+export async function ustvariInNastaviStranko(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const rezultat =
+        novaStrankaNarocilaSchema.safeParse({
+            dokumentId,
+            naziv: formData.get("naziv"),
+            telefonskaStevilka:
+                formData.get("telefonskaStevilka") ?? "",
+            email: formData.get("email") ?? "",
+            hisniNaslov:
+                formData.get("hisniNaslov") ?? "",
+            davcniZavezanec:
+                formData.get("davcniZavezanec") === "on",
+            nazivPodjetja:
+                formData.get("nazivPodjetja") ?? "",
+            davcnaStevilka:
+                formData.get("davcnaStevilka") ?? "",
+        });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljavni-podatki-stranke`,
+        );
+    }
+
+    const supabase =
+        await preveriPravicoZaStranko(dokumentId);
+
+    const { data: novaStranka, error } = await supabase
+        .from("stranka")
+        .insert({
+            naziv: rezultat.data.naziv,
+            telefonska_stevilka:
+                rezultat.data.telefonskaStevilka || null,
+            email: rezultat.data.email || null,
+            hisni_naslov:
+                rezultat.data.hisniNaslov || null,
+            naziv_podjetja:
+                rezultat.data.davcniZavezanec
+                    ? rezultat.data.nazivPodjetja
+                    : null,
+            davcna_stevilka:
+                rezultat.data.davcniZavezanec
+                    ? rezultat.data.davcnaStevilka
+                    : null,
+            davcni_zavezanec:
+                rezultat.data.davcniZavezanec,
+        })
+        .select(
+            "id, naziv, naziv_podjetja, telefonska_stevilka, email, hisni_naslov, davcna_stevilka, davcni_zavezanec",
+        )
+        .single();
+
+    if (error || !novaStranka) {
+        console.error(
+            "Napaka pri ustvarjanju stranke:",
+            error,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=ustvarjanje-stranke`,
+        );
+    }
+
+    await nastaviStrankoNaNarocilo(
+        dokumentId,
+        novaStranka,
+    );
+
+    revalidatePath("/stranke");
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+}
+const spremeniSalonSchema = z.object({
+    dokumentId: z.number().int().positive(),
+    salonPrevzema: z.enum([
+        "ljubljana",
+        "bevke",
+    ]),
+});
+
+export async function spremeniSalonPrevzema(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const rezultat = spremeniSalonSchema.safeParse({
+        dokumentId,
+        salonPrevzema:
+            formData.get("salonPrevzema"),
+    });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljaven-salon`,
+        );
+    }
+
+    const supabase =
+        await preveriPravicoZaStranko(dokumentId);
+
+    const { error } = await supabase
+        .from("narocilo")
+        .update({
+            salon_prevzema:
+                rezultat.data.salonPrevzema,
+        })
+        .eq("id", rezultat.data.dokumentId)
+        .eq("vrsta", "narocilo");
+
+    if (error) {
+        console.error(
+            "Napaka pri spremembi salona prevzema:",
+            error,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=sprememba-salona`,
+        );
+    }
+
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+}

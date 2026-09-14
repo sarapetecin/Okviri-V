@@ -530,25 +530,6 @@ export default async function NovaPostavkaPage({
                       className={inputClassName}
                     />
                   </div>
-
-                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 lg:col-span-2">
-                    <input
-                      name="ogledalo"
-                      type="checkbox"
-                      defaultChecked={urejanaPostavka?.ogledalo ?? false}
-                      className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                    />
-
-                    <span>
-                      <span className="block text-sm font-semibold text-slate-900">
-                        Postavka je ogledalo
-                      </span>
-
-                      <span className="mt-1 block text-sm text-slate-600">
-                        Označi, kadar se namesto slike okvirja ogledalo.
-                      </span>
-                    </span>
-                  </label>
                 </div>
               </section>
 

@@ -102,6 +102,7 @@ export type Database = {
           popust: number
           posodobljeno_at: string
           rok_izdelave: string | null
+          salon_prevzema: string
           skupni_znesek: number
           status: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           stranka_davcna_stevilka: string | null
@@ -110,6 +111,7 @@ export type Database = {
           stranka_hisni_naslov: string | null
           stranka_id: number | null
           stranka_naziv: string
+          stranka_naziv_podjetja: string | null
           stranka_telefonska_stevilka: string | null
           ustvarjeno_at: string
           vrsta: Database["public"]["Enums"]["vrsta_prodajnega_dokumenta"]
@@ -127,6 +129,7 @@ export type Database = {
           popust?: number
           posodobljeno_at?: string
           rok_izdelave?: string | null
+          salon_prevzema?: string
           skupni_znesek?: number
           status?: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           stranka_davcna_stevilka?: string | null
@@ -135,6 +138,7 @@ export type Database = {
           stranka_hisni_naslov?: string | null
           stranka_id?: number | null
           stranka_naziv: string
+          stranka_naziv_podjetja?: string | null
           stranka_telefonska_stevilka?: string | null
           ustvarjeno_at?: string
           vrsta?: Database["public"]["Enums"]["vrsta_prodajnega_dokumenta"]
@@ -152,6 +156,7 @@ export type Database = {
           popust?: number
           posodobljeno_at?: string
           rok_izdelave?: string | null
+          salon_prevzema?: string
           skupni_znesek?: number
           status?: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           stranka_davcna_stevilka?: string | null
@@ -160,6 +165,7 @@ export type Database = {
           stranka_hisni_naslov?: string | null
           stranka_id?: number | null
           stranka_naziv?: string
+          stranka_naziv_podjetja?: string | null
           stranka_telefonska_stevilka?: string | null
           ustvarjeno_at?: string
           vrsta?: Database["public"]["Enums"]["vrsta_prodajnega_dokumenta"]
@@ -757,6 +763,7 @@ export type Database = {
           hisni_naslov: string | null
           id: number
           naziv: string
+          naziv_podjetja: string | null
           telefonska_stevilka: string | null
           ustvarjeno_at: string
         }
@@ -767,6 +774,7 @@ export type Database = {
           hisni_naslov?: string | null
           id?: number
           naziv: string
+          naziv_podjetja?: string | null
           telefonska_stevilka?: string | null
           ustvarjeno_at?: string
         }
@@ -777,6 +785,7 @@ export type Database = {
           hisni_naslov?: string | null
           id?: number
           naziv?: string
+          naziv_podjetja?: string | null
           telefonska_stevilka?: string | null
           ustvarjeno_at?: string
         }

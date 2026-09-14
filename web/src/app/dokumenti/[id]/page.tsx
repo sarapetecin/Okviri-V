@@ -4,12 +4,23 @@ import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
-import { spremeniStatusDokumenta } from "./actions";
+import {
+  spremeniPlacano,
+  spremeniPopust,
+  spremeniStatusDokumenta,
+  spremeniStranko,
+  ustvariInNastaviStranko,
+  spremeniSalonPrevzema,
+} from "./actions";
+
+import { PlaciloInPopust } from "./placano-checkbox";
 import { GumbiStatusa } from "./gumbi-statusa";
 import { izbrisiPostavko } from "./brisanje-postavke";
 import { GumbIzbrisiPostavko } from "./gumb-izbrisi-postavko";
 
 import NovaPostavkaPage from "./postavke/nova/page";
+
+import { UrejanjeStranke } from "./urejanje-stranke";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -81,7 +92,7 @@ export default async function DokumentPage({
   const { data: dokument, error: napakaDokumenta } = await supabase
     .from("narocilo")
     .select(
-      "id, datum_sprejema, rok_izdelave, stranka_naziv, stranka_telefonska_stevilka, stranka_email, stranka_hisni_naslov, vrsta, status, popust, skupni_znesek, izdal_ime",
+      "id, datum_sprejema, rok_izdelave, stranka_naziv, stranka_telefonska_stevilka, stranka_email, stranka_hisni_naslov, vrsta, status, popust, placano, salon_prevzema, skupni_znesek, izdal_ime",
     )
     .eq("id", dokumentId)
     .maybeSingle();
@@ -174,6 +185,15 @@ export default async function DokumentPage({
         .order("ustvarjeno_at", { ascending: false })
     ).data
     : [];
+  const { data: stranke } = !jePartner
+    ? await supabase
+      .from("stranka")
+      .select("id, naziv, telefonska_stevilka")
+      .order("naziv")
+    : { data: [] };
+  if (napakaDokumenta || !dokument) {
+    notFound();
+  }
 
   return (
     <main className="min-h-screen bg-slate-100">
@@ -266,6 +286,28 @@ export default async function DokumentPage({
                 {dokument.stranka_hisni_naslov ?? "Brez naslova"}
               </p>
             </div>
+            {dokument.vrsta === "narocilo" && !jePartner && (
+              <UrejanjeStranke
+                stranke={stranke ?? []}
+                salonPrevzema={
+                  dokument.salon_prevzema as
+                  | "ljubljana"
+                  | "bevke"
+                }
+                actionIzberi={spremeniStranko.bind(
+                  null,
+                  dokument.id,
+                )}
+                actionUstvari={ustvariInNastaviStranko.bind(
+                  null,
+                  dokument.id,
+                )}
+                actionSalon={spremeniSalonPrevzema.bind(
+                  null,
+                  dokument.id,
+                )}
+              />
+            )}
           </article>
 
           <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -279,6 +321,20 @@ export default async function DokumentPage({
             <p className="mt-2 text-sm text-slate-600">
               Popust: {dokument.popust} %
             </p>
+            {dokument.vrsta === "narocilo" && !jePartner && (
+              <PlaciloInPopust
+                placano={dokument.placano}
+                popust={dokument.popust}
+                actionPlacano={spremeniPlacano.bind(
+                  null,
+                  dokument.id,
+                )}
+                actionPopust={spremeniPopust.bind(
+                  null,
+                  dokument.id,
+                )}
+              />
+            )}
           </article>
         </div>
         <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
