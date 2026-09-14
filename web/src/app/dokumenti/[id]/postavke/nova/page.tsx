@@ -9,6 +9,9 @@ import {
   IzbiraDodatnihDel,
   IzbiraMaterialov,
 } from "./iskalni-izbirnik";
+import {
+  FormularZEnterNavigacijo,
+} from "../formular-z-enter-navigacijo";
 
 type NovaPostavkaPageProps = {
   params: Promise<{
@@ -294,7 +297,13 @@ export default async function NovaPostavkaPage({
           postavka_paspartu (paspartu_id, nacin_paspartu, vrstni_red),
           postavka_steklo (steklo_id),
           postavka_podokvir (je_podokvir),
-          postavka_dodatno_delo (dodatno_delo_id)
+          postavka_dodatno_delo (
+            id,
+            dodatno_delo_id,
+            naziv,
+            opis,
+            cena_enote
+          )
         `,
       )
       .eq("id", urejanaPostavkaId)
@@ -328,6 +337,14 @@ export default async function NovaPostavkaPage({
       .map((delo) => delo.dodatno_delo_id)
       .filter((id): id is number => id !== null)
     : [];
+
+  const enkratnoDelo =
+    urejanaPostavka
+      ?.postavka_dodatno_delo
+      ?.find(
+        (delo) =>
+          delo.dodatno_delo_id === null,
+      ) ?? null;
 
   const sporociloNapake =
     napaka === "neveljavni-podatki"
@@ -401,7 +418,7 @@ export default async function NovaPostavkaPage({
             Katalogov materialov ni bilo mogoče naložiti.
           </div>
         ) : (
-          <form
+          <FormularZEnterNavigacijo
             key={
               urejanaPostavka
                 ? `urejanje-${urejanaPostavka.id}`
@@ -612,6 +629,7 @@ export default async function NovaPostavkaPage({
                       key={`dela-${urejanaPostavka?.id ?? "nova"}`}
                       moznosti={moznostiDodatnihDel}
                       privzetiIds={izbranaDodatnaDela}
+                      privzetoEnkratnoDelo={enkratnoDelo}
                     />
                   )}
                 </div>
@@ -684,7 +702,7 @@ export default async function NovaPostavkaPage({
                 po shranjevanju.
               </div>
             </aside>
-          </form>
+          </FormularZEnterNavigacijo>
         )}
       </section>
     </div>

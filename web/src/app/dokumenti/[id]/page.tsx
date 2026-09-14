@@ -539,19 +539,6 @@ export default async function DokumentPage({
                         prvo.vrstni_red - drugo.vrstni_red,
                     );
 
-                    const imaPodokvir =
-                      postavka.postavka_podokvir?.je_podokvir === true;
-
-                    const prikazanaDolzina = imaPodokvir
-                      ? postavka.postavka_podokvir?.podokvir_dolzina ??
-                      postavka.dolzina
-                      : postavka.dolzina;
-
-                    const prikazanaSirina = imaPodokvir
-                      ? postavka.postavka_podokvir?.podokvir_sirina ??
-                      postavka.sirina
-                      : postavka.sirina;
-
                     return (
                       <tr
                         key={postavka.id}
@@ -566,11 +553,11 @@ export default async function DokumentPage({
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
-                          {prikazanaDolzina}
+                          {postavka.dolzina}
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
-                          {prikazanaSirina}
+                          {postavka.sirina}
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">

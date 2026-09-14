@@ -353,20 +353,6 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                         ...postavka.postavka_dodatno_delo,
                                     ].sort((a, b) => a.vrstni_red - b.vrstni_red);
 
-                                    const imaPodokvir =
-                                        postavka.postavka_podokvir?.je_podokvir ===
-                                        true;
-
-                                    const prikazanaDolzina = imaPodokvir
-                                        ? postavka.postavka_podokvir
-                                            ?.podokvir_dolzina ?? postavka.dolzina
-                                        : postavka.dolzina;
-
-                                    const prikazanaSirina = imaPodokvir
-                                        ? postavka.postavka_podokvir
-                                            ?.podokvir_sirina ?? postavka.sirina
-                                        : postavka.sirina;
-
                                     return (
                                         <tr key={postavka.id} className="break-inside-avoid">
                                             <td className="border border-slate-300 px-2 py-3 align-top">
@@ -378,11 +364,11 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
-                                                {oblikujMero(prikazanaDolzina)}
+                                                {postavka.dolzina}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
-                                                {oblikujMero(prikazanaSirina)}
+                                                {postavka.sirina}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">

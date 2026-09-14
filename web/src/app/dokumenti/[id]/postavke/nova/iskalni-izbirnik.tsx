@@ -48,6 +48,7 @@ type IskalniIzbirnikProps = {
 type IzbiraDodatnihDelProps = {
     moznosti: Moznost[];
     privzetiIds?: number[];
+    privzetoEnkratnoDelo?: EnkratnoDelo | null;
 };
 
 type IzbiraMaterialovProps = {
@@ -59,6 +60,12 @@ type IzbiraMaterialovProps = {
     privzetiNaciniPaspartuja?: Array<"vrezan" | "polozen">;
     privzetoStekloId?: number | null;
     privzetaPostavitev?: "pokoncno" | "lezece";
+};
+
+type EnkratnoDelo = {
+    naziv: string;
+    opis: string | null;
+    cena_enote: number;
 };
 
 export function IskalniIzbirnik({
@@ -201,10 +208,16 @@ export function IskalniIzbirnik({
 export function IzbiraDodatnihDel({
     moznosti,
     privzetiIds = [],
+    privzetoEnkratnoDelo = null,
 }: IzbiraDodatnihDelProps) {
     const [steviloDel, setSteviloDel] = useState(
         Math.max(1, privzetiIds.length),
     );
+
+    const [
+        prikaziEnkratnoDelo,
+        setPrikaziEnkratnoDelo,
+    ] = useState(privzetoEnkratnoDelo !== null,);
 
     return (
         <div className="space-y-4">
@@ -264,6 +277,90 @@ export function IzbiraDodatnihDel({
                         Dodaj dodatno delo
                     </button>
                 )}
+            <div className="border-t border-slate-200 pt-4">
+                <button
+                    type="button"
+                    onClick={() => {
+                        setPrikaziEnkratnoDelo(
+                            (trenutno) => !trenutno,
+                        );
+                    }}
+                    className="text-sm font-semibold text-slate-700 underline"
+                >
+                    {prikaziEnkratnoDelo
+                        ? "Odstrani enkratno delo"
+                        : "Vnesi drugo dodatno delo"}
+                </button>
+
+                {prikaziEnkratnoDelo && (
+                    <div className="mt-3 grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-2">
+                        <div>
+                            <label
+                                htmlFor="enkratnoDeloNaziv"
+                                className="mb-1 block text-sm font-medium text-slate-700"
+                            >
+                                Naziv dela *
+                            </label>
+
+                            <input
+                                id="enkratnoDeloNaziv"
+                                name="enkratnoDeloNaziv"
+                                type="text"
+                                required
+                                maxLength={200}
+                                defaultValue={
+                                    privzetoEnkratnoDelo?.naziv ?? ""
+                                }
+                                placeholder="Na primer: posebno čiščenje"
+                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="enkratnoDeloCena"
+                                className="mb-1 block text-sm font-medium text-slate-700"
+                            >
+                                Cena na kos (€) *
+                            </label>
+
+                            <input
+                                id="enkratnoDeloCena"
+                                name="enkratnoDeloCena"
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                required
+                                defaultValue={
+                                    privzetoEnkratnoDelo?.cena_enote ?? ""
+                                }
+                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                            />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label
+                                htmlFor="enkratnoDeloOpis"
+                                className="mb-1 block text-sm font-medium text-slate-700"
+                            >
+                                Opis
+                            </label>
+
+                            <input
+                                id="enkratnoDeloOpis"
+                                name="enkratnoDeloOpis"
+                                type="text"
+                                maxLength={500}
+                                defaultValue={
+                                    privzetoEnkratnoDelo?.opis ?? ""
+                                }
+                                placeholder="Neobvezno"
+                                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900"
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

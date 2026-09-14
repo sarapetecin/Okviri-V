@@ -25,6 +25,22 @@ const urejenaPostavkaSchema = z.object({
         "pokoncno",
         "lezece",
     ]),
+    enkratnoDeloNaziv: z
+        .string()
+        .trim()
+        .max(200)
+        .nullable(),
+
+    enkratnoDeloOpis: z
+        .string()
+        .trim()
+        .max(500)
+        .nullable(),
+
+    enkratnoDeloCena: z
+        .number()
+        .min(0)
+        .nullable(),
 });
 
 function preberiStevilo(vrednost: FormDataEntryValue | null) {
@@ -86,6 +102,14 @@ export async function urediPostavko(
 
     const opisSlikeVrednost = formData.get("opisSlike");
     const opombeVrednost = formData.get("opombe");
+    const enkratnoDeloNazivVrednost =
+        formData.get("enkratnoDeloNaziv");
+
+    const enkratnoDeloOpisVrednost =
+        formData.get("enkratnoDeloOpis");
+
+    const enkratnoDeloCenaVrednost =
+        formData.get("enkratnoDeloCena");
 
     const rezultat = urejenaPostavkaSchema.safeParse({
         dokumentId,
@@ -123,6 +147,26 @@ export async function urediPostavko(
             formData.get("postavitev") === "lezece"
                 ? "lezece"
                 : "pokoncno",
+        enkratnoDeloNaziv:
+            typeof enkratnoDeloNazivVrednost ===
+                "string"
+                ? enkratnoDeloNazivVrednost.trim() ||
+                null
+                : null,
+
+        enkratnoDeloOpis:
+            typeof enkratnoDeloOpisVrednost ===
+                "string"
+                ? enkratnoDeloOpisVrednost.trim() ||
+                null
+                : null,
+
+        enkratnoDeloCena:
+            typeof enkratnoDeloCenaVrednost ===
+                "string" &&
+                enkratnoDeloCenaVrednost.trim() !== ""
+                ? Number(enkratnoDeloCenaVrednost)
+                : null,
     });
 
     if (!rezultat.success) {
@@ -213,6 +257,113 @@ export async function urediPostavko(
         );
 
         redirect(potNapake("shranjevanje"));
+    }
+
+    /*
+ * Odstrani prejšnje enkratno delo.
+ * Kataloška dela ostanejo nespremenjena.
+ */
+    const { error: napakaBrisanjaEnkratnegaDela } =
+        await supabase
+            .from("postavka_dodatno_delo")
+            .delete()
+            .eq("postavka_id", postavka.id)
+            .is("dodatno_delo_id", null);
+
+    if (napakaBrisanjaEnkratnegaDela) {
+        console.error(
+            "Napaka pri odstranitvi starega enkratnega dela:",
+            napakaBrisanjaEnkratnegaDela,
+        );
+
+        redirect(
+            potNapake("shranjevanje-enkratnega-dela"),
+        );
+    }
+
+    /*
+     * Če so inputi izpolnjeni, ponovno shrani
+     * enkratno dodatno delo.
+     */
+    if (
+        rezultat.data.enkratnoDeloNaziv &&
+        rezultat.data.enkratnoDeloCena !== null
+    ) {
+        const cenaEnote =
+            rezultat.data.enkratnoDeloCena;
+
+        const skupnaCena =
+            cenaEnote * rezultat.data.kolicina;
+
+        const { error: napakaEnkratnegaDela } =
+            await supabase
+                .from("postavka_dodatno_delo")
+                .insert({
+                    postavka_id: postavka.id,
+                    dodatno_delo_id: null,
+                    naziv:
+                        rezultat.data.enkratnoDeloNaziv,
+                    opis:
+                        rezultat.data.enkratnoDeloOpis,
+                    nacin_obracuna: "kos",
+                    kolicina:
+                        rezultat.data.kolicina,
+                    cena_enote: cenaEnote,
+                    skupna_cena: skupnaCena,
+                });
+
+        if (napakaEnkratnegaDela) {
+            console.error(
+                "Napaka pri ponovnem shranjevanju enkratnega dela:",
+                napakaEnkratnegaDela,
+            );
+
+            redirect(
+                potNapake("shranjevanje-enkratnega-dela"),
+            );
+        }
+    }
+
+    /*
+     * Ponovno izračuna ceno postavke in dokumenta.
+     */
+    const { error: napakaCenePostavke } =
+        await supabase.rpc(
+            "osvezi_ceno_postavke",
+            {
+                p_postavka_id: postavka.id,
+            },
+        );
+
+    if (napakaCenePostavke) {
+        console.error(
+            "Napaka pri osvežitvi cene postavke:",
+            napakaCenePostavke,
+        );
+
+        redirect(
+            potNapake("izracun-cene"),
+        );
+    }
+
+    const { error: napakaSkupnegaZneska } =
+        await supabase.rpc(
+            "osvezi_skupni_znesek_dokumenta",
+            {
+                p_narocilo_id:
+                    rezultat.data.dokumentId,
+            },
+        );
+
+    if (napakaSkupnegaZneska) {
+        console.error(
+            "Napaka pri osvežitvi skupnega zneska:",
+            napakaSkupnegaZneska,
+        );
+
+        redirect(
+            potNapake("izracun-skupnega-zneska"),
+        );
     }
 
     if (rezultat.data.paspartuIds.length > 0) {
