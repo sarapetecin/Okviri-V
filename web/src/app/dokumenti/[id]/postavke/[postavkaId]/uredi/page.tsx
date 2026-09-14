@@ -69,6 +69,7 @@ export default async function UrediPostavkoPage({
         kolicina,
         dolzina,
         sirina,
+        postavitev,
         opis_slike,
         opombe,
         ogledalo,
@@ -519,6 +520,51 @@ export default async function UrediPostavkoPage({
                     moznosti={moznostiStekel}
                     privzetiId={izbranoStekloId}
                   />
+                  <fieldset>
+                    <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                      Postavitev
+                    </legend>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                        <input
+                          name="postavitev"
+                          type="radio"
+                          value="pokoncno"
+                          defaultChecked={
+                            postavka.postavitev === "pokoncno"
+                          }
+                          className="h-4 w-4 accent-slate-900"
+                        />
+
+                        <span
+                          aria-hidden="true"
+                          className="inline-block h-6 w-4 rounded-sm border-2 border-slate-700"
+                        />
+
+                        <span>Pokončno</span>
+                      </label>
+
+                      <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                        <input
+                          name="postavitev"
+                          type="radio"
+                          value="lezece"
+                          defaultChecked={
+                            postavka.postavitev === "lezece"
+                          }
+                          className="h-4 w-4 accent-slate-900"
+                        />
+
+                        <span
+                          aria-hidden="true"
+                          className="inline-block h-4 w-6 rounded-sm border-2 border-slate-700"
+                        />
+
+                        <span>Ležeče</span>
+                      </label>
+                    </div>
+                  </fieldset>
 
                   <div className="space-y-3">
                     <IskalniIzbirnik

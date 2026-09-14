@@ -21,6 +21,10 @@ const urejenaPostavkaSchema = z.object({
     stekloId: z.number().int().positive().nullable(),
     dodajPodokvir: z.boolean(),
     dodatnoDeloIds: z.array(z.number().int().positive()).max(50),
+    postavitev: z.enum([
+        "pokoncno",
+        "lezece",
+    ]),
 });
 
 function preberiStevilo(vrednost: FormDataEntryValue | null) {
@@ -115,6 +119,10 @@ export async function urediPostavko(
         stekloId: preberiId(formData.get("stekloId")),
         dodajPodokvir: formData.get("dodajPodokvir") === "on",
         dodatnoDeloIds: preberiIdje(formData, "dodatnoDeloId"),
+        postavitev:
+            formData.get("postavitev") === "lezece"
+                ? "lezece"
+                : "pokoncno",
     });
 
     if (!rezultat.success) {
@@ -170,6 +178,30 @@ export async function urediPostavko(
             "uredi_celotno_postavko",
             parametri,
         );
+
+    const { error: napakaPostavitve } =
+        await supabase
+            .from("narocilo_postavka")
+            .update({
+                postavitev:
+                    rezultat.data.postavitev,
+            })
+            .eq("id", postavka.id)
+            .eq(
+                "narocilo_id",
+                rezultat.data.dokumentId,
+            );
+
+    if (napakaPostavitve) {
+        console.error(
+            "Napaka pri shranjevanju postavitve:",
+            napakaPostavitve,
+        );
+
+        redirect(
+            potNapake("shranjevanje-postavitve"),
+        );
+    }
 
     const napakaShranjevanja =
         rezultatShranjevanja.error;

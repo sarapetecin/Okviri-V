@@ -289,6 +289,7 @@ export default async function NovaPostavkaPage({
           opis_slike,
           opombe,
           ogledalo,
+          postavitev,
           postavka_okvir (okvir_id, vrstni_red),
           postavka_paspartu (paspartu_id, nacin_paspartu, vrstni_red),
           postavka_steklo (steklo_id),
@@ -559,6 +560,11 @@ export default async function NovaPostavkaPage({
                   privzetiNaciniPaspartuja={izbraniNaciniPaspartuja}
                   privzetoStekloId={
                     urejanaPostavka?.postavka_steklo?.steklo_id ?? null
+                  }
+                  privzetaPostavitev={
+                    urejanaPostavka?.postavitev === "lezece"
+                      ? "lezece"
+                      : "pokoncno"
                   }
                 />
               </section>

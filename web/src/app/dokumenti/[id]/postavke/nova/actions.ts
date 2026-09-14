@@ -25,6 +25,11 @@ const novaPostavkaSchema = z.object({
 
   paspartuIds: z.array(z.number().int().positive()).max(2),
 
+  postavitev: z.enum([
+    "pokoncno",
+    "lezece",
+  ]),
+
   naciniPaspartuja: z
     .array(z.enum(["vrezan", "polozen"]))
     .max(2),
@@ -116,6 +121,11 @@ export async function ustvariPostavko(
         : null,
 
     ogledalo: formData.get("ogledalo") === "on",
+
+    postavitev:
+      formData.get("postavitev") === "lezece"
+        ? "lezece"
+        : "pokoncno",
 
     okvirIds: preberiIdje(formData, "okvirId"),
 
@@ -236,6 +246,27 @@ export async function ustvariPostavko(
 
     redirect(
       `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
+    );
+  }
+
+  const { error: napakaPostavitve } =
+    await supabase
+      .from("narocilo_postavka")
+      .update({
+        postavitev:
+          rezultat.data.postavitev,
+      })
+      .eq("id", novaPostavkaId)
+      .eq("narocilo_id", dokumentId);
+
+  if (napakaPostavitve) {
+    console.error(
+      "Napaka pri shranjevanju postavitve:",
+      napakaPostavitve,
+    );
+
+    redirect(
+      `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje-postavitve`,
     );
   }
 

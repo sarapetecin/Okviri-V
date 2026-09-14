@@ -198,6 +198,7 @@ export type Database = {
           ogledalo: boolean
           opis_slike: string | null
           opombe: string | null
+          postavitev: string
           sirina: number
           ustvarjeno_at: string
           vrstni_red: number
@@ -211,6 +212,7 @@ export type Database = {
           ogledalo?: boolean
           opis_slike?: string | null
           opombe?: string | null
+          postavitev?: string
           sirina: number
           ustvarjeno_at?: string
           vrstni_red?: number
@@ -224,6 +226,7 @@ export type Database = {
           ogledalo?: boolean
           opis_slike?: string | null
           opombe?: string | null
+          postavitev?: string
           sirina?: number
           ustvarjeno_at?: string
           vrstni_red?: number

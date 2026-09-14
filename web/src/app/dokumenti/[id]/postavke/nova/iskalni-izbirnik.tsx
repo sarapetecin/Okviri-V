@@ -1,6 +1,31 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
+
+function jeVelikostPrimernaZaPaspartu(
+    dolzina: number,
+    sirina: number,
+) {
+    const krajsaStran = Math.min(
+        dolzina,
+        sirina,
+    );
+
+    const daljsaStran = Math.max(
+        dolzina,
+        sirina,
+    );
+
+    return (
+        krajsaStran <= 80 &&
+        daljsaStran <= 120
+    );
+}
 
 type Moznost = {
     id: number;
@@ -15,6 +40,9 @@ type IskalniIzbirnikProps = {
     moznosti: Moznost[];
     required?: boolean;
     privzetiId?: number | null;
+    onSelectionChange?: (
+        moznost: Moznost | null,
+    ) => void;
 };
 
 type IzbiraDodatnihDelProps = {
@@ -30,6 +58,7 @@ type IzbiraMaterialovProps = {
     privzetiPaspartuIds?: number[];
     privzetiNaciniPaspartuja?: Array<"vrezan" | "polozen">;
     privzetoStekloId?: number | null;
+    privzetaPostavitev?: "pokoncno" | "lezece";
 };
 
 export function IskalniIzbirnik({
@@ -39,6 +68,7 @@ export function IskalniIzbirnik({
     moznosti,
     required = false,
     privzetiId = null,
+    onSelectionChange,
 }: IskalniIzbirnikProps) {
     const privzetaMoznost =
         moznosti.find((moznost) => moznost.id === privzetiId) ?? null;
@@ -72,12 +102,14 @@ export function IskalniIzbirnik({
         setIzbranaMoznost(moznost);
         setIskanje(moznost.naziv);
         setOdprto(false);
+        onSelectionChange?.(moznost);
     }
 
     function pocistiIzbiro() {
         setIzbranaMoznost(null);
         setIskanje("");
         setOdprto(true);
+        onSelectionChange?.(null);
     }
 
     return (
@@ -244,6 +276,7 @@ export function IzbiraMaterialov({
     privzetiPaspartuIds = [],
     privzetiNaciniPaspartuja = [],
     privzetoStekloId = null,
+    privzetaPostavitev = "pokoncno",
 }: IzbiraMaterialovProps) {
     const [steviloOkvirjev, setSteviloOkvirjev] =
         useState(Math.max(1, privzetiOkvirIds.length));
@@ -253,8 +286,104 @@ export function IzbiraMaterialov({
         setSteviloPaspartujev,
     ] = useState(Math.max(1, privzetiPaspartuIds.length));
 
+    const vsebnikRef = useRef<HTMLDivElement>(null);
+
+    const [dolzinaSlike, setDolzinaSlike] =
+        useState(0);
+
+    const [sirinaSlike, setSirinaSlike] =
+        useState(0);
+
+    const [izbranPaspartu, setIzbranPaspartu] =
+        useState(privzetiPaspartuIds.length > 0);
+
+    const privzetoSteklo =
+        moznostiStekel.find(
+            (moznost) =>
+                moznost.id === privzetoStekloId,
+        );
+
+    const [
+        izbranoStekloJeOgledalo,
+        setIzbranoStekloJeOgledalo,
+    ] = useState(
+        privzetoSteklo?.naziv
+            .toLocaleLowerCase("sl")
+            .includes("ogledalo") ?? false,
+    );
+
+    useEffect(() => {
+        const obrazec =
+            vsebnikRef.current?.closest("form");
+
+        if (!obrazec) {
+            return;
+        }
+
+        const dolzinaInput =
+            obrazec.elements.namedItem("dolzina");
+
+        const sirinaInput =
+            obrazec.elements.namedItem("sirina");
+
+        if (
+            !(dolzinaInput instanceof HTMLInputElement) ||
+            !(sirinaInput instanceof HTMLInputElement)
+        ) {
+            return;
+        }
+
+
+        const dolzinaPolje = dolzinaInput;
+        const sirinaPolje = sirinaInput;
+
+        function osveziMere() {
+            setDolzinaSlike(
+                Number(dolzinaPolje.value) || 0,
+            );
+
+            setSirinaSlike(
+                Number(sirinaPolje.value) || 0,
+            );
+        }
+
+        osveziMere();
+
+        dolzinaPolje.addEventListener(
+            "input",
+            osveziMere,
+        );
+
+        sirinaPolje.addEventListener(
+            "input",
+            osveziMere,
+        );
+
+        return () => {
+            dolzinaPolje.removeEventListener(
+                "input",
+                osveziMere,
+            );
+
+            sirinaPolje.removeEventListener(
+                "input",
+                osveziMere,
+            );
+        };
+    }, []);
+
+    const mereSoVnesene =
+        dolzinaSlike > 0 && sirinaSlike > 0;
+
+    const paspartuJePrimeren =
+        mereSoVnesene &&
+        jeVelikostPrimernaZaPaspartu(
+            dolzinaSlike,
+            sirinaSlike,
+        );
+
     return (
-        <div className="grid items-start gap-6 lg:grid-cols-3">
+        <div ref={vsebnikRef} className="grid items-start gap-6 lg:grid-cols-3">
             {/* OKVIRJI */}
             <div className="space-y-4">
                 {Array.from(
@@ -313,7 +442,36 @@ export function IzbiraMaterialov({
             </div>
 
             {/* PASPARTUJI */}
-            <div className="space-y-4">
+            {/* PASPARTUJI */}
+            <div
+                className={
+                    izbranPaspartu &&
+                        mereSoVnesene &&
+                        !paspartuJePrimeren
+                        ? "space-y-4 rounded-xl border-2 border-red-300 bg-red-50 p-3"
+                        : izbranPaspartu && paspartuJePrimeren
+                            ? "space-y-4 rounded-xl border border-green-300 bg-green-50 p-3"
+                            : "space-y-4"
+                }
+            >
+                {izbranPaspartu && mereSoVnesene && (
+                    <div
+                        role={
+                            paspartuJePrimeren
+                                ? "status"
+                                : "alert"
+                        }
+                        className={
+                            paspartuJePrimeren
+                                ? "rounded-lg bg-green-100 px-3 py-2 text-sm font-semibold text-green-800"
+                                : "rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-800"
+                        }
+                    >
+                        {paspartuJePrimeren
+                            ? `Primerno za paspartu: ${dolzinaSlike} × ${sirinaSlike} cm`
+                            : `Ni primerno za paspartu. Največja dovoljena velikost je 80 × 120 cm.`}
+                    </div>
+                )}
                 {Array.from(
                     { length: steviloPaspartujev },
                     (_, indeks) => (
@@ -328,6 +486,9 @@ export function IzbiraMaterialov({
                                 placeholder="Poišči paspartu"
                                 moznosti={moznostiPaspartujev}
                                 privzetiId={privzetiPaspartuIds[indeks]}
+                                onSelectionChange={(id) => {
+                                    setIzbranPaspartu(id !== null);
+                                }}
                             />
 
                             <fieldset>
@@ -412,14 +573,80 @@ export function IzbiraMaterialov({
                 )}
             </div>
 
-            {/* STEKLO */}
-            <IskalniIzbirnik
-                name="stekloId"
-                label="Steklo"
-                placeholder="Poišči steklo"
-                moznosti={moznostiStekel}
-                privzetiId={privzetoStekloId}
-            />
+            {/* STEKLO IN POSTAVITEV */}
+            <div className="space-y-4">
+                <IskalniIzbirnik
+                    name="stekloId"
+                    label="Steklo"
+                    placeholder="Poišči steklo"
+                    moznosti={moznostiStekel}
+                    privzetiId={privzetoStekloId}
+                    onSelectionChange={(moznost) => {
+                        const naziv =
+                            moznost?.naziv
+                                .trim()
+                                .toLocaleLowerCase("sl") ?? "";
+
+                        setIzbranoStekloJeOgledalo(
+                            naziv.includes("ogledalo"),
+                        );
+                    }}
+                />
+
+                {izbranoStekloJeOgledalo && (
+                    <fieldset>
+                        <legend className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+                            Postavitev ogledala
+                        </legend>
+
+                        <div className="grid grid-cols-2 gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900">
+                                <input
+                                    name="postavitev"
+                                    type="radio"
+                                    value="pokoncno"
+                                    defaultChecked={
+                                        privzetaPostavitev ===
+                                        "pokoncno"
+                                    }
+                                    className="h-4 w-4 accent-slate-900"
+                                />
+
+                                <span
+                                    aria-hidden="true"
+                                    className="inline-block h-6 w-4 rounded-sm border-2 border-slate-700"
+                                />
+
+                                <span className="text-slate-900">
+                                    Pokončno
+                                </span>
+                            </label>
+
+                            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900">
+                                <input
+                                    name="postavitev"
+                                    type="radio"
+                                    value="lezece"
+                                    defaultChecked={
+                                        privzetaPostavitev ===
+                                        "lezece"
+                                    }
+                                    className="h-4 w-4 accent-slate-900"
+                                />
+
+                                <span
+                                    aria-hidden="true"
+                                    className="inline-block h-4 w-6 rounded-sm border-2 border-slate-700"
+                                />
+
+                                <span className="text-slate-900">
+                                    Ležeče
+                                </span>
+                            </label>
+                        </div>
+                    </fieldset>
+                )}
+            </div>
         </div>
     );
 }
