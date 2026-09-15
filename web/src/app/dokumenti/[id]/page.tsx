@@ -11,6 +11,7 @@ import {
   spremeniStranko,
   ustvariInNastaviStranko,
   spremeniSalonPrevzema,
+  spremeniRokIzdelave,
 } from "./actions";
 
 import { PlaciloInPopust } from "./placano-checkbox";
@@ -21,6 +22,8 @@ import { GumbIzbrisiPostavko } from "./gumb-izbrisi-postavko";
 import NovaPostavkaPage from "./postavke/nova/page";
 
 import { UrejanjeStranke } from "./urejanje-stranke";
+
+import { KoledarRoka } from "./koledar-roka";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -195,6 +198,47 @@ export default async function DokumentPage({
     notFound();
   }
 
+  const steviloSlikNarocila =
+    postavke?.reduce(
+      (vsota, postavka) =>
+        vsota + postavka.kolicina,
+      0,
+    ) ?? 0;
+
+  const { data: narocilaZaKoledar } =
+    await supabase
+      .from("narocilo")
+      .select(`
+      id,
+      rok_izdelave,
+      narocilo_postavka (
+        kolicina
+      )
+    `)
+      .eq("vrsta", "narocilo")
+      .neq("status", "preklicano")
+      .not("rok_izdelave", "is", null)
+      .neq("id", dokument.id);
+
+  const zasedenost: Record<string, number> = {};
+
+  for (const narocilo of narocilaZaKoledar ?? []) {
+    if (!narocilo.rok_izdelave) {
+      continue;
+    }
+
+    const steviloSlik =
+      narocilo.narocilo_postavka.reduce(
+        (vsota, postavka) =>
+          vsota + postavka.kolicina,
+        0,
+      );
+
+    zasedenost[narocilo.rok_izdelave] =
+      (zasedenost[narocilo.rok_izdelave] ??
+        0) + steviloSlik;
+  }
+
   return (
     <main className="min-h-screen bg-slate-100">
       <header className="border-b border-slate-200 bg-white">
@@ -249,12 +293,36 @@ export default async function DokumentPage({
                 </dd>
               </div>
 
-              <div className="flex justify-between gap-4">
-                <dt className="text-sm text-slate-600">Rok izdelave</dt>
-                <dd className="text-sm font-medium text-slate-900">
-                  {dokument.rok_izdelave
-                    ? oblikujDatum(dokument.rok_izdelave)
-                    : "—"}
+              <div className="flex items-start justify-between gap-4">
+                <dt className="pt-2 text-sm text-slate-600">
+                  Rok izdelave
+                </dt>
+
+                <dd>
+                  {dokument.vrsta === "narocilo" &&
+                    !jePartner ? (
+                    <KoledarRoka
+                      trenutniRok={
+                        dokument.rok_izdelave
+                      }
+                      zasedenost={zasedenost}
+                      steviloSlikNarocila={
+                        steviloSlikNarocila
+                      }
+                      action={spremeniRokIzdelave.bind(
+                        null,
+                        dokument.id,
+                      )}
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-slate-900">
+                      {dokument.rok_izdelave
+                        ? oblikujDatum(
+                          dokument.rok_izdelave,
+                        )
+                        : "—"}
+                    </span>
+                  )}
                 </dd>
               </div>
 

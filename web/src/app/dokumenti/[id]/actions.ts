@@ -1078,3 +1078,120 @@ export async function spremeniSalonPrevzema(
     revalidatePath("/dokumenti");
     revalidatePath(`/dokumenti/${dokumentId}`);
 }
+
+const spremeniRokIzdelaveSchema = z.object({
+    dokumentId: z.number().int().positive(),
+
+    rokIzdelave: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/),
+
+    potrdiPreseganje: z.boolean(),
+});
+
+export async function spremeniRokIzdelave(
+    dokumentId: number,
+    formData: FormData,
+) {
+    const rezultat =
+        spremeniRokIzdelaveSchema.safeParse({
+            dokumentId,
+            rokIzdelave:
+                formData.get("rokIzdelave"),
+
+            potrdiPreseganje:
+                formData.get("potrdiPreseganje") ===
+                "da",
+        });
+
+    if (!rezultat.success) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=neveljaven-rok`,
+        );
+    }
+
+    const supabase =
+        await preveriPravicoZaStranko(dokumentId);
+
+    const { data: trenutnePostavke } =
+        await supabase
+            .from("narocilo_postavka")
+            .select("kolicina")
+            .eq("narocilo_id", dokumentId);
+
+    const steviloSlikNarocila =
+        trenutnePostavke?.reduce(
+            (vsota, postavka) =>
+                vsota + postavka.kolicina,
+            0,
+        ) ?? 0;
+
+    const { data: drugaNarocila } =
+        await supabase
+            .from("narocilo")
+            .select(`
+        id,
+        narocilo_postavka (
+          kolicina
+        )
+      `)
+            .eq(
+                "rok_izdelave",
+                rezultat.data.rokIzdelave,
+            )
+            .eq("vrsta", "narocilo")
+            .neq("status", "preklicano")
+            .neq("id", dokumentId);
+
+    const trenutnaZasedenost =
+        drugaNarocila?.reduce(
+            (vsotaNarocil, narocilo) =>
+                vsotaNarocil +
+                narocilo.narocilo_postavka.reduce(
+                    (vsotaPostavk, postavka) =>
+                        vsotaPostavk +
+                        postavka.kolicina,
+                    0,
+                ),
+            0,
+        ) ?? 0;
+
+    const skupnoPoShranitvi =
+        trenutnaZasedenost +
+        steviloSlikNarocila;
+
+    if (
+        skupnoPoShranitvi > 80 &&
+        !rezultat.data.potrdiPreseganje
+    ) {
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=rok-presega-zmogljivost`,
+        );
+    }
+
+    const { error } = await supabase
+        .from("narocilo")
+        .update({
+            rok_izdelave:
+                rezultat.data.rokIzdelave,
+        })
+        .eq("id", dokumentId)
+        .eq("vrsta", "narocilo");
+
+    if (error) {
+        console.error(
+            "Napaka pri spremembi roka:",
+            error,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?napaka=sprememba-roka`,
+        );
+    }
+
+    revalidatePath("/dokumenti");
+    revalidatePath(`/dokumenti/${dokumentId}`);
+    revalidatePath(
+        `/dokumenti/${dokumentId}/natisni`,
+    );
+}
