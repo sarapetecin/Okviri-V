@@ -299,16 +299,11 @@ export default async function DokumentPage({
                 </dt>
 
                 <dd>
-                  {dokument.vrsta === "narocilo" &&
-                    !jePartner ? (
+                  {!jePartner ? (
                     <KoledarRoka
-                      trenutniRok={
-                        dokument.rok_izdelave
-                      }
+                      trenutniRok={dokument.rok_izdelave}
                       zasedenost={zasedenost}
-                      steviloSlikNarocila={
-                        steviloSlikNarocila
-                      }
+                      steviloSlikNarocila={steviloSlikNarocila}
                       action={spremeniRokIzdelave.bind(
                         null,
                         dokument.id,
@@ -317,9 +312,7 @@ export default async function DokumentPage({
                   ) : (
                     <span className="text-sm font-medium text-slate-900">
                       {dokument.rok_izdelave
-                        ? oblikujDatum(
-                          dokument.rok_izdelave,
-                        )
+                        ? oblikujDatum(dokument.rok_izdelave)
                         : "—"}
                     </span>
                   )}
@@ -354,7 +347,7 @@ export default async function DokumentPage({
                 {dokument.stranka_hisni_naslov ?? "Brez naslova"}
               </p>
             </div>
-            {dokument.vrsta === "narocilo" && !jePartner && (
+            {!jePartner && (
               <UrejanjeStranke
                 stranke={stranke ?? []}
                 salonPrevzema={
@@ -389,7 +382,7 @@ export default async function DokumentPage({
             <p className="mt-2 text-sm text-slate-600">
               Popust: {dokument.popust} %
             </p>
-            {dokument.vrsta === "narocilo" && !jePartner && (
+            {!jePartner && (
               <PlaciloInPopust
                 placano={dokument.placano}
                 popust={dokument.popust}

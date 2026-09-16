@@ -638,7 +638,6 @@ export async function spremeniPlacano(
         .from("narocilo")
         .update({ placano })
         .eq("id", rezultat.data.dokumentId)
-        .eq("vrsta", "narocilo");
 
     if (error) {
         console.error(
@@ -719,7 +718,6 @@ export async function spremeniPopust(
             popust: rezultat.data.popust,
         })
         .eq("id", rezultat.data.dokumentId)
-        .eq("vrsta", "narocilo");
 
     if (napakaPopusta) {
         console.error(
@@ -798,7 +796,7 @@ async function preveriPravicoZaStranko(
     return supabase;
 }
 
-async function nastaviStrankoNaNarocilo(
+async function nastaviStrankoNaDokument(
     dokumentId: number,
     stranka: {
         id: number;
@@ -831,7 +829,6 @@ async function nastaviStrankoNaNarocilo(
                 stranka.davcni_zavezanec,
         })
         .eq("id", dokumentId)
-        .eq("vrsta", "narocilo");
 
     if (error) {
         console.error(
@@ -895,7 +892,7 @@ export async function spremeniStranko(
         );
     }
 
-    await nastaviStrankoNaNarocilo(
+    await nastaviStrankoNaDokument(
         dokumentId,
         stranka,
     );
@@ -1019,7 +1016,7 @@ export async function ustvariInNastaviStranko(
         );
     }
 
-    await nastaviStrankoNaNarocilo(
+    await nastaviStrankoNaDokument(
         dokumentId,
         novaStranka,
     );
@@ -1062,7 +1059,6 @@ export async function spremeniSalonPrevzema(
                 rezultat.data.salonPrevzema,
         })
         .eq("id", rezultat.data.dokumentId)
-        .eq("vrsta", "narocilo");
 
     if (error) {
         console.error(
@@ -1139,7 +1135,6 @@ export async function spremeniRokIzdelave(
                 "rok_izdelave",
                 rezultat.data.rokIzdelave,
             )
-            .eq("vrsta", "narocilo")
             .neq("status", "preklicano")
             .neq("id", dokumentId);
 
@@ -1176,7 +1171,6 @@ export async function spremeniRokIzdelave(
                 rezultat.data.rokIzdelave,
         })
         .eq("id", dokumentId)
-        .eq("vrsta", "narocilo");
 
     if (error) {
         console.error(
