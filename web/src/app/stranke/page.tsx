@@ -3,7 +3,19 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export default async function StrankePage() {
+import { izbrisiStranko } from "./actions";
+import { GumbIzbrisiStranko } from "./gumb-izbrisi-stranko";
+
+type StrankePageProps = {
+    searchParams: Promise<{
+        napaka?: string;
+        uspeh?: string;
+    }>;
+};
+
+export default async function StrankePage({
+    searchParams,
+}: StrankePageProps) {
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -19,6 +31,22 @@ export default async function StrankePage() {
             "id, naziv, telefonska_stevilka, email, davcni_zavezanec, davcna_stevilka",
         )
         .order("naziv");
+
+    const { napaka, uspeh } = await searchParams;
+
+    const sporociloNapake =
+        napaka === "brisanje"
+            ? "Stranke in njenih dokumentov ni bilo mogoče izbrisati. Poskusi ponovno."
+            : null;
+
+    const sporociloUspeha =
+        uspeh === "stranka-izbrisana"
+            ? "Stranka je bila izbrisana."
+            : uspeh === "stranka-posodobljena"
+              ? "Podatki stranke so bili posodobljeni."
+              : uspeh === "stranka-ustvarjena"
+                ? "Stranka je bila ustvarjena."
+                : null;
 
     return (
         <main className="min-h-screen bg-slate-100">
@@ -61,6 +89,24 @@ export default async function StrankePage() {
                     </Link>
                 </div>
 
+                {sporociloNapake && (
+                    <div
+                        role="alert"
+                        className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
+                    >
+                        {sporociloNapake}
+                    </div>
+                )}
+
+                {sporociloUspeha && (
+                    <div
+                        role="status"
+                        className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700"
+                    >
+                        {sporociloUspeha}
+                    </div>
+                )}
+
                 {error ? (
                     <div
                         role="alert"
@@ -98,6 +144,9 @@ export default async function StrankePage() {
                                         <th className="px-5 py-3 text-sm font-semibold text-slate-700">
                                             Davčna številka
                                         </th>
+                                        <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                                            Dejanja
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -118,6 +167,24 @@ export default async function StrankePage() {
                                             </td>
                                             <td className="px-5 py-4 text-sm text-slate-600">
                                                 {stranka.davcna_stevilka ?? "—"}
+                                            </td>
+                                            <td className="px-5 py-4">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={`/stranke/${stranka.id}/uredi`}
+                                                        className="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                                                    >
+                                                        Uredi
+                                                    </Link>
+
+                                                    <GumbIzbrisiStranko
+                                                        naziv={stranka.naziv}
+                                                        action={izbrisiStranko.bind(
+                                                            null,
+                                                            stranka.id,
+                                                        )}
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

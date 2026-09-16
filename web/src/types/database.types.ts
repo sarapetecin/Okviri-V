@@ -1028,6 +1028,14 @@ export type Database = {
         Args: { p_postavka_id: number }
         Returns: number
       }
+      izbrisi_material_iz_kataloga: {
+        Args: { p_material_id: number; p_vrsta: string }
+        Returns: undefined
+      }
+      izbrisi_stranko_z_dokumenti: {
+        Args: { p_stranka_id: number }
+        Returns: number
+      }
       je_administrator: { Args: never; Returns: boolean }
       je_interni_uporabnik: { Args: never; Returns: boolean }
       je_partner: { Args: never; Returns: boolean }

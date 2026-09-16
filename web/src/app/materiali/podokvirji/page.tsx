@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { izbrisiMaterial } from "../actions";
+import { GumbIzbrisiMaterial } from "../gumb-izbrisi-material";
+
 function oblikujCeno(znesek: number | null, enota = "") {
     if (znesek === null) {
         return "—";
@@ -27,14 +30,28 @@ function oblikujDolzino(dolzina: number | null) {
 type PodokvirjiPageProps = {
     searchParams: Promise<{
         iskanje?: string;
+        napaka?: string;
+        uspeh?: string;
     }>;
 };
 
 export default async function PodokvirjiPage({
     searchParams,
 }: PodokvirjiPageProps) {
-    const { iskanje = "" } = await searchParams;
+    const {
+        iskanje = "",
+        napaka,
+        uspeh,
+    } = await searchParams;
     const iskaniNiz = iskanje.trim();
+    const sporociloNapake =
+        napaka === "brisanje"
+            ? "Podokvirja ni bilo mogoče izbrisati."
+            : null;
+    const sporociloUspeha =
+        uspeh === "izbrisano"
+            ? "Podokvir je bil izbrisan iz kataloga."
+            : null;
 
     const supabase = await createClient();
 
@@ -92,6 +109,24 @@ export default async function PodokvirjiPage({
                         Nazaj na katalog
                     </Link>
                 </div>
+
+                {sporociloNapake && (
+                    <div
+                        role="alert"
+                        className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
+                    >
+                        {sporociloNapake}
+                    </div>
+                )}
+
+                {sporociloUspeha && (
+                    <div
+                        role="status"
+                        className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700"
+                    >
+                        {sporociloUspeha}
+                    </div>
+                )}
             </header>
 
             <section className="mx-auto max-w-7xl px-6 py-10">
@@ -226,13 +261,24 @@ export default async function PodokvirjiPage({
                                                 </span>
                                             </td>
 
-                                            <td className="px-5 py-4 text-right">
-                                                <Link
-                                                    href={`/materiali/podokvirji/${podokvir.id}/uredi`}
-                                                    className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                                                >
-                                                    Uredi
-                                                </Link>
+                                            <td className="px-5 py-4">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={`/materiali/podokvirji/${podokvir.id}/uredi`}
+                                                        className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                                                    >
+                                                        Uredi
+                                                    </Link>
+
+                                                    <GumbIzbrisiMaterial
+                                                        naziv={`Podokvir ${oblikujDolzino(podokvir.dolzina)}`}
+                                                        action={izbrisiMaterial.bind(
+                                                            null,
+                                                            "podokvir",
+                                                            podokvir.id,
+                                                        )}
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

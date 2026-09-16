@@ -3,10 +3,15 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { izbrisiMaterial } from "../actions";
+import { GumbIzbrisiMaterial } from "../gumb-izbrisi-material";
+
 type OkvirjiPageProps = {
     searchParams: Promise<{
         iskanje?: string;
         stran?: string;
+        napaka?: string;
+        uspeh?: string;
     }>;
 };
 
@@ -37,6 +42,14 @@ export default async function OkvirjiPage({
 
     const parametri = await searchParams;
     const iskanje = parametri.iskanje?.trim() ?? "";
+    const sporociloNapake =
+        parametri.napaka === "brisanje"
+            ? "Okvirja ni bilo mogoče izbrisati."
+            : null;
+    const sporociloUspeha =
+        parametri.uspeh === "izbrisano"
+            ? "Okvir je bil izbrisan iz kataloga."
+            : null;
 
     const zahtevanaStran = Number(parametri.stran ?? "1");
     const trenutnaStran =
@@ -143,6 +156,24 @@ export default async function OkvirjiPage({
                         Dodaj okvir
                     </Link>
                 </div>
+
+                {sporociloNapake && (
+                    <div
+                        role="alert"
+                        className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
+                    >
+                        {sporociloNapake}
+                    </div>
+                )}
+
+                {sporociloUspeha && (
+                    <div
+                        role="status"
+                        className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700"
+                    >
+                        {sporociloUspeha}
+                    </div>
+                )}
 
                 <form
                     method="get"
@@ -271,13 +302,24 @@ export default async function OkvirjiPage({
                                                     </span>
                                                 </td>
 
-                                                <td className="px-4 py-3 text-right">
-                                                    <Link
-                                                        href={`/materiali/okvirji/${okvir.id}/uredi`}
-                                                        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                                                    >
-                                                        Uredi
-                                                    </Link>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Link
+                                                            href={`/materiali/okvirji/${okvir.id}/uredi`}
+                                                            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                                                        >
+                                                            Uredi
+                                                        </Link>
+
+                                                        <GumbIzbrisiMaterial
+                                                            naziv={okvir.vzorec}
+                                                            action={izbrisiMaterial.bind(
+                                                                null,
+                                                                "okvir",
+                                                                okvir.id,
+                                                            )}
+                                                        />
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

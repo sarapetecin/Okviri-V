@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+import { izbrisiMaterial } from "../actions";
+import { GumbIzbrisiMaterial } from "../gumb-izbrisi-material";
+
 function oblikujCeno(znesek: number | null, enota = "") {
     if (znesek === null) {
         return "—";
@@ -19,14 +22,28 @@ function oblikujCeno(znesek: number | null, enota = "") {
 type SteklaPageProps = {
     searchParams: Promise<{
         iskanje?: string;
+        napaka?: string;
+        uspeh?: string;
     }>;
 };
 
 export default async function SteklaPage({
     searchParams,
 }: SteklaPageProps) {
-    const { iskanje = "" } = await searchParams;
+    const {
+        iskanje = "",
+        napaka,
+        uspeh,
+    } = await searchParams;
     const iskaniNiz = iskanje.trim();
+    const sporociloNapake =
+        napaka === "brisanje"
+            ? "Stekla ni bilo mogoče izbrisati."
+            : null;
+    const sporociloUspeha =
+        uspeh === "izbrisano"
+            ? "Steklo je bilo izbrisano iz kataloga."
+            : null;
 
     const supabase = await createClient();
 
@@ -83,6 +100,24 @@ export default async function SteklaPage({
                         Nazaj na katalog
                     </Link>
                 </div>
+
+                {sporociloNapake && (
+                    <div
+                        role="alert"
+                        className="mb-6 rounded-xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-700"
+                    >
+                        {sporociloNapake}
+                    </div>
+                )}
+
+                {sporociloUspeha && (
+                    <div
+                        role="status"
+                        className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-700"
+                    >
+                        {sporociloUspeha}
+                    </div>
+                )}
             </header>
 
             <section className="mx-auto max-w-7xl px-6 py-10">
@@ -231,13 +266,24 @@ export default async function SteklaPage({
                                                 </span>
                                             </td>
 
-                                            <td className="px-5 py-4 text-right">
-                                                <Link
-                                                    href={`/materiali/stekla/${steklo.id}/uredi`}
-                                                    className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
-                                                >
-                                                    Uredi
-                                                </Link>
+                                            <td className="px-5 py-4">
+                                                <div className="flex justify-end gap-2">
+                                                    <Link
+                                                        href={`/materiali/stekla/${steklo.id}/uredi`}
+                                                        className="inline-flex rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                                                    >
+                                                        Uredi
+                                                    </Link>
+
+                                                    <GumbIzbrisiMaterial
+                                                        naziv={steklo.naziv}
+                                                        action={izbrisiMaterial.bind(
+                                                            null,
+                                                            "steklo",
+                                                            steklo.id,
+                                                        )}
+                                                    />
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
