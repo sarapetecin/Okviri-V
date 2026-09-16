@@ -6,6 +6,9 @@ import type { Database } from "@/types/database.types";
 
 import { KlikabilnaVrstica } from "./klikabilna-vrstica";
 
+import { izbrisiDokument } from "./brisanje-dokumenta";
+import { GumbIzbrisiDokument } from "./gumb-izbrisi-dokument";
+
 type StatusDokumenta =
     Database["public"]["Enums"]["status_prodajnega_dokumenta"];
 
@@ -140,43 +143,24 @@ export default async function DokumentiPage({
                     </Link>
                 </div>
             </header>
-
-            <div className="mb-5 flex flex-wrap gap-2">
-                <Link
-                    href="/dokumenti?vrsta=ponudba"
-                    className={
-                        izbranaVrsta === "ponudba"
-                            ? "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-                            : "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-                    }
-                >
-                    Ponudbe
-                </Link>
-
-                <Link
-                    href="/dokumenti?vrsta=narocilo"
-                    className={
-                        izbranaVrsta === "narocilo"
-                            ? "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-                            : "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-                    }
-                >
-                    Naročila
-                </Link>
-
-                <Link
-                    href="/dokumenti"
-                    className={
-                        izbranaVrsta === null
-                            ? "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
-                            : "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-                    }
-                >
-                    Vsi dokumenti
-                </Link>
-            </div>
-
             <section className="mx-auto max-w-7xl px-6 py-10">
+                <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                    <div>
+                        <h2 className="text-3xl font-bold text-slate-900">
+                            Ponudbe
+                        </h2>
+                        <p className="mt-2 text-slate-600">
+                            Pregled ponudb.
+                        </p>
+                    </div>
+
+                    <Link
+                        href="/dokumenti/nov"
+                        className="rounded-lg bg-slate-900 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-slate-700"
+                    >
+                        Nov dokument
+                    </Link>
+                </div>
                 {izbranaVrsta === "ponudba" && avtorjiPonudb.length > 0 && (
                     <form
                         method="get"
@@ -227,25 +211,6 @@ export default async function DokumentiPage({
                         )}
                     </form>
                 )}
-
-                <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-                    <div>
-                        <h2 className="text-3xl font-bold text-slate-900">
-                            Prodajni dokumenti
-                        </h2>
-                        <p className="mt-2 text-slate-600">
-                            Pregled ponudb in naročil.
-                        </p>
-                    </div>
-
-                    <Link
-                        href="/dokumenti/nov"
-                        className="rounded-lg bg-slate-900 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-slate-700"
-                    >
-                        Nov dokument
-                    </Link>
-                </div>
-
                 {error ? (
                     <div
                         role="alert"
@@ -294,6 +259,9 @@ export default async function DokumentiPage({
                                         <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
                                             Znesek
                                         </th>
+                                        <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                                            Dejanja
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -331,6 +299,14 @@ export default async function DokumentiPage({
                                             </td>
                                             <td className="px-5 py-4 text-right text-sm font-medium text-slate-900">
                                                 {oblikujZnesek(dokument.skupni_znesek)}
+                                            </td>
+                                            <td className="px-5 py-4 text-right">
+                                                <GumbIzbrisiDokument
+                                                    action={izbrisiDokument.bind(
+                                                        null,
+                                                        dokument.id,
+                                                    )}
+                                                />
                                             </td>
                                         </KlikabilnaVrstica>
                                     ))}

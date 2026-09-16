@@ -79,56 +79,178 @@ export default async function ZacetnaStran() {
           </p>
         </div>
 
+        {/* Glavni del */}
         <div
           className={
             jePartner
-              ? "grid max-w-md gap-6"
-              : "grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              ? "grid max-w-xl gap-6"
+              : "grid gap-6 md:grid-cols-2"
           }
         >
-          {!jePartner && (
-            <Link
-              href="/stranke"
-              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-            >
-              <h3 className="text-lg font-semibold text-slate-900">
-                Stranke
-              </h3>
-
-              <p className="mt-2 text-sm text-slate-600">
-                Dodajanje in pregled strank.
-              </p>
-            </Link>
-          )}
-
           <Link
             href="/dokumenti?vrsta=ponudba"
-            className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+            className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
           >
-            <h3 className="text-lg font-semibold text-slate-900">
+            <h3 className="text-2xl font-bold text-slate-900">
               Ponudbe
             </h3>
 
             <p className="mt-2 text-sm text-slate-600">
-              Priprava informativnih izračunov.
+              Priprava in pregled informativnih izračunov.
+            </p>
+
+            <p className="mt-6 text-sm font-semibold text-slate-900">
+              Odpri ponudbe →
             </p>
           </Link>
 
           {!jePartner && (
             <Link
               href="/dokumenti?vrsta=narocilo"
-              className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              className="group rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md"
             >
-              <h3 className="text-lg font-semibold text-slate-900">
+              <h3 className="text-2xl font-bold text-slate-900">
                 Naročila
               </h3>
 
               <p className="mt-2 text-sm text-slate-600">
-                Upravljanje naročil in njihovih statusov.
+                Upravljanje naročil, rokov in statusov.
+              </p>
+
+              <p className="mt-6 text-sm font-semibold text-slate-900">
+                Odpri naročila →
               </p>
             </Link>
           )}
         </div>
+
+        {/* Stranke in katalogi so vidni samo internim uporabnikom */}
+        {!jePartner && (
+          <div className="mt-10">
+            <div className="mb-5">
+              <h2 className="text-xl font-bold text-slate-900">
+                Stranke in katalogi
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-600">
+                Upravljanje strank, materialov in storitev.
+              </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Link
+                href="/stranke"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Stranke
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Dodajanje in pregled strank.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/okvirji"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Okvirji
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Katalog okvirjev in cen.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/paspartuji"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Paspartuji
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Katalog paspartujev.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/stekla"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Stekla
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Vrste stekel in cene.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/podokvirji"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Podokvirji
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Mere in cene podokvirjev.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/dodatna-dela"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Dodatna dela
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Storitve in načini obračuna.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/dobavitelji"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Dobavitelji
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Kontakti dobaviteljev.
+                </p>
+              </Link>
+
+              <Link
+                href="/materiali/barve"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+              >
+                <h3 className="font-bold text-slate-900">
+                  Barve
+                </h3>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  Barve za katalog okvirjev.
+                </p>
+              </Link>
+            </div>
+
+            <Link
+              href="/materiali"
+              className="mt-5 inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            >
+              Odpri celoten katalog
+            </Link>
+          </div>
+        )}
       </section>
     </main>
   );
