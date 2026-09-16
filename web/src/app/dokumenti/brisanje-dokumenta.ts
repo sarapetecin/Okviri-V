@@ -5,8 +5,14 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function izbrisiDokument(dokumentId: number) {
+export async function izbrisiDokument(dokumentId: number, vrsta: string | null,) {
     const supabase = await createClient();
+    const povratnaPot =
+        vrsta === "narocilo"
+            ? "/dokumenti?vrsta=narocilo"
+            : vrsta === "ponudba"
+                ? "/dokumenti?vrsta=ponudba"
+                : "/dokumenti";
 
     const { data: podatkiZetona, error: napakaZetona } =
         await supabase.auth.getClaims();
@@ -31,7 +37,10 @@ export async function izbrisiDokument(dokumentId: number) {
             napakaPostavk,
         );
 
-        redirect("/dokumenti?napaka=brisanje");
+        redirect(
+            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
+            }napaka=brisanje`,
+        );
     }
 
     for (const postavka of postavke ?? []) {
@@ -48,7 +57,10 @@ export async function izbrisiDokument(dokumentId: number) {
                 error,
             );
 
-            redirect("/dokumenti?napaka=brisanje");
+            redirect(
+                `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
+                }napaka=brisanje`,
+            );
         }
     }
 
@@ -63,7 +75,10 @@ export async function izbrisiDokument(dokumentId: number) {
             napakaSporocil,
         );
 
-        redirect("/dokumenti?napaka=brisanje");
+        redirect(
+            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
+            }napaka=brisanje`,
+        );
     }
 
     const { error: napakaZgodovine } = await supabase
@@ -77,7 +92,10 @@ export async function izbrisiDokument(dokumentId: number) {
             napakaZgodovine,
         );
 
-        redirect("/dokumenti?napaka=brisanje");
+        redirect(
+            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
+            }napaka=brisanje`,
+        );
     }
 
     const { error: napakaBrisanja } = await supabase
@@ -91,11 +109,14 @@ export async function izbrisiDokument(dokumentId: number) {
             napakaBrisanja,
         );
 
-        redirect("/dokumenti?napaka=brisanje");
+        redirect(
+            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
+            }napaka=brisanje`,
+        );
     }
 
     revalidatePath("/");
     revalidatePath("/dokumenti");
 
-    redirect("/dokumenti");
+    redirect(povratnaPot);
 }

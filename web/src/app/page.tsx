@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 import { odjava } from "./actions";
+import { ustvariPrazenDokument } from "./dokumenti/ustvari-prazen-dokument";
 
 export default async function ZacetnaStran() {
   const supabase = await createClient();
@@ -69,14 +70,48 @@ export default async function ZacetnaStran() {
       </header>
 
       <section className="mx-auto max-w-7xl px-6 py-10">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-slate-900">
-            Nadzorna plošča
-          </h2>
+        <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="text-3xl font-bold text-slate-900">
+              Nadzorna plošča
+            </h2>
 
-          <p className="mt-2 text-slate-600">
-            Izberi del sistema, ki ga želiš uporabljati.
-          </p>
+            <p className="mt-2 text-slate-600">
+              Izberi del sistema, ki ga želiš uporabljati.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <form
+              action={ustvariPrazenDokument.bind(
+                null,
+                "ponudba",
+              )}
+            >
+              <button
+                type="submit"
+                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Nova ponudba
+              </button>
+            </form>
+
+            {!jePartner && (
+              <form
+                action={ustvariPrazenDokument.bind(
+                  null,
+                  "narocilo",
+                )}
+              >
+                <button
+                  type="submit"
+                  className="rounded-lg bg-slate-900 px-5 py-2.5 font-semibold text-white transition hover:bg-slate-700"
+                >
+                  Novo naročilo
+                </button>
+              </form>
+            )}
+          </div>
         </div>
 
         {/* Glavni del */}

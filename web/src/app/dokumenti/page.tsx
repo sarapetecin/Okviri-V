@@ -9,6 +9,10 @@ import { KlikabilnaVrstica } from "./klikabilna-vrstica";
 import { izbrisiDokument } from "./brisanje-dokumenta";
 import { GumbIzbrisiDokument } from "./gumb-izbrisi-dokument";
 
+import { ustvariPrazenDokument } from "./ustvari-prazen-dokument";
+import { GumbNovDokument } from "./gumb-nov-dokument";
+
+
 type StatusDokumenta =
     Database["public"]["Enums"]["status_prodajnega_dokumenta"];
 
@@ -229,12 +233,23 @@ export default async function DokumentiPage({
                                     : "Pregled ponudb in naročil."}
                         </p>
                     </div>
-                    <Link
-                        href="/dokumenti/nov"
-                        className="rounded-lg bg-slate-900 px-5 py-2.5 text-center font-semibold text-white transition hover:bg-slate-700"
-                    >
-                        Nov dokument
-                    </Link>
+                    <GumbNovDokument
+                        vrsta={
+                            vrsta === "ponudba" ||
+                                vrsta === "narocilo"
+                                ? vrsta
+                                : null
+                        }
+                        actionPonudba={ustvariPrazenDokument.bind(
+                            null,
+                            "ponudba",
+                        )}
+                        actionNarocilo={ustvariPrazenDokument.bind(
+                            null,
+                            "narocilo",
+                        )}
+                    />
+
                 </div>
                 <nav
                     aria-label="Vrsta dokumentov"
@@ -747,6 +762,7 @@ export default async function DokumentiPage({
                                                     action={izbrisiDokument.bind(
                                                         null,
                                                         dokument.id,
+                                                        vrsta ?? null,
                                                     )}
                                                 />
                                             </td>
@@ -758,6 +774,6 @@ export default async function DokumentiPage({
                     </div>
                 )}
             </section>
-        </main>
+        </main >
     );
 }
