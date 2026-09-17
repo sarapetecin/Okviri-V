@@ -425,7 +425,7 @@ export default async function NovaPostavkaPage({
                 : "nova-postavka"
             }
             action={shraniPostavko}
-            className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]"
+            className="space-y-6"
           >
             {vdelano && (
               <input
@@ -636,7 +636,7 @@ export default async function NovaPostavkaPage({
               </section>
             </div>
 
-            <aside className="space-y-4 xl:sticky xl:top-6">
+            <aside className="space-y-4">
               <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900">
                   Celotna postavka

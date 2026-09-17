@@ -76,7 +76,7 @@ export function KoledarRoka({
             </button>
 
             {odprto && (
-                <div className="absolute left-0 top-full z-40 mt-2 w-[340px] rounded-xl border border-slate-200 bg-white p-4 text-slate-900 shadow-xl">
+                <div className="absolute right-0 top-full z-40 mt-2 w-[340px] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-200 bg-white p-4 text-slate-900 shadow-xl">
                     <DayPicker
                         className="text-slate-900"
                         style={

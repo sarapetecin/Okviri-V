@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { useFormStatus } from "react-dom";
+
 type Stranka = {
     id: number;
     naziv: string;
@@ -27,6 +29,23 @@ type UrejanjeStrankeProps = {
 
 const inputClassName =
     "w-full rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 outline-none focus:border-slate-600";
+
+function GumbUstvariInIzberi() {
+    const { pending } = useFormStatus();
+
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            aria-disabled={pending}
+            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-wait disabled:opacity-60"
+        >
+            {pending
+                ? "Ustvarjam stranko ..."
+                : "Ustvari in izberi"}
+        </button>
+    );
+}
 
 export function UrejanjeStranke({
     stranke,
@@ -268,12 +287,7 @@ export function UrejanjeStranke({
                     )}
 
                     <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"
-                        >
-                            Ustvari in izberi
-                        </button>
+                        <GumbUstvariInIzberi />
 
                         <button
                             type="button"

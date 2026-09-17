@@ -235,8 +235,7 @@ export default async function DokumentiPage({
                     </div>
                     <GumbNovDokument
                         vrsta={
-                            vrsta === "ponudba" ||
-                                vrsta === "narocilo"
+                            vrsta === "ponudba" || vrsta === "narocilo"
                                 ? vrsta
                                 : null
                         }

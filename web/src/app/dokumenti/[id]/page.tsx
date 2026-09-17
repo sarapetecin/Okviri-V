@@ -241,7 +241,7 @@ export default async function DokumentPage({
 
   return (
     <main className="min-h-screen bg-slate-100">
-      <header className="border-b border-slate-200 bg-white">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white shadow-sm">
         <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-4 xl:px-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
@@ -349,6 +349,7 @@ export default async function DokumentPage({
             </div>
             {!jePartner && (
               <UrejanjeStranke
+                key={`${dokument.stranka_naziv}-${dokument.stranka_telefonska_stevilka ?? ""}-${dokument.salon_prevzema}`}
                 stranke={stranke ?? []}
                 salonPrevzema={
                   dokument.salon_prevzema as

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 import { odjava } from "./actions";
 import { ustvariPrazenDokument } from "./dokumenti/ustvari-prazen-dokument";
+import { GumbUstvariDokument } from "./dokumenti/gumb-dodaj-narocilo-ponudbo";
 
 export default async function ZacetnaStran() {
   const supabase = await createClient();
@@ -88,12 +89,10 @@ export default async function ZacetnaStran() {
                 "ponudba",
               )}
             >
-              <button
-                type="submit"
-                className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-50"
-              >
-                Nova ponudba
-              </button>
+              <GumbUstvariDokument
+                naziv="Nova ponudba"
+                nazivMedShranjevanjem="Ustvarjam ponudbo ..."
+              />
             </form>
 
             {!jePartner && (
@@ -103,12 +102,11 @@ export default async function ZacetnaStran() {
                   "narocilo",
                 )}
               >
-                <button
-                  type="submit"
-                  className="rounded-lg bg-slate-900 px-5 py-2.5 font-semibold text-white transition hover:bg-slate-700"
-                >
-                  Novo naročilo
-                </button>
+                <GumbUstvariDokument
+                  naziv="Novo naročilo"
+                  nazivMedShranjevanjem="Ustvarjam naročilo ..."
+                  poudarjen
+                />
               </form>
             )}
           </div>

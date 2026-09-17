@@ -1052,15 +1052,21 @@ export async function spremeniSalonPrevzema(
     const supabase =
         await preveriPravicoZaStranko(dokumentId);
 
-    const { error } = await supabase
+    const {
+        data: posodobljenoNarocilo,
+        error,
+    } = await supabase
         .from("narocilo")
         .update({
             salon_prevzema:
                 rezultat.data.salonPrevzema,
         })
         .eq("id", rezultat.data.dokumentId)
+        .eq("vrsta", "narocilo")
+        .select("id, salon_prevzema")
+        .maybeSingle();
 
-    if (error) {
+    if (error || !posodobljenoNarocilo) {
         console.error(
             "Napaka pri spremembi salona prevzema:",
             error,
@@ -1073,6 +1079,8 @@ export async function spremeniSalonPrevzema(
 
     revalidatePath("/dokumenti");
     revalidatePath(`/dokumenti/${dokumentId}`);
+
+    redirect(`/dokumenti/${dokumentId}`);
 }
 
 const spremeniRokIzdelaveSchema = z.object({
