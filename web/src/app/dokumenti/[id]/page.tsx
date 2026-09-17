@@ -407,9 +407,11 @@ export default async function DokumentPage({
               </h2>
 
               <p className="mt-1 text-sm text-slate-600">
-                Trenutni status:{" "}
+                Vrsta dokumenta:{" "}
                 <span className="font-semibold text-slate-900">
-                  {naziviStatusov[dokument.status]}
+                  {dokument.vrsta === "ponudba"
+                    ? "Ponudba"
+                    : "Naročilo"}
                 </span>
               </p>
 

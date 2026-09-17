@@ -6,6 +6,7 @@ import {
     useState,
     type CSSProperties,
 } from "react"; import { DayPicker } from "react-day-picker";
+import { useFormStatus } from "react-dom";
 
 import "react-day-picker/style.css";
 
@@ -17,6 +18,26 @@ type KoledarRokaProps = {
         formData: FormData,
     ) => void | Promise<void>;
 };
+
+function GumbShraniRok({
+    imaIzbraniDatum,
+}: {
+    imaIzbraniDatum: boolean;
+}) {
+    const { pending } = useFormStatus();
+
+    return (
+        <button
+            type="submit"
+            disabled={!imaIzbraniDatum || pending}
+            className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+        >
+            {pending
+                ? "Shranjujem rok ..."
+                : "Shrani rok izdelave"}
+        </button>
+    );
+}
 
 function razredZasedenosti(stevilo: number) {
     if (stevilo <= 30) {
@@ -219,7 +240,6 @@ export function KoledarRoka({
                                     potrditev.value = "da";
                                 }
                             }
-                            setOdprto(false);
                         }}
                     >
                         <input
@@ -234,13 +254,9 @@ export function KoledarRoka({
                             value="ne"
                         />
 
-                        <button
-                            type="submit"
-                            disabled={!izbraniDatum}
-                            className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            Shrani rok izdelave
-                        </button>
+                        <GumbShraniRok
+                            imaIzbraniDatum={Boolean(izbraniDatum)}
+                        />
                     </form>
 
                     <div className="mt-3 grid grid-cols-2 gap-1 text-xs text-slate-600">
