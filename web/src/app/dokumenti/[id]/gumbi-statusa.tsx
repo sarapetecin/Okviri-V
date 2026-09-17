@@ -1,5 +1,7 @@
 "use client";
 
+import { useFormStatus } from "react-dom";
+
 type StatusDokumenta =
     | "osnutek"
     | "poslano_v_pregled"
@@ -26,6 +28,30 @@ type StatusniGumb = {
     opozorilo?: string;
 };
 
+function StatusniGumb({
+    naziv,
+    nevaren = false,
+}: {
+    naziv: string;
+    nevaren?: boolean;
+}) {
+    const { pending } = useFormStatus();
+
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            className={
+                nevaren
+                    ? "rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    : "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50"
+            }
+        >
+            {pending ? "Shranjujem ..." : naziv}
+        </button>
+    );
+}
+
 export function GumbiStatusa({
     status,
     vrsta,
@@ -34,122 +60,38 @@ export function GumbiStatusa({
 }: GumbiStatusaProps) {
     const gumbi: StatusniGumb[] = [];
 
-    if (jePartner) {
-        if (
-            vrsta === "ponudba" &&
-            (status === "osnutek" || status === "zavrnjeno")
-        ) {
-            gumbi.push({
-                status: "poslano_v_pregled",
-                naziv:
-                    status === "zavrnjeno"
-                        ? "Ponovno pošlji v pregled"
-                        : "Pošlji v pregled",
-            });
-        }
+    const jeDokumentZakljucen =
+        status === "dokoncano" ||
+        status === "preklicano" ||
+        status === "rocno_zaprto";
 
-        if (
-            vrsta === "ponudba" &&
-            status === "poslano_v_pregled"
-        ) {
-            gumbi.push({
-                status: "osnutek",
-                naziv: "Umakni iz pregleda",
-                nevaren: true,
-                opozorilo:
-                    "Ponudba se bo vrnila v osnutek. Nato jo boš lahko ponovno urejal. Ali želiš nadaljevati?",
-            });
-        }
-    } else {
-        if (status === "osnutek") {
-            if (vrsta === "ponudba") {
-                gumbi.push({
-                    status: "poslano_v_pregled",
-                    naziv: "Pošlji v pregled",
-                });
-
-                gumbi.push({
-                    status: "potrjeno",
-                    naziv: "Potrdi ponudbo",
-                    opozorilo:
-                        "Ponudba se bo spremenila v naročilo. Ali želiš nadaljevati?",
-                });
-            } else {
-                gumbi.push({
-                    status: "potrjeno",
-                    naziv: "Potrdi naročilo",
-                });
-            }
-        }
-
-        if (status === "poslano_v_pregled") {
+    if (!jeDokumentZakljucen) {
+        if (vrsta === "ponudba") {
             gumbi.push({
                 status: "potrjeno",
-                naziv: "Potrdi ponudbo",
+                naziv: "Ponudba → naročilo",
                 opozorilo:
                     "Ponudba se bo spremenila v naročilo. Ali želiš nadaljevati?",
             });
-
-            gumbi.push({
-                status: "zavrnjeno",
-                naziv: "Zavrni ponudbo",
-                nevaren: true,
-                opozorilo: "Ali želiš zavrniti ponudbo?",
-            });
         }
 
-        if (status === "zavrnjeno") {
-            gumbi.push({
-                status: "osnutek",
-                naziv: "Vrni v osnutek",
-            });
-        }
-
-        if (
-            status === "potrjeno" ||
-            status === "v_izdelavi"
-        ) {
+        if (vrsta === "narocilo") {
             gumbi.push({
                 status: "dokoncano",
-                naziv: "Označi kot dokončano",
+                naziv: "Dokončaj naročilo",
                 opozorilo:
-                    "Dokument bo označen kot dokončan. SMS se v tej fazi še ne bo poslal.",
+                    "Naročilo bo označeno kot dokončano. Ali želiš nadaljevati?",
             });
 
-            gumbi.push({
-                status: "rocno_zaprto",
-                naziv: "Ročno zapri",
-                nevaren: true,
-                opozorilo:
-                    "Naročilo bo zaprto brez SMS-obvestila. Ali želiš nadaljevati?",
-            });
-        }
-
-        if (
-            status !== "dokoncano" &&
-            status !== "rocno_zaprto" &&
-            status !== "preklicano"
-        ) {
             gumbi.push({
                 status: "preklicano",
-                naziv: "Prekliči dokument",
+                naziv: "Prekliči naročilo",
                 nevaren: true,
                 opozorilo:
-                    "Preklicanega dokumenta ne bo mogoče nadaljevati. Ali želiš nadaljevati?",
+                    "Preklicanega naročila ne bo mogoče nadaljevati. Ali želiš nadaljevati?",
             });
         }
     }
-
-    if (gumbi.length === 0) {
-        return (
-            <p className="text-sm text-slate-500">
-                {jePartner
-                    ? "Ponudbe ni več mogoče spreminjati."
-                    : "Dokument je zaključen."}
-            </p>
-        );
-    }
-
     return (
         <div className="flex flex-wrap gap-3">
             {gumbi.map((gumb) => (
@@ -171,16 +113,10 @@ export function GumbiStatusa({
                         value={gumb.status}
                     />
 
-                    <button
-                        type="submit"
-                        className={
-                            gumb.nevaren
-                                ? "rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50"
-                                : "rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-                        }
-                    >
-                        {gumb.naziv}
-                    </button>
+                    <StatusniGumb
+                        naziv={gumb.naziv}
+                        nevaren={gumb.nevaren}
+                    />
                 </form>
             ))}
         </div>
