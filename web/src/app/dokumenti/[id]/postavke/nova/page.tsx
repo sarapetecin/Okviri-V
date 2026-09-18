@@ -249,7 +249,20 @@ export default async function NovaPostavkaPage({
     },
   );
 
-  const moznostiDodatnihDel = dodatnaDela.map(
+  const napenjanjeSlike =
+    dodatnaDela.find(
+      (delo) =>
+        delo.naziv.trim().toLocaleLowerCase("sl") ===
+        "napenjanje slike",
+    ) ?? null;
+
+  const ostalaDodatnaDela =
+    dodatnaDela.filter(
+      (delo) =>
+        delo.id !== napenjanjeSlike?.id,
+    );
+
+  const moznostiDodatnihDel = ostalaDodatnaDela.map(
     (delo) => {
       const deliCene = [
         delo.cena
@@ -296,7 +309,7 @@ export default async function NovaPostavkaPage({
           postavka_okvir (okvir_id, vrstni_red),
           postavka_paspartu (paspartu_id, nacin_paspartu, vrstni_red),
           postavka_steklo (steklo_id),
-          postavka_podokvir (je_podokvir),
+          postavka_podokvir (je_podokvir, vrsta_podokvirja),
           postavka_dodatno_delo (
             id,
             dodatno_delo_id,
@@ -597,27 +610,115 @@ export default async function NovaPostavkaPage({
                   </h3>
                 </div>
 
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <input
-                    name="dodajPodokvir"
-                    type="checkbox"
-                    defaultChecked={
-                      urejanaPostavka?.postavka_podokvir
-                        ?.je_podokvir === true
-                    }
-                    className="mt-0.5 h-4 w-4 rounded border-slate-300"
-                  />
+                <fieldset>
+                  <legend className="mb-3 text-sm font-semibold text-slate-900">
+                    Izberi podokvir
+                  </legend>
 
-                  <span>
-                    <span className="block text-sm font-semibold text-slate-900">
-                      Dodaj podokvir
-                    </span>
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <input
+                        name="vrstaPodokvirja"
+                        type="radio"
+                        value="navadni"
+                        defaultChecked={
+                          urejanaPostavka
+                            ?.postavka_podokvir
+                            ?.vrsta_podokvirja === "navadni"
+                        }
+                        className="mt-0.5 h-4 w-4 border-slate-300"
+                      />
 
-                    <span className="mt-1 block text-sm text-slate-600">
-                      Primerna dimenzija in cena se določita samodejno.
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-900">
+                          Navadni podokvir
+                        </span>
+
+                        <span className="mt-1 block text-sm text-slate-600">
+                          8,00 €/m
+                        </span>
+                      </span>
+                    </label>
+
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <input
+                        name="vrstaPodokvirja"
+                        type="radio"
+                        value="po_narocilu"
+                        defaultChecked={
+                          urejanaPostavka
+                            ?.postavka_podokvir
+                            ?.vrsta_podokvirja === "po_narocilu"
+                        }
+                        className="mt-0.5 h-4 w-4 border-slate-300"
+                      />
+
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-900">
+                          Podokvir po naročilu
+                        </span>
+
+                        <span className="mt-1 block text-sm text-slate-600">
+                          16,00 €/m
+                        </span>
+                      </span>
+                    </label>
+
+                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <input
+                        name="vrstaPodokvirja"
+                        type="radio"
+                        value="standardni"
+                        defaultChecked={
+                          urejanaPostavka
+                            ?.postavka_podokvir
+                            ?.vrsta_podokvirja === "standardni"
+                        }
+                        className="mt-0.5 h-4 w-4 border-slate-300"
+                      />
+
+                      <span>
+                        <span className="block text-sm font-semibold text-slate-900">
+                          Standardni podokvir
+                        </span>
+
+                        <span className="mt-1 block text-sm text-slate-600">
+                          15,00 €/m
+                        </span>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                {napenjanjeSlike && (
+                  <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <input
+                      name="dodatnoDeloId"
+                      type="checkbox"
+                      value={napenjanjeSlike.id}
+                      defaultChecked={
+                        izbranaDodatnaDela.includes(
+                          napenjanjeSlike.id,
+                        )
+                      }
+                      className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                    />
+
+                    <span>
+                      <span className="block text-sm font-semibold text-slate-900">
+                        {napenjanjeSlike.naziv}
+                      </span>
+
+                      <span className="mt-1 block text-sm text-slate-600">
+                        {napenjanjeSlike.cena_na_m2 !== null
+                          ? `${oblikujCeno(
+                            napenjanjeSlike.cena_na_m2,
+                          )}/m²`
+                          : "Cena ni določena"}
+                      </span>
                     </span>
-                  </span>
-                </label>
+                  </label>
+                )}
 
                 <div className="mt-5">
                   {moznostiDodatnihDel.length === 0 ? (
