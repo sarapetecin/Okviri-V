@@ -126,6 +126,7 @@ export default async function DokumentPage({
     opis_slike,
     ogledalo,
     opombe,
+    mere_paspartuja,
     cena_postavke,
     vrstni_red,
     postavka_okvir (
@@ -677,6 +678,11 @@ export default async function DokumentPage({
                                     .join(" – ")}
                                 </p>
                               ))}
+                              {postavka.mere_paspartuja && (
+                                <p className="mt-2 text-xs text-slate-600">
+                                  Širina: {postavka.mere_paspartuja} cm
+                                </p>
+                              )}
                             </div>
                           ) : (
                             "—"

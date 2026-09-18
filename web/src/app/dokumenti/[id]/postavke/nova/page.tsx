@@ -304,6 +304,7 @@ export default async function NovaPostavkaPage({
           sirina,
           opis_slike,
           opombe,
+          mere_paspartuja,
           ogledalo,
           postavitev,
           postavka_okvir (okvir_id, vrstni_red),
@@ -588,13 +589,8 @@ export default async function NovaPostavkaPage({
                   privzetiOkvirIds={izbraniOkvirji}
                   privzetiPaspartuIds={izbraniPaspartuji}
                   privzetiNaciniPaspartuja={izbraniNaciniPaspartuja}
-                  privzetoStekloId={
-                    urejanaPostavka?.postavka_steklo?.steklo_id ?? null
-                  }
-                  privzetaPostavitev={
-                    urejanaPostavka?.postavitev === "lezece"
-                      ? "lezece"
-                      : "pokoncno"
+                  privzeteMerePaspartuja={
+                    urejanaPostavka?.mere_paspartuja ?? ""
                   }
                 />
               </section>

@@ -14,6 +14,7 @@ const urejenaPostavkaSchema = z.object({
     sirina: z.number().positive().max(10000),
     opisSlike: z.string().trim().nullable(),
     opombe: z.string().trim().nullable(),
+    merePaspartuja: z.string().trim().max(100).nullable(),
     ogledalo: z.boolean(),
     okvirIds: z.array(z.number().int().positive()).max(3),
     paspartuIds: z.array(z.number().int().positive()).max(2),
@@ -110,6 +111,7 @@ export async function urediPostavko(
 
     const opisSlikeVrednost = formData.get("opisSlike");
     const opombeVrednost = formData.get("opombe");
+    const merePaspartujaVrednost = formData.get("merePaspartuja");
     const enkratnoDeloNazivVrednost =
         formData.get("enkratnoDeloNaziv");
 
@@ -143,6 +145,11 @@ export async function urediPostavko(
         opombe:
             typeof opombeVrednost === "string"
                 ? opombeVrednost.trim() || null
+                : null,
+
+        merePaspartuja:
+            typeof merePaspartujaVrednost === "string"
+                ? merePaspartujaVrednost.trim() || null
                 : null,
 
         ogledalo: formData.get("ogledalo") === "on",
@@ -401,6 +408,27 @@ export async function urediPostavko(
                 ),
             },
         );
+        const { error: napakaMerPaspartuja } =
+            await supabase
+                .from("narocilo_postavka")
+                .update({
+                    mere_paspartuja:
+                        rezultat.data.merePaspartuja,
+                })
+                .eq("id", postavka.id)
+                .eq(
+                    "narocilo_id",
+                    rezultat.data.dokumentId,
+                );
+
+        if (napakaMerPaspartuja) {
+            console.error(
+                "Napaka pri shranjevanju mer paspartuja:",
+                napakaMerPaspartuja,
+            );
+
+            redirect(potNapake("shranjevanje"));
+        }
 
         if (napakaNacinaPaspartuja) {
             console.error(

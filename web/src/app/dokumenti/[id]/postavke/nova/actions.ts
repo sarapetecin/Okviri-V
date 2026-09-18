@@ -19,6 +19,12 @@ const novaPostavkaSchema = z.object({
 
   opombe: z.string().trim().nullable(),
 
+  merePaspartuja: z
+    .string()
+    .trim()
+    .max(100)
+    .nullable(),
+
   ogledalo: z.boolean(),
 
   okvirIds: z.array(z.number().int().positive()).max(3),
@@ -128,6 +134,9 @@ export async function ustvariPostavko(
   const opisSlikeVrednost = formData.get("opisSlike");
   const opombeVrednost = formData.get("opombe");
 
+  const merePaspartujaVrednost =
+    formData.get("merePaspartuja");
+
   const enkratnoDeloNazivVrednost =
     formData.get("enkratnoDeloNaziv");
 
@@ -161,6 +170,11 @@ export async function ustvariPostavko(
     opombe:
       typeof opombeVrednost === "string"
         ? opombeVrednost.trim() || null
+        : null,
+
+    merePaspartuja:
+      typeof merePaspartujaVrednost === "string"
+        ? merePaspartujaVrednost.trim() || null
         : null,
 
     ogledalo: formData.get("ogledalo") === "on",
@@ -352,6 +366,33 @@ export async function ustvariPostavko(
             ),
         },
       );
+    const { error: napakaMerPaspartuja } =
+      await supabase
+        .from("narocilo_postavka")
+        .update({
+          mere_paspartuja:
+            rezultat.data.merePaspartuja,
+        })
+        .eq("id", novaPostavkaId)
+        .eq("narocilo_id", dokumentId);
+
+    if (napakaMerPaspartuja) {
+      console.error(
+        "Napaka pri shranjevanju mer paspartuja:",
+        napakaMerPaspartuja,
+      );
+
+      await supabase.rpc(
+        "izbrisi_celotno_postavko",
+        {
+          p_postavka_id: novaPostavkaId,
+        },
+      );
+
+      redirect(
+        `/dokumenti/${dokumentId}/postavke/nova?napaka=shranjevanje`,
+      );
+    }
 
     if (napakaNacinaPaspartuja) {
       console.error(

@@ -58,6 +58,7 @@ type IzbiraMaterialovProps = {
     privzetiOkvirIds?: number[];
     privzetiPaspartuIds?: number[];
     privzetiNaciniPaspartuja?: Array<"vrezan" | "polozen">;
+    privzeteMerePaspartuja?: string | null;
     privzetoStekloId?: number | null;
     privzetaPostavitev?: "pokoncno" | "lezece";
 };
@@ -372,6 +373,7 @@ export function IzbiraMaterialov({
     privzetiOkvirIds = [],
     privzetiPaspartuIds = [],
     privzetiNaciniPaspartuja = [],
+    privzeteMerePaspartuja = "",
     privzetoStekloId = null,
     privzetaPostavitev = "pokoncno",
 }: IzbiraMaterialovProps) {
@@ -539,7 +541,6 @@ export function IzbiraMaterialov({
             </div>
 
             {/* PASPARTUJI */}
-            {/* PASPARTUJI */}
             <div
                 className={
                     izbranPaspartu &&
@@ -668,6 +669,35 @@ export function IzbiraMaterialov({
                         Dodaj paspartu
                     </button>
                 )}
+                <div>
+                    <label
+                        htmlFor="merePaspartuja"
+                        className="mb-1 block text-sm font-medium text-slate-700"
+                    >
+                        Širine paspartuja
+                    </label>
+
+                    <div className="relative">
+                        <input
+                            id="merePaspartuja"
+                            name="merePaspartuja"
+                            type="text"
+                            placeholder="Na primer 4 ali 4-4-4-6"
+                            defaultValue={privzeteMerePaspartuja ?? ""}
+                            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 pr-12 text-sm text-slate-900 outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+                        />
+
+                        <span className="absolute inset-y-0 right-3 flex items-center text-sm text-slate-500">
+                            cm
+                        </span>
+                    </div>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                        Če širine niso enake, jih vnesi po vrstnem redu:
+                        levo-zgoraj-desno-spodaj.
+                    </p>
+                </div>
+
             </div>
 
             {/* STEKLO IN POSTAVITEV */}

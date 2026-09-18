@@ -88,6 +88,7 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
         sirina,
         opis_slike,
         opombe,
+        mere_paspartuja,
         ogledalo,
         cena_postavke,
         postavka_okvir (
@@ -402,17 +403,34 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">
-                                                {paspartuji.map((paspartu) => (
-                                                    <p key={paspartu.id}>
-                                                        <span className="mr-1 text-base font-semibold">
-                                                            {paspartu.nacin_paspartu === "polozen" ? "○" : "□"}
-                                                        </span>
+                                                {paspartuji.length > 0 ? (
+                                                    <>
+                                                        {paspartuji.map((paspartu) => (
+                                                            <p key={paspartu.id}>
+                                                                <span className="mr-1 text-base font-semibold">
+                                                                    {paspartu.nacin_paspartu === "polozen"
+                                                                        ? "○"
+                                                                        : "□"}
+                                                                </span>
 
-                                                        {[paspartu.oznaka, paspartu.barva]
-                                                            .filter(Boolean)
-                                                            .join(" – ")}
-                                                    </p>
-                                                ))}
+                                                                {[
+                                                                    paspartu.oznaka,
+                                                                    paspartu.barva,
+                                                                ]
+                                                                    .filter(Boolean)
+                                                                    .join(" – ")}
+                                                            </p>
+                                                        ))}
+
+                                                        {postavka.mere_paspartuja && (
+                                                            <p className="mt-1 text-xs">
+                                                                Širina: {postavka.mere_paspartuja} cm
+                                                            </p>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    "—"
+                                                )}
                                             </td>
 
                                             <td className="border border-slate-300 px-2 py-3 align-top">

@@ -194,6 +194,7 @@ export type Database = {
           dolzina: number
           id: number
           kolicina: number
+          mere_paspartuja: string | null
           narocilo_id: number
           ogledalo: boolean
           opis_slike: string | null
@@ -208,6 +209,7 @@ export type Database = {
           dolzina: number
           id?: number
           kolicina?: number
+          mere_paspartuja?: string | null
           narocilo_id: number
           ogledalo?: boolean
           opis_slike?: string | null
@@ -222,6 +224,7 @@ export type Database = {
           dolzina?: number
           id?: number
           kolicina?: number
+          mere_paspartuja?: string | null
           narocilo_id?: number
           ogledalo?: boolean
           opis_slike?: string | null
@@ -520,6 +523,7 @@ export type Database = {
           cena_paspartuja: number
           dodatni_opis: string | null
           id: number
+          mere: string | null
           nacin_paspartu: string | null
           oznaka: string | null
           paspartu_id: number | null
@@ -531,6 +535,7 @@ export type Database = {
           cena_paspartuja?: number
           dodatni_opis?: string | null
           id?: number
+          mere?: string | null
           nacin_paspartu?: string | null
           oznaka?: string | null
           paspartu_id?: number | null
@@ -542,6 +547,7 @@ export type Database = {
           cena_paspartuja?: number
           dodatni_opis?: string | null
           id?: number
+          mere?: string | null
           nacin_paspartu?: string | null
           oznaka?: string | null
           paspartu_id?: number | null
@@ -1019,14 +1025,16 @@ export type Database = {
         Args: { p_paspartu_id: number; p_postavka_id: number }
         Returns: number
       }
-      dodaj_podokvir_postavki:
-        | { Args: { p_postavka_id: number }; Returns: number }
-        | {
-            Args: { p_postavka_id: number; p_vrsta_podokvirja: string }
-            Returns: number
-          }
+      dodaj_podokvir_postavki: {
+        Args: { p_postavka_id: number; p_vrsta_podokvirja?: string }
+        Returns: number
+      }
       dodaj_steklo_postavki: {
         Args: { p_postavka_id: number; p_steklo_id: number }
+        Returns: number
+      }
+      izberi_standardno_mero_podokvirja: {
+        Args: { p_mera: number }
         Returns: number
       }
       izbrisi_celotno_postavko: {
