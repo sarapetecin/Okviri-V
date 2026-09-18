@@ -36,6 +36,14 @@ const novaPostavkaSchema = z.object({
 
   stekloId: z.number().int().positive().nullable(),
 
+  vrstaPodokvirja: z
+    .enum([
+      "navadni",
+      "po_narocilu",
+      "standardni",
+    ])
+    .nullable(),
+
   dodajPodokvir: z.boolean(),
 
   dodatnoDeloIds: z
@@ -129,6 +137,16 @@ export async function ustvariPostavko(
   const enkratnoDeloCenaVrednost =
     formData.get("enkratnoDeloCena");
 
+  const vrstaPodokvirjaVrednost =
+    formData.get("vrstaPodokvirja");
+
+  const vrstaPodokvirja =
+    vrstaPodokvirjaVrednost === "navadni" ||
+      vrstaPodokvirjaVrednost === "po_narocilu" ||
+      vrstaPodokvirjaVrednost === "standardni"
+      ? vrstaPodokvirjaVrednost
+      : null;
+
   const rezultat = novaPostavkaSchema.safeParse({
     dokumentId,
     kolicina: preberiStevilo(formData.get("kolicina")),
@@ -168,8 +186,11 @@ export async function ustvariPostavko(
 
     stekloId: preberiId(formData.get("stekloId")),
 
+    vrstaPodokvirja:
+      formData.get("vrstaPodokvirja") || null,
+
     dodajPodokvir:
-      formData.get("dodajPodokvir") === "on",
+      vrstaPodokvirja !== null,
 
     dodatnoDeloIds: preberiIdje(
       formData,
@@ -240,8 +261,10 @@ export async function ustvariPostavko(
     p_ogledalo: rezultat.data.ogledalo,
     p_okvir_ids: rezultat.data.okvirIds,
     p_paspartu_ids: rezultat.data.paspartuIds,
-    p_dodaj_podokvir:
-      rezultat.data.dodajPodokvir,
+    p_dodaj_podokvir: false,
+
+    p_vrsta_podokvirja:
+      rezultat.data.vrstaPodokvirja,
     p_dodatno_delo_ids:
       rezultat.data.dodatnoDeloIds,
 

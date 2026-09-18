@@ -19,6 +19,14 @@ const urejenaPostavkaSchema = z.object({
     paspartuIds: z.array(z.number().int().positive()).max(2),
     naciniPaspartuja: z.array(z.enum(["vrezan", "polozen"])).max(2),
     stekloId: z.number().int().positive().nullable(),
+    vrstaPodokvirja: z
+        .enum([
+            "navadni",
+            "po_narocilu",
+            "standardni",
+        ])
+        .nullable(),
+
     dodajPodokvir: z.boolean(),
     dodatnoDeloIds: z.array(z.number().int().positive()).max(50),
     postavitev: z.enum([
@@ -110,6 +118,15 @@ export async function urediPostavko(
 
     const enkratnoDeloCenaVrednost =
         formData.get("enkratnoDeloCena");
+    const vrstaPodokvirjaVrednost =
+        formData.get("vrstaPodokvirja");
+
+    const vrstaPodokvirja =
+        vrstaPodokvirjaVrednost === "navadni" ||
+            vrstaPodokvirjaVrednost === "po_narocilu" ||
+            vrstaPodokvirjaVrednost === "standardni"
+            ? vrstaPodokvirjaVrednost
+            : null;
 
     const rezultat = urejenaPostavkaSchema.safeParse({
         dokumentId,
@@ -141,7 +158,11 @@ export async function urediPostavko(
                 : "vrezan",
         ],
         stekloId: preberiId(formData.get("stekloId")),
-        dodajPodokvir: formData.get("dodajPodokvir") === "on",
+        vrstaPodokvirja:
+            formData.get("vrstaPodokvirja"),
+
+        dodajPodokvir:
+            vrstaPodokvirja !== null,
         dodatnoDeloIds: preberiIdje(formData, "dodatnoDeloId"),
         postavitev:
             formData.get("postavitev") === "lezece"
@@ -197,7 +218,10 @@ export async function urediPostavko(
         p_ogledalo: rezultat.data.ogledalo,
         p_okvir_ids: rezultat.data.okvirIds,
         p_paspartu_ids: rezultat.data.paspartuIds,
-        p_dodaj_podokvir: rezultat.data.dodajPodokvir,
+        p_dodaj_podokvir: false,
+
+        p_vrsta_podokvirja:
+            rezultat.data.vrstaPodokvirja,
         p_dodatno_delo_ids: rezultat.data.dodatnoDeloIds,
 
         ...(rezultat.data.opisSlike
