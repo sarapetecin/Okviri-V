@@ -1026,7 +1026,7 @@ export type Database = {
         Returns: number
       }
       dodaj_podokvir_postavki: {
-        Args: { p_postavka_id: number; p_vrsta_podokvirja?: string }
+        Args: { p_postavka_id: number }
         Returns: number
       }
       dodaj_steklo_postavki: {
