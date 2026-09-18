@@ -55,7 +55,6 @@ function StatusniGumb({
 export function GumbiStatusa({
     status,
     vrsta,
-    jePartner,
     action,
 }: GumbiStatusaProps) {
     const gumbi: StatusniGumb[] = [];
