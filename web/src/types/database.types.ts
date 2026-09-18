@@ -588,7 +588,6 @@ export type Database = {
           podokvir_sirina: number | null
           postavka_id: number
           vrsta_podokvirja: string
-          vrsta_podokvirja: string
         }
         Insert: {
           cena_podokvirja?: number
@@ -599,7 +598,6 @@ export type Database = {
           podokvir_sirina?: number | null
           postavka_id: number
           vrsta_podokvirja?: string
-          vrsta_podokvirja?: string
         }
         Update: {
           cena_podokvirja?: number
@@ -609,7 +607,6 @@ export type Database = {
           podokvir_id?: number | null
           podokvir_sirina?: number | null
           postavka_id?: number
-          vrsta_podokvirja?: string
           vrsta_podokvirja?: string
         }
         Relationships: [
@@ -1175,78 +1172,6 @@ export type Database = {
             }
             Returns: number
           }
-      partner_uredi_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
-      partner_ustvari_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
       spremeni_status_dokumenta: {
         Args: {
           p_narocilo_id: number
@@ -1256,78 +1181,6 @@ export type Database = {
       }
       trenutna_uporabniska_vloga: { Args: never; Returns: string }
       trenutni_uporabnik_id: { Args: never; Returns: number }
-      uredi_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
-      ustvari_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
       uredi_celotno_postavko:
         | {
             Args: {
@@ -1558,4 +1411,5 @@ export const Constants = {
     },
   },
 } as const
+
 
