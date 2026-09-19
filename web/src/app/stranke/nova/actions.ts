@@ -18,7 +18,17 @@ const novaStrankaSchema = z.object({
     .min(1, "Naziv stranke je obvezen.")
     .max(200, "Naziv stranke je predolg."),
 
-  telefonskaStevilka: praznoVNull,
+  telefonskaStevilka: z
+    .string()
+    .trim()
+    .min(
+      1,
+      "Telefonska številka je obvezna.",
+    )
+    .max(
+      50,
+      "Telefonska številka je predolga.",
+    ),
 
   email: z
     .union([

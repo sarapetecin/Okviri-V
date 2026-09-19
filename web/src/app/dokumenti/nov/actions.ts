@@ -128,7 +128,10 @@ export async function ustvariDokument(formData: FormData) {
 
   const { error } = await supabase.from("narocilo").insert({
     vrsta: interniRezultat.data.vrsta,
-    status: "osnutek",
+    status:
+      interniRezultat.data.vrsta === "narocilo"
+        ? "v_izdelavi"
+        : "osnutek",
 
     stranka_id: stranka.id,
     stranka_naziv: stranka.naziv,

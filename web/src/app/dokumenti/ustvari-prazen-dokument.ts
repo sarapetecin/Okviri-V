@@ -61,8 +61,10 @@ export async function ustvariPrazenDokument(
         .from("narocilo")
         .insert({
             vrsta,
-            status: "osnutek",
-
+            status:
+                vrsta === "narocilo"
+                    ? "v_izdelavi"
+                    : "osnutek",
             stranka_id: null,
             stranka_naziv: "Brez izbrane stranke",
             stranka_telefonska_stevilka: null,

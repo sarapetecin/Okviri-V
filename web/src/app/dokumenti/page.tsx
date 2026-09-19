@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
 import { izbrisiDokumente } from "./brisanje-dokumenta";
+import { oznaciKotDokoncano } from "./oznaci-kot-dokoncano";
+import { rocnoZapriDokumente } from "./rocno-zapiranje";
 
 import { TabelaDokumentov } from "./tabela-dokumentov";
 
@@ -570,15 +572,6 @@ export default async function DokumentiPage({
                                 >
                                     <option value="">Vsi statusi</option>
                                     <option value="osnutek">Osnutek</option>
-                                    <option value="poslano_v_pregled">
-                                        Poslano v pregled
-                                    </option>
-                                    <option value="zavrnjeno">
-                                        Zavrnjeno
-                                    </option>
-                                    <option value="potrjeno">
-                                        Potrjeno
-                                    </option>
                                     <option value="v_izdelavi">
                                         V izdelavi
                                     </option>
@@ -586,7 +579,7 @@ export default async function DokumentiPage({
                                         Dokončano
                                     </option>
                                     <option value="rocno_zaprto">
-                                        Ročno zaprto
+                                        Dokončano – ročno zaprto
                                     </option>
                                     <option value="preklicano">
                                         Preklicano
@@ -663,6 +656,8 @@ export default async function DokumentiPage({
                         dokumenti={dokumenti}
                         vrsta={izbranaVrsta}
                         actionIzbrisi={izbrisiDokumente}
+                        actionDokoncano={oznaciKotDokoncano}
+                        actionRocnoZapri={rocnoZapriDokumente}
                     />
                 )}
             </section>

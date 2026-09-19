@@ -31,6 +31,12 @@ type Props = {
         dokumentIds: number[],
         vrsta: VrstaDokumenta | null,
     ) => Promise<void>;
+    actionDokoncano: (
+        dokumentId: number,
+    ) => Promise<void>;
+    actionRocnoZapri: (
+        dokumentIds: number[],
+    ) => Promise<void>;
 };
 
 const naziviStatusov: Record<
@@ -43,7 +49,7 @@ const naziviStatusov: Record<
     potrjeno: "Potrjeno",
     v_izdelavi: "V izdelavi",
     dokoncano: "Dokončano",
-    rocno_zaprto: "Ročno zaprto",
+    rocno_zaprto: "Dokončano – ročno zaprto",
     preklicano: "Preklicano",
 };
 
@@ -69,13 +75,25 @@ export function TabelaDokumentov({
     dokumenti,
     vrsta,
     actionIzbrisi,
+    actionDokoncano,
+    actionRocnoZapri,
 }: Props) {
     const [izbrani, setIzbrani] = useState<
         Set<number>
     >(new Set());
 
-    const [brisanjePoteka, zacniBrisanje] =
+    const [akcijaPoteka, zacniAkcijo] =
         useTransition();
+
+    const [
+        dokumentVObdelavi,
+        setDokumentVObdelavi,
+    ] = useState<number | null>(null);
+
+    const prikaziDejanja = dokumenti.some(
+        (dokument) =>
+            dokument.vrsta === "narocilo",
+    );
 
     const vsiPrikazaniSoIzbrani =
         dokumenti.length > 0 &&
@@ -129,11 +147,63 @@ export function TabelaDokumentov({
         if (!potrjeno) {
             return;
         }
-
-        zacniBrisanje(() => {
+        setIzbrani(new Set());
+        zacniAkcijo(() => {
             void actionIzbrisi(
                 dokumentIds,
                 vrsta,
+            );
+        });
+    }
+
+    function oznaciDokoncano(
+        dokumentId: number,
+    ) {
+        const potrjeno = window.confirm(
+            "Naročilo bo označeno kot dokončano. Ali želiš nadaljevati?",
+        );
+
+        if (!potrjeno) {
+            return;
+        }
+
+        setDokumentVObdelavi(dokumentId);
+
+        zacniAkcijo(() => {
+            void actionDokoncano(dokumentId);
+        });
+    }
+
+    function rocnoZapriIzbrane() {
+        const izbranaNarocila = dokumenti
+            .filter(
+                (dokument) =>
+                    izbrani.has(dokument.id) &&
+                    dokument.vrsta === "narocilo" &&
+                    dokument.status ===
+                    "v_izdelavi",
+            )
+            .map((dokument) => dokument.id);
+
+        if (izbranaNarocila.length === 0) {
+            window.alert(
+                "Izberi vsaj eno naročilo s statusom V izdelavi.",
+            );
+
+            return;
+        }
+
+        const potrjeno = window.confirm(
+            `Ročno bo zaprtih ${izbranaNarocila.length} naročil. Naročila bodo ostala shranjena, SMS pa ne bo poslan. Nadaljujem?`,
+        );
+
+        if (!potrjeno) {
+            return;
+        }
+        setIzbrani(new Set());
+        zacniAkcijo(() => {
+            void actionRocnoZapri(
+                izbranaNarocila,
             );
         });
     }
@@ -151,15 +221,28 @@ export function TabelaDokumentov({
                     <button
                         type="button"
                         disabled={
-                            brisanjePoteka ||
+                            akcijaPoteka ||
                             izbrani.size === 0
                         }
                         onClick={izbrisiIzbrane}
                         className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                        {brisanjePoteka
+                        {akcijaPoteka
                             ? "Brišem ..."
                             : "Izbriši izbrane"}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={
+                            akcijaPoteka ||
+                            izbrani.size === 0
+                        }
+                        onClick={rocnoZapriIzbrane}
+                        className="rounded-lg border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                        {akcijaPoteka
+                            ? "Shranjujem ..."
+                            : "Ročno zapri izbrane"}
                     </button>
                 </div>
             </div>
@@ -216,6 +299,11 @@ export function TabelaDokumentov({
                                 <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
                                     Znesek
                                 </th>
+                                {prikaziDejanja && (
+                                    <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                                        Dejanja
+                                    </th>
+                                )}
                             </tr>
                         </thead>
 
@@ -311,6 +399,41 @@ export function TabelaDokumentov({
                                                 dokument.skupni_znesek,
                                             )}
                                         </td>
+                                        {prikaziDejanja && (
+                                            <td
+                                                className="px-5 py-4 text-right"
+                                                onClick={(dogodek) => {
+                                                    dogodek.stopPropagation();
+                                                }}
+                                                onKeyDown={(dogodek) => {
+                                                    dogodek.stopPropagation();
+                                                }}
+                                            >
+                                                {dokument.vrsta === "narocilo" &&
+                                                    ![
+                                                        "dokoncano",
+                                                        "rocno_zaprto",
+                                                        "preklicano",
+                                                    ].includes(dokument.status) && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={akcijaPoteka}
+                                                            onClick={() =>
+                                                                oznaciDokoncano(
+                                                                    dokument.id,
+                                                                )
+                                                            }
+                                                            className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                                        >
+                                                            {akcijaPoteka &&
+                                                                dokumentVObdelavi ===
+                                                                dokument.id
+                                                                ? "Shranjujem ..."
+                                                                : "Dokončano"}
+                                                        </button>
+                                                    )}
+                                            </td>
+                                        )}
                                     </KlikabilnaVrstica>
                                 ),
                             )}

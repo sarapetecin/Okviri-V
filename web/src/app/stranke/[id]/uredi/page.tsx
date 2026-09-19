@@ -52,8 +52,8 @@ export default async function UrediStrankoPage({
         napaka === "neveljavni-podatki"
             ? "Preveri vnesene podatke. Naziv je obvezen, e-poštni naslov pa mora biti veljaven."
             : napaka === "shranjevanje"
-              ? "Sprememb ni bilo mogoče shraniti. Poskusi ponovno."
-              : null;
+                ? "Sprememb ni bilo mogoče shraniti. Poskusi ponovno."
+                : null;
 
     const inputClassName =
         "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-slate-700 focus:ring-2 focus:ring-slate-200";
@@ -129,12 +129,14 @@ export default async function UrediStrankoPage({
                                     htmlFor="telefonskaStevilka"
                                     className="mb-2 block text-sm font-medium text-slate-700"
                                 >
-                                    Telefonska številka
+                                    Telefonska številka *
                                 </label>
                                 <input
                                     id="telefonskaStevilka"
                                     name="telefonskaStevilka"
                                     type="tel"
+                                    required
+                                    maxLength={50}
                                     autoComplete="tel"
                                     defaultValue={
                                         stranka.telefonska_stevilka ?? ""

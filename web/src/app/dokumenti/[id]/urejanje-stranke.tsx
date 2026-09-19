@@ -262,13 +262,16 @@ export function UrejanjeStranke({
                             htmlFor="telefonNoveStranke"
                             className="mb-1 block text-sm font-medium text-slate-700"
                         >
-                            Telefonska številka
+                            Telefonska številka *
                         </label>
 
                         <input
                             id="telefonNoveStranke"
                             name="telefonskaStevilka"
                             type="tel"
+                            required
+                            maxLength={50}
+                            autoComplete="tel"
                             className={inputClassName}
                         />
                     </div>

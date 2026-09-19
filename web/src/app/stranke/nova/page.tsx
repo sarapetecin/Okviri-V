@@ -108,6 +108,8 @@ export default async function NovaStrankaPage({
                   id="telefonskaStevilka"
                   name="telefonskaStevilka"
                   type="tel"
+                  required
+                  maxLength={50}
                   autoComplete="tel"
                   className={inputClassName}
                 />

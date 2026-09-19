@@ -542,29 +542,79 @@ export async function spremeniStatusDokumenta(
         }
     }
 
-    const { error } =
-        jePartner &&
-            rezultat.data.noviStatus === "osnutek"
-            ? await supabase.rpc(
-                "partner_umakni_ponudbo_iz_pregleda",
-                {
-                    p_narocilo_id: dokument.id,
-                },
-            )
-            : await supabase.rpc(
+    if (
+        !jePartner &&
+        dokument.vrsta === "ponudba" &&
+        rezultat.data.noviStatus === "potrjeno"
+    ) {
+        const { error: napakaPotrditve } =
+            await supabase.rpc(
                 "spremeni_status_dokumenta",
                 {
                     p_narocilo_id: dokument.id,
-                    p_novi_status: rezultat.data.noviStatus,
+                    p_novi_status: "potrjeno",
                 },
             );
 
-    if (error) {
-        console.error("Napaka pri spremembi statusa:", error);
+        if (napakaPotrditve) {
+            console.error(
+                "Napaka pri potrditvi ponudbe:",
+                napakaPotrditve,
+            );
 
-        redirect(
-            `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
-        );
+            redirect(
+                `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
+            );
+        }
+
+        const { error: napakaIzdelave } =
+            await supabase.rpc(
+                "spremeni_status_dokumenta",
+                {
+                    p_narocilo_id: dokument.id,
+                    p_novi_status: "v_izdelavi",
+                },
+            );
+
+        if (napakaIzdelave) {
+            console.error(
+                "Napaka pri začetku izdelave:",
+                napakaIzdelave,
+            );
+
+            redirect(
+                `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
+            );
+        }
+    } else {
+        const { error } =
+            jePartner &&
+                rezultat.data.noviStatus === "osnutek"
+                ? await supabase.rpc(
+                    "partner_umakni_ponudbo_iz_pregleda",
+                    {
+                        p_narocilo_id: dokument.id,
+                    },
+                )
+                : await supabase.rpc(
+                    "spremeni_status_dokumenta",
+                    {
+                        p_narocilo_id: dokument.id,
+                        p_novi_status:
+                            rezultat.data.noviStatus,
+                    },
+                );
+
+        if (error) {
+            console.error(
+                "Napaka pri spremembi statusa:",
+                error,
+            );
+
+            redirect(
+                `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
+            );
+        }
     }
 
     revalidatePath("/dokumenti");
@@ -911,7 +961,17 @@ const novaStrankaNarocilaSchema = z
             .min(1)
             .max(200),
 
-        telefonskaStevilka: z.string().trim(),
+        telefonskaStevilka: z
+            .string()
+            .trim()
+            .min(
+                1,
+                "Telefonska številka je obvezna.",
+            )
+            .max(
+                50,
+                "Telefonska številka je predolga.",
+            ),
 
         email: z.union([
             z.literal(""),
@@ -985,7 +1045,7 @@ export async function ustvariInNastaviStranko(
         .insert({
             naziv: rezultat.data.naziv,
             telefonska_stevilka:
-                rezultat.data.telefonskaStevilka || null,
+                rezultat.data.telefonskaStevilka,
             email: rezultat.data.email || null,
             hisni_naslov:
                 rezultat.data.hisniNaslov || null,
