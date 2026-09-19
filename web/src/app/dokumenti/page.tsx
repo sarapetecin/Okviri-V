@@ -7,6 +7,7 @@ import type { Database } from "@/types/database.types";
 import { izbrisiDokumente } from "./brisanje-dokumenta";
 import { oznaciKotDokoncano } from "./oznaci-kot-dokoncano";
 import { rocnoZapriDokumente } from "./rocno-zapiranje";
+import { ponudbaVIzdelavo } from "./ponudba-v-izdelavo";
 
 import { TabelaDokumentov } from "./tabela-dokumentov";
 
@@ -658,6 +659,7 @@ export default async function DokumentiPage({
                         actionIzbrisi={izbrisiDokumente}
                         actionDokoncano={oznaciKotDokoncano}
                         actionRocnoZapri={rocnoZapriDokumente}
+                        actionVIzdelavo={ponudbaVIzdelavo}
                     />
                 )}
             </section>

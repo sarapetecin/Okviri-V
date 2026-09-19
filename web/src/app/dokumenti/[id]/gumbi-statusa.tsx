@@ -67,10 +67,10 @@ export function GumbiStatusa({
     if (!jeDokumentZakljucen) {
         if (vrsta === "ponudba") {
             gumbi.push({
-                status: "potrjeno",
+                status: "v_izdelavi",
                 naziv: "Ponudba → naročilo",
                 opozorilo:
-                    "Ponudba se bo spremenila v naročilo. Ali želiš nadaljevati?",
+                    "Ponudba se bo spremenila v naročilo s statusom V izdelavi. Ali želiš nadaljevati?",
             });
         }
 

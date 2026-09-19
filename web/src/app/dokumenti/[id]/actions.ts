@@ -545,69 +545,24 @@ export async function spremeniStatusDokumenta(
     if (
         !jePartner &&
         dokument.vrsta === "ponudba" &&
-        rezultat.data.noviStatus === "potrjeno"
+        rezultat.data.noviStatus === "v_izdelavi"
     ) {
-        const { error: napakaPotrditve } =
-            await supabase.rpc(
-                "spremeni_status_dokumenta",
-                {
-                    p_narocilo_id: dokument.id,
-                    p_novi_status: "potrjeno",
-                },
-            );
+        const trenutek = new Date().toISOString();
 
-        if (napakaPotrditve) {
-            console.error(
-                "Napaka pri potrditvi ponudbe:",
-                napakaPotrditve,
-            );
-
-            redirect(
-                `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
-            );
-        }
-
-        const { error: napakaIzdelave } =
-            await supabase.rpc(
-                "spremeni_status_dokumenta",
-                {
-                    p_narocilo_id: dokument.id,
-                    p_novi_status: "v_izdelavi",
-                },
-            );
-
-        if (napakaIzdelave) {
-            console.error(
-                "Napaka pri začetku izdelave:",
-                napakaIzdelave,
-            );
-
-            redirect(
-                `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
-            );
-        }
-    } else {
-        const { error } =
-            jePartner &&
-                rezultat.data.noviStatus === "osnutek"
-                ? await supabase.rpc(
-                    "partner_umakni_ponudbo_iz_pregleda",
-                    {
-                        p_narocilo_id: dokument.id,
-                    },
-                )
-                : await supabase.rpc(
-                    "spremeni_status_dokumenta",
-                    {
-                        p_narocilo_id: dokument.id,
-                        p_novi_status:
-                            rezultat.data.noviStatus,
-                    },
-                );
+        const { error } = await supabase
+            .from("narocilo")
+            .update({
+                vrsta: "narocilo",
+                status: "v_izdelavi",
+                ponudba_potrjena_at: trenutek,
+                posodobljeno_at: trenutek,
+            })
+            .eq("id", dokument.id)
+            .eq("vrsta", "ponudba");
 
         if (error) {
             console.error(
-                "Napaka pri spremembi statusa:",
+                "Napaka pri pretvorbi ponudbe v naročilo:",
                 error,
             );
 
@@ -615,8 +570,17 @@ export async function spremeniStatusDokumenta(
                 `/dokumenti/${dokumentId}?napaka=sprememba-statusa`,
             );
         }
-    }
 
+        revalidatePath("/");
+        revalidatePath("/dokumenti");
+        revalidatePath(
+            `/dokumenti/${dokumentId}`,
+        );
+
+        redirect(
+            `/dokumenti/${dokumentId}?uspeh=ponudba-pretvorjena`,
+        );
+    }
     revalidatePath("/dokumenti");
     revalidatePath(`/dokumenti/${dokumentId}`);
 

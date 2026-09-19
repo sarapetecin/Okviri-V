@@ -37,6 +37,9 @@ type Props = {
     actionRocnoZapri: (
         dokumentIds: number[],
     ) => Promise<void>;
+    actionVIzdelavo: (
+        dokumentId: number,
+    ) => Promise<void>;
 };
 
 const naziviStatusov: Record<
@@ -77,6 +80,7 @@ export function TabelaDokumentov({
     actionIzbrisi,
     actionDokoncano,
     actionRocnoZapri,
+    actionVIzdelavo,
 }: Props) {
     const [izbrani, setIzbrani] = useState<
         Set<number>
@@ -90,10 +94,8 @@ export function TabelaDokumentov({
         setDokumentVObdelavi,
     ] = useState<number | null>(null);
 
-    const prikaziDejanja = dokumenti.some(
-        (dokument) =>
-            dokument.vrsta === "narocilo",
-    );
+    const prikaziDejanja =
+        dokumenti.length > 0;
 
     const vsiPrikazaniSoIzbrani =
         dokumenti.length > 0 &&
@@ -205,6 +207,24 @@ export function TabelaDokumentov({
             void actionRocnoZapri(
                 izbranaNarocila,
             );
+        });
+    }
+
+    function prestaviVIzdelavo(
+        dokumentId: number,
+    ) {
+        const potrjeno = window.confirm(
+            "Ponudba bo postala naročilo s statusom V izdelavi. Ali želiš nadaljevati?",
+        );
+
+        if (!potrjeno) {
+            return;
+        }
+
+        setDokumentVObdelavi(dokumentId);
+
+        zacniAkcijo(() => {
+            void actionVIzdelavo(dokumentId);
         });
     }
 
@@ -409,6 +429,23 @@ export function TabelaDokumentov({
                                                     dogodek.stopPropagation();
                                                 }}
                                             >
+                                                {dokument.vrsta === "ponudba" && (
+                                                    <button
+                                                        type="button"
+                                                        disabled={akcijaPoteka}
+                                                        onClick={() =>
+                                                            prestaviVIzdelavo(
+                                                                dokument.id,
+                                                            )
+                                                        }
+                                                        className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold whitespace-nowrap text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    >
+                                                        {akcijaPoteka &&
+                                                            dokumentVObdelavi === dokument.id
+                                                            ? "Shranjujem ..."
+                                                            : "V izdelavo"}
+                                                    </button>
+                                                )}
                                                 {dokument.vrsta === "narocilo" &&
                                                     ![
                                                         "dokoncano",

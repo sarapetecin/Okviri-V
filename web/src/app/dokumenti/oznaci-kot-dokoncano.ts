@@ -122,5 +122,5 @@ export async function oznaciKotDokoncano(
         `/dokumenti/${dokument.id}`,
     );
 
-    redirect("/dokumenti?vrsta=narocilo");
+    return;
 }
