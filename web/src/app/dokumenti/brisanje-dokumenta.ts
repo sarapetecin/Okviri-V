@@ -5,118 +5,76 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export async function izbrisiDokument(dokumentId: number, vrsta: string | null,) {
+type VrstaDokumenta =
+    | "ponudba"
+    | "narocilo"
+    | null;
+
+function povratnaPot(vrsta: VrstaDokumenta) {
+    if (vrsta === "narocilo") {
+        return "/dokumenti?vrsta=narocilo";
+    }
+
+    if (vrsta === "ponudba") {
+        return "/dokumenti?vrsta=ponudba";
+    }
+
+    return "/dokumenti";
+}
+
+export async function izbrisiDokumente(
+    dokumentIds: number[],
+    vrsta: VrstaDokumenta,
+) {
     const supabase = await createClient();
-    const povratnaPot =
-        vrsta === "narocilo"
-            ? "/dokumenti?vrsta=narocilo"
-            : vrsta === "ponudba"
-                ? "/dokumenti?vrsta=ponudba"
-                : "/dokumenti";
+    const pot = povratnaPot(vrsta);
 
-    const { data: podatkiZetona, error: napakaZetona } =
-        await supabase.auth.getClaims();
+    const {
+        data: podatkiZetona,
+        error: napakaZetona,
+    } = await supabase.auth.getClaims();
 
-    if (napakaZetona || !podatkiZetona?.claims?.sub) {
+    if (
+        napakaZetona ||
+        !podatkiZetona?.claims?.sub
+    ) {
         redirect("/prijava");
     }
 
-    if (!Number.isInteger(dokumentId) || dokumentId <= 0) {
-        redirect("/dokumenti");
+    const veljavniIds = Array.from(
+        new Set(
+            dokumentIds.filter(
+                (id) =>
+                    Number.isInteger(id) &&
+                    id > 0,
+            ),
+        ),
+    );
+
+    if (veljavniIds.length === 0) {
+        redirect(pot);
     }
 
-    const { data: postavke, error: napakaPostavk } =
-        await supabase
-            .from("narocilo_postavka")
-            .select("id")
-            .eq("narocilo_id", dokumentId);
+    const { error } = await supabase.rpc(
+        "izbrisi_dokumente",
+        {
+            p_dokument_ids: veljavniIds,
+        },
+    );
 
-    if (napakaPostavk) {
+    if (error) {
         console.error(
-            "Napaka pri pridobivanju postavk:",
-            napakaPostavk,
+            "Napaka pri skupinskem brisanju:",
+            error,
         );
 
         redirect(
-            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
-            }napaka=brisanje`,
-        );
-    }
-
-    for (const postavka of postavke ?? []) {
-        const { error } = await supabase.rpc(
-            "izbrisi_celotno_postavko",
-            {
-                p_postavka_id: postavka.id,
-            },
-        );
-
-        if (error) {
-            console.error(
-                "Napaka pri brisanju postavke:",
-                error,
-            );
-
-            redirect(
-                `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
-                }napaka=brisanje`,
-            );
-        }
-    }
-
-    const { error: napakaSporocil } = await supabase
-        .from("sms_sporocilo")
-        .delete()
-        .eq("narocilo_id", dokumentId);
-
-    if (napakaSporocil) {
-        console.error(
-            "Napaka pri brisanju SMS-sporočil:",
-            napakaSporocil,
-        );
-
-        redirect(
-            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
-            }napaka=brisanje`,
-        );
-    }
-
-    const { error: napakaZgodovine } = await supabase
-        .from("zgodovina_statusa_narocila")
-        .delete()
-        .eq("narocilo_id", dokumentId);
-
-    if (napakaZgodovine) {
-        console.error(
-            "Napaka pri brisanju zgodovine:",
-            napakaZgodovine,
-        );
-
-        redirect(
-            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
-            }napaka=brisanje`,
-        );
-    }
-
-    const { error: napakaBrisanja } = await supabase
-        .from("narocilo")
-        .delete()
-        .eq("id", dokumentId);
-
-    if (napakaBrisanja) {
-        console.error(
-            "Napaka pri brisanju dokumenta:",
-            napakaBrisanja,
-        );
-
-        redirect(
-            `${povratnaPot}${povratnaPot.includes("?") ? "&" : "?"
-            }napaka=brisanje`,
+            `${pot}${pot.includes("?") ? "&" : "?"}napaka=brisanje`,
         );
     }
 
     revalidatePath("/");
     revalidatePath("/dokumenti");
 
-    redirect(povratnaPot);
+    redirect(pot);
 }

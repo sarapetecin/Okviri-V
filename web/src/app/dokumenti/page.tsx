@@ -4,10 +4,9 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/types/database.types";
 
-import { KlikabilnaVrstica } from "./klikabilna-vrstica";
+import { izbrisiDokumente } from "./brisanje-dokumenta";
 
-import { izbrisiDokument } from "./brisanje-dokumenta";
-import { GumbIzbrisiDokument } from "./gumb-izbrisi-dokument";
+import { TabelaDokumentov } from "./tabela-dokumentov";
 
 import { ustvariPrazenDokument } from "./ustvari-prazen-dokument";
 import { GumbNovDokument } from "./gumb-nov-dokument";
@@ -25,30 +24,6 @@ type DokumentiPageProps = {
         status?: string;
     }>;
 };
-
-const naziviStatusov: Record<StatusDokumenta, string> = {
-    osnutek: "Osnutek",
-    poslano_v_pregled: "Poslano v pregled",
-    zavrnjeno: "Zavrnjeno",
-    potrjeno: "Potrjeno",
-    v_izdelavi: "V izdelavi",
-    dokoncano: "Dokončano",
-    rocno_zaprto: "Ročno zaprto",
-    preklicano: "Preklicano",
-};
-
-function oblikujDatum(datum: string) {
-    return new Intl.DateTimeFormat("sl-SI").format(
-        new Date(`${datum}T00:00:00`),
-    );
-}
-
-function oblikujZnesek(znesek: number) {
-    return new Intl.NumberFormat("sl-SI", {
-        style: "currency",
-        currency: "EUR",
-    }).format(znesek);
-}
 
 export default async function DokumentiPage({
     searchParams,
@@ -684,93 +659,11 @@ export default async function DokumentiPage({
                         </p>
                     </div>
                 ) : (
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left">
-                                <thead className="border-b border-slate-200 bg-slate-50">
-                                    <tr>
-                                        <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                            Številka
-                                        </th>
-                                        <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                            Vrsta
-                                        </th>
-                                        <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                            Stranka
-                                        </th>
-                                        {izbranaVrsta === "ponudba" && (
-                                            <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                                Avtor
-                                            </th>
-                                        )}
-                                        <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                            Datum
-                                        </th>
-                                        <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                            Rok izdelave
-                                        </th>
-                                        <th className="px-5 py-3 text-sm font-semibold text-slate-700">
-                                            Status
-                                        </th>
-                                        <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
-                                            Znesek
-                                        </th>
-                                        <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
-                                            Dejanja
-                                        </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody className="divide-y divide-slate-200">
-                                    {dokumenti.map((dokument) => (
-                                        <KlikabilnaVrstica
-                                            key={dokument.id}
-                                            href={`/dokumenti/${dokument.id}`}
-                                            oznaka={`Odpri dokument ${dokument.id}`}
-                                        >
-                                            <td className="px-5 py-4 text-sm text-slate-900">
-                                                {dokument.id}
-                                            </td>
-                                            <td className="px-5 py-4 text-sm capitalize text-slate-700">
-                                                {dokument.vrsta}
-                                            </td>
-                                            <td className="px-5 py-4 text-sm text-slate-700">
-                                                {dokument.stranka_naziv}
-                                            </td>
-                                            {izbranaVrsta === "ponudba" && (
-                                                <td className="px-5 py-4 text-sm font-medium text-slate-700">
-                                                    {dokument.izdal_ime}
-                                                </td>
-                                            )}
-                                            <td className="px-5 py-4 text-sm text-slate-600">
-                                                {oblikujDatum(dokument.datum_sprejema)}
-                                            </td>
-                                            <td className="px-5 py-4 text-sm text-slate-600">
-                                                {dokument.rok_izdelave
-                                                    ? oblikujDatum(dokument.rok_izdelave)
-                                                    : "—"}
-                                            </td>
-                                            <td className="px-5 py-4 text-sm text-slate-700">
-                                                {naziviStatusov[dokument.status]}
-                                            </td>
-                                            <td className="px-5 py-4 text-right text-sm font-medium text-slate-900">
-                                                {oblikujZnesek(dokument.skupni_znesek)}
-                                            </td>
-                                            <td className="px-5 py-4 text-right">
-                                                <GumbIzbrisiDokument
-                                                    action={izbrisiDokument.bind(
-                                                        null,
-                                                        dokument.id,
-                                                        vrsta ?? null,
-                                                    )}
-                                                />
-                                            </td>
-                                        </KlikabilnaVrstica>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <TabelaDokumentov
+                        dokumenti={dokumenti}
+                        vrsta={izbranaVrsta}
+                        actionIzbrisi={izbrisiDokumente}
+                    />
                 )}
             </section>
         </main >

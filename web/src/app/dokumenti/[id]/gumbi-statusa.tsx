@@ -77,14 +77,14 @@ export function GumbiStatusa({
         if (vrsta === "narocilo") {
             gumbi.push({
                 status: "dokoncano",
-                naziv: "Dokončaj naročilo",
+                naziv: "Dokončano",
                 opozorilo:
                     "Naročilo bo označeno kot dokončano. Ali želiš nadaljevati?",
             });
 
             gumbi.push({
                 status: "preklicano",
-                naziv: "Prekliči naročilo",
+                naziv: "Ročno zapri naročilo",
                 nevaren: true,
                 opozorilo:
                     "Preklicanega naročila ne bo mogoče nadaljevati. Ali želiš nadaljevati?",

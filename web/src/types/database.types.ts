@@ -1026,7 +1026,7 @@ export type Database = {
         Returns: number
       }
       dodaj_podokvir_postavki: {
-        Args: { p_postavka_id: number }
+        Args: { p_postavka_id: number; p_vrsta_podokvirja?: string }
         Returns: number
       }
       dodaj_steklo_postavki: {
@@ -1041,6 +1041,7 @@ export type Database = {
         Args: { p_postavka_id: number }
         Returns: number
       }
+      izbrisi_dokumente: { Args: { p_dokument_ids: number[] }; Returns: number }
       izbrisi_material_iz_kataloga: {
         Args: { p_material_id: number; p_vrsta: string }
         Returns: undefined
@@ -1411,5 +1412,3 @@ export const Constants = {
     },
   },
 } as const
-
-
