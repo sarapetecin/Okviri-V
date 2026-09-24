@@ -33,6 +33,10 @@ export default async function ZacetnaStran() {
   const jePartner =
     uporabnik.uporabniske_pravice === "partner";
 
+  const jeAdministrator =
+    uporabnik.uporabniske_pravice ===
+    "administrator";
+
   return (
     <main className="min-h-screen bg-slate-100">
       <header className="border-b border-slate-200 bg-white">
@@ -171,6 +175,20 @@ export default async function ZacetnaStran() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {jeAdministrator && (
+                <Link
+                  href="/uporabniki"
+                  className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <h3 className="font-bold text-slate-900">
+                    Uporabniki
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-600">
+                    Računi, pravice in dostop.
+                  </p>
+                </Link>
+              )}
               <Link
                 href="/stranke"
                 className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"

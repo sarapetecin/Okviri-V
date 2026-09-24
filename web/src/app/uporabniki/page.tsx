@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { posodobiUporabnika } from "./actions";
+import { izbrisiUporabnika, posodobiUporabnika } from "./actions";
+import { GumbIzbrisiUporabnika } from "./gumb-izbrisi-uporabnika";
 
 type UporabnikiPageProps = {
     searchParams: Promise<{
@@ -64,7 +65,11 @@ export default async function UporabnikiPage({
                         ? "Za to dejanje nimaš dovoljenja."
                         : napaka === "shranjevanje"
                             ? "Sprememb ni bilo mogoče shraniti."
-                            : null;
+                            : napaka === "brisanje-lastnega-racuna"
+                                ? "Svojega uporabniškega računa ne moreš odstraniti."
+                                : napaka === "brisanje"
+                                    ? "Uporabnika ni bilo mogoče odstraniti."
+                                    : null;
 
     return (
         <main className="min-h-screen bg-slate-100">
@@ -110,14 +115,17 @@ export default async function UporabnikiPage({
                 </div>
 
                 {(uspeh === "posodobljeno" ||
-                    uspeh === "uporabnik-ustvarjen") && (
+                    uspeh === "uporabnik-ustvarjen" ||
+                    uspeh === "uporabnik-izbrisan") && (
                         <div
                             role="status"
                             className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-emerald-700"
                         >
-                            {uspeh === "uporabnik-ustvarjen"
-                                ? "Uporabnik je bil uspešno ustvarjen."
-                                : "Uporabnik je bil uspešno posodobljen."}
+                            {uspeh === "uporabnik-izbrisan"
+                                ? "Uporabnik je bil uspešno odstranjen."
+                                : uspeh === "uporabnik-ustvarjen"
+                                    ? "Uporabnik je bil uspešno ustvarjen."
+                                    : "Uporabnik je bil uspešno posodobljen."}
                         </div>
                     )}
 
@@ -176,6 +184,9 @@ export default async function UporabnikiPage({
                                         <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
                                             Dejanja
                                         </th>
+                                        <th className="px-5 py-3 text-right text-sm font-semibold text-slate-700">
+                                            Briši
+                                        </th>
                                     </tr>
                                 </thead>
 
@@ -191,6 +202,11 @@ export default async function UporabnikiPage({
 
                                         const shraniUporabnika =
                                             posodobiUporabnika.bind(
+                                                null,
+                                                uporabnik.auth_user_id,
+                                            );
+                                        const odstraniUporabnika =
+                                            izbrisiUporabnika.bind(
                                                 null,
                                                 uporabnik.auth_user_id,
                                             );
@@ -306,6 +322,28 @@ export default async function UporabnikiPage({
                                                                     Shrani
                                                                 </button>
                                                             </form>
+                                                        </td>
+                                                        <td
+                                                            colSpan={3}
+                                                            className="px-5 py-4"
+                                                        >
+                                                            <div className="flex flex-wrap items-center justify-end gap-3">
+                                                                <form
+                                                                    action={shraniUporabnika}
+                                                                    className="flex flex-wrap items-center justify-end gap-4"
+                                                                >
+                                                                    {/* select, checkbox in gumb Shrani */}
+                                                                </form>
+
+                                                                <GumbIzbrisiUporabnika
+                                                                    action={odstraniUporabnika}
+                                                                    uporabniskoIme={
+                                                                        uporabnik.uporabnisko_ime ||
+                                                                        uporabnik.email ||
+                                                                        "Neznani uporabnik"
+                                                                    }
+                                                                />
+                                                            </div>
                                                         </td>
                                                     </>
                                                 )}

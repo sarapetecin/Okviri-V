@@ -246,12 +246,19 @@ export default async function DokumentPage({
         <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-4 xl:px-6">
           <div>
             <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-              {dokument.vrsta === "ponudba" ? "Ponudba" : "Naročilo"} #
-              {dokument.id}
+              Okviri V
             </p>
+
             <h1 className="text-xl font-bold text-slate-900">
-              {dokument.stranka_naziv}
+              {dokument.vrsta === "ponudba"
+                ? "Ponudba"
+                : "Naročilo"}{" "}
+              #{dokument.id}
             </h1>
+
+            <p className="mt-1 text-sm text-slate-600">
+              {dokument.stranka_naziv}
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -263,7 +270,11 @@ export default async function DokumentPage({
             </Link>
 
             <Link
-              href="/dokumenti"
+              href={
+                dokument.vrsta === "ponudba"
+                  ? "/dokumenti?vrsta=ponudba"
+                  : "/dokumenti?vrsta=narocilo"
+              }
               className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Nazaj na dokumente
@@ -348,29 +359,29 @@ export default async function DokumentPage({
                 {dokument.stranka_hisni_naslov ?? "Brez naslova"}
               </p>
             </div>
-            {!jePartner && (
-              <UrejanjeStranke
-                key={`${dokument.stranka_naziv}-${dokument.stranka_telefonska_stevilka ?? ""}-${dokument.salon_prevzema}`}
-                stranke={stranke ?? []}
-                salonPrevzema={
-                  dokument.salon_prevzema as
-                  | "ljubljana"
-                  | "bevke"
-                }
-                actionIzberi={spremeniStranko.bind(
-                  null,
-                  dokument.id,
-                )}
-                actionUstvari={ustvariInNastaviStranko.bind(
-                  null,
-                  dokument.id,
-                )}
-                actionSalon={spremeniSalonPrevzema.bind(
-                  null,
-                  dokument.id,
-                )}
-              />
-            )}
+
+            <UrejanjeStranke
+              key={`${dokument.stranka_naziv}-${dokument.stranka_telefonska_stevilka ?? ""}-${dokument.salon_prevzema}`}
+              stranke={stranke ?? []}
+              salonPrevzema={
+                dokument.salon_prevzema as
+                | "ljubljana"
+                | "bevke"
+              }
+              actionIzberi={spremeniStranko.bind(
+                null,
+                dokument.id,
+              )}
+              actionUstvari={ustvariInNastaviStranko.bind(
+                null,
+                dokument.id,
+              )}
+              actionSalon={spremeniSalonPrevzema.bind(
+                null,
+                dokument.id,
+              )}
+            />
+
           </article>
 
           <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -422,16 +433,17 @@ export default async function DokumentPage({
                 </p>
               )}
             </div>
-
-            <GumbiStatusa
-              status={dokument.status}
-              vrsta={dokument.vrsta}
-              jePartner={jePartner}
-              action={spremeniStatusDokumenta.bind(
-                null,
-                dokument.id,
-              )}
-            />
+            {!jePartner && (
+              <GumbiStatusa
+                status={dokument.status}
+                vrsta={dokument.vrsta}
+                jePartner={jePartner}
+                action={spremeniStatusDokumenta.bind(
+                  null,
+                  dokument.id,
+                )}
+              />
+            )}
           </div>
         </section>
 
