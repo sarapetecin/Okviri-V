@@ -44,6 +44,7 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
             `
         id,
         vrsta,
+        salon_prevzema,
         datum_sprejema,
         rok_izdelave,
         stranka_naziv,
@@ -92,7 +93,8 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
         ),
         postavka_steklo (
           id,
-          naziv
+          naziv,
+          steklo (oznaka)
         ),
         postavka_podokvir (
           id,
@@ -186,6 +188,11 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                         01 427 1 420 / 031 361 043 / okviri@siol.net / www.okviri.net
                     </div>
                 </header>
+                {dokument.vrsta === "narocilo" && dokument.salon_prevzema === "bevke" && (
+                    <div className="mt-2 border-y-2 border-red-700 bg-red-100 px-2 py-1.5 text-center text-[14px] font-extrabold uppercase tracking-wide text-red-900">
+                        Salon Bevke
+                    </div>
+                )}
                 <section className="mt-2 grid grid-cols-[1fr_0.9fr_1fr] gap-3">
                     <div>
                         <p className="text-[12px] font-semibold uppercase tracking-wider text-slate-500">
@@ -297,16 +304,16 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                     {prikaziPaspartu && <th className="border border-slate-300 px-1 py-1">
                                         Paspartu
                                     </th>}
-                                    {prikaziSteklo && <th className="border border-slate-300 px-1 py-1">
+                                    {prikaziSteklo && <th className="border border-slate-300 px-1 py-1 w-[18%]">
                                         Steklo
                                     </th>}
-                                    {prikaziOpis && <th className="border border-slate-300 px-1 py-1">
+                                    {prikaziOpis && <th className="border border-slate-300 px-1 py-1 w-[9%]">
                                         Opis slike
                                     </th>}
                                     {prikaziOpombe && <th className="border border-slate-300 px-1 py-1">
                                         Opombe
                                     </th>}
-                                    <th className="border border-slate-300 px-1 py-1 text-right">
+                                    <th className="border border-slate-300 px-1 py-1 text-right w-[8%]">
                                         Cena
                                     </th>
                                 </tr>
@@ -331,10 +338,10 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                 {postavka.kolicina}
                                             </td>
                                             <td className="border border-slate-300 px-1 py-1 align-top">
-                                                {postavka.dolzina}
+                                                {oblikujMero(postavka.dolzina)}
                                             </td>
                                             <td className="border border-slate-300 px-1 py-1 align-top">
-                                                {postavka.sirina}
+                                                {oblikujMero(postavka.dolzina)}
                                             </td>
                                             {prikaziOkvir && <td className="border border-slate-300 px-1 py-1 align-top">
                                                 {okvirji.length > 0 ? (
@@ -392,7 +399,12 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                 )}
                                             </td>}
                                             {prikaziSteklo && <td className="border border-slate-300 px-1 py-1 align-top">
-                                                {postavka.postavka_steklo?.naziv ?? "—"}
+                                                {postavka.postavka_steklo
+                                                    ? [
+                                                        postavka.postavka_steklo.steklo?.oznaka,
+                                                        postavka.postavka_steklo.naziv,
+                                                    ].filter(Boolean).join(" - ")
+                                                    : "—"}
                                             </td>}
                                             {prikaziOpis && <td className="border border-slate-300 px-1 py-1 align-top">
                                                 {postavka.opis_slike ?? "—"}
@@ -410,7 +422,7 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                     </div>
                                                 )}
                                             </td>}
-                                            <td className="border border-slate-300 px-1 py-1 text-right align-top font-medium">
+                                            <td className="border border-slate-300 px-1 py-1 text-right align-top font-medium whitespace-nowrap">
                                                 {oblikujZnesek(postavka.cena_postavke)}
                                             </td>
                                         </tr>

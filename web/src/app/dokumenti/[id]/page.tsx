@@ -138,7 +138,8 @@ export default async function DokumentPage({
     postavka_steklo (
       id,
       naziv,
-      cena_stekla
+      cena_stekla,
+      steklo (oznaka)
     ),
     postavka_paspartu (
       id,
@@ -184,6 +185,12 @@ export default async function DokumentPage({
     : { data: [] };
   if (napakaDokumenta || !dokument) {
     notFound();
+  }
+
+  function oblikujMero(mera: number) {
+    return new Intl.NumberFormat("sl-SI", {
+      maximumFractionDigits: 1,
+    }).format(mera);
   }
 
   const steviloSlikNarocila =
@@ -489,7 +496,7 @@ export default async function DokumentPage({
                       Opombe
                     </th>
 
-                    <th className="w-[8%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2 text-right">
+                    <th className="w-[5%] border-b border-r border-slate-200 last:border-r-0 px-1.5 py-2 text-right">
                       Cena
                     </th>
 
@@ -536,11 +543,11 @@ export default async function DokumentPage({
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
-                          {postavka.dolzina}
+                          {oblikujMero(postavka.dolzina)}
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
-                          {postavka.sirina}
+                          {oblikujMero(postavka.sirina)}
                         </td>
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
@@ -609,7 +616,10 @@ export default async function DokumentPage({
 
                         <td className="border-b border-r border-slate-200 px-3 py-4 last:border-r-0">
                           {postavka.postavka_steklo ? (
-                            postavka.postavka_steklo.naziv
+                            [
+                              postavka.postavka_steklo.steklo?.oznaka,
+                              postavka.postavka_steklo.naziv,
+                            ].filter(Boolean).join(" - ")
                           ) : (
                             "—"
                           )}

@@ -462,24 +462,6 @@ export default async function NovaPostavkaPage({
                 </div>
 
                 <div className="grid gap-5 lg:grid-cols-2">
-                  <div className="lg:col-span-2">
-                    <label
-                      htmlFor="opisSlike"
-                      className="mb-2 block text-sm font-medium text-slate-700"
-                    >
-                      Opis slike
-                    </label>
-
-                    <input
-                      id="opisSlike"
-                      name="opisSlike"
-                      type="text"
-                      placeholder="Na primer: družinska fotografija"
-                      defaultValue={urejanaPostavka?.opis_slike ?? ""}
-                      className={inputClassName}
-                    />
-                  </div>
-
                   <div className="grid gap-5 sm:grid-cols-3 lg:col-span-2">
                     <div>
                       <label
@@ -547,6 +529,24 @@ export default async function NovaPostavkaPage({
 
                   <div className="lg:col-span-2">
                     <label
+                      htmlFor="opisSlike"
+                      className="mb-2 block text-sm font-medium text-slate-700"
+                    >
+                      Opis slike
+                    </label>
+
+                    <input
+                      id="opisSlike"
+                      name="opisSlike"
+                      type="text"
+                      placeholder="Na primer: družinska fotografija"
+                      defaultValue={urejanaPostavka?.opis_slike ?? ""}
+                      className={inputClassName}
+                    />
+                  </div>
+
+                  <div className="lg:col-span-2">
+                    <label
                       htmlFor="opombe"
                       className="mb-2 block text-sm font-medium text-slate-700"
                     >
@@ -589,9 +589,8 @@ export default async function NovaPostavkaPage({
                   privzetiOkvirIds={izbraniOkvirji}
                   privzetiPaspartuIds={izbraniPaspartuji}
                   privzetiNaciniPaspartuja={izbraniNaciniPaspartuja}
-                  privzeteMerePaspartuja={
-                    urejanaPostavka?.mere_paspartuja ?? ""
-                  }
+                  privzeteMerePaspartuja={urejanaPostavka?.mere_paspartuja ?? ""}
+                  privzetoStekloId={urejanaPostavka?.postavka_steklo?.steklo_id ?? null}
                 />
               </section>
 
