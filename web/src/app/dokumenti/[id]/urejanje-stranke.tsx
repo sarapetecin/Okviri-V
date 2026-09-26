@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 
 import { useFormStatus } from "react-dom";
 
@@ -58,6 +58,32 @@ function IzbiraStranke({
 
     const skritoPoljeRef =
         useRef<HTMLInputElement>(null);
+    const izbiraRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!odprto) return;
+
+        function zapriObKlikaZunaj(dogodek: PointerEvent) {
+            if (
+                dogodek.target instanceof Node &&
+                !izbiraRef.current?.contains(dogodek.target)
+            ) {
+                setOdprto(false);
+            }
+        }
+
+        function zapriObEscape(dogodek: KeyboardEvent) {
+            if (dogodek.key === "Escape") setOdprto(false);
+        }
+
+        document.addEventListener("pointerdown", zapriObKlikaZunaj);
+        document.addEventListener("keydown", zapriObEscape);
+
+        return () => {
+            document.removeEventListener("pointerdown", zapriObKlikaZunaj);
+            document.removeEventListener("keydown", zapriObEscape);
+        };
+    }, [odprto]);
 
     const rezultati = useMemo(() => {
         const iskaniNiz = iskanje
@@ -101,7 +127,7 @@ function IzbiraStranke({
     }
 
     return (
-        <div className="relative">
+        <div ref={izbiraRef} className="relative">
             <label
                 htmlFor="iskanjeStranke"
                 className="mb-2 block text-sm font-medium text-slate-700"
@@ -123,6 +149,7 @@ function IzbiraStranke({
                 autoComplete="off"
                 disabled={pending}
                 onFocus={() => setOdprto(true)}
+                onClick={() => setOdprto(true)}
                 onChange={(dogodek) => {
                     setIskanje(
                         dogodek.currentTarget.value,
@@ -270,8 +297,14 @@ export function UrejanjeStranke({
                             name="telefonskaStevilka"
                             type="tel"
                             required
-                            maxLength={50}
+                            maxLength={11}
+                            inputMode="numeric"
                             autoComplete="tel"
+                            placeholder="031 361 043"
+                            onInput={(event) => {
+                                const stevilke = event.currentTarget.value.replace(/\D/g, "").slice(0, 9);
+                                event.currentTarget.value = stevilke.replace(/(\d{3})(?=\d)/g, "$1 ");
+                            }}
                             className={inputClassName}
                         />
                     </div>

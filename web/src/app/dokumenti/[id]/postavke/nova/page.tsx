@@ -733,72 +733,31 @@ export default async function NovaPostavkaPage({
               </section>
             </div>
 
-            <aside className="space-y-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900">
-                  Celotna postavka
-                </h3>
+            <button
+              type="submit"
+              className="mt-6 w-full rounded-lg bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-700"
+            >
+              {urejanaPostavka
+                ? "Shrani spremembe"
+                : "Shrani celotno postavko"}
+            </button>
 
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Ob shranjevanju se bodo hkrati dodali osnovni podatki
-                  in vsi izbrani materiali.
-                </p>
-
-                <div className="mt-5 space-y-3 border-t border-slate-200 pt-5 text-sm">
-                  <div className="flex justify-between gap-3">
-                    <span className="text-slate-500">Dokument</span>
-                    <span className="font-medium text-slate-900">
-                      #{dokument.id}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between gap-3">
-                    <span className="text-slate-500">Stranka</span>
-                    <span className="text-right font-medium text-slate-900">
-                      {dokument.stranka_naziv}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between gap-3">
-                    <span className="text-slate-500">Izračun</span>
-                    <span className="text-right font-medium text-slate-900">
-                      Samodejen
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="mt-6 w-full rounded-lg bg-slate-900 px-5 py-3 font-semibold text-white transition hover:bg-slate-700"
-                >
-                  {urejanaPostavka
-                    ? "Shrani spremembe"
-                    : "Shrani celotno postavko"}
-                </button>
-
-                {vdelano && urejanaPostavka && (
-                  <Link
-                    href={`/dokumenti/${dokument.id}#nova-postavka`}
-                    className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Prekliči urejanje
-                  </Link>
-                )}
-                {!vdelano && (
-                  <Link
-                    href={`/dokumenti/${dokument.id}`}
-                    className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Prekliči
-                  </Link>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm leading-6 text-blue-800">
-                Cena postavke in skupni znesek dokumenta se izračunata
-                po shranjevanju.
-              </div>
-            </aside>
+            {vdelano && urejanaPostavka && (
+              <Link
+                href={`/dokumenti/${dokument.id}#nova-postavka`}
+                className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Prekliči urejanje
+              </Link>
+            )}
+            {!vdelano && (
+              <Link
+                href={`/dokumenti/${dokument.id}`}
+                className="mt-3 block w-full rounded-lg border border-slate-300 bg-white px-5 py-3 text-center font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                Prekliči
+              </Link>
+            )}
           </FormularZEnterNavigacijo>
         )}
       </section>

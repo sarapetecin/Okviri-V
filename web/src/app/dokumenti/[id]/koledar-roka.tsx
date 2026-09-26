@@ -3,6 +3,8 @@
 import { sl } from "date-fns/locale";
 import { format, parseISO } from "date-fns";
 import {
+    useEffect,
+    useRef,
     useState,
     type CSSProperties,
 } from "react"; import { DayPicker } from "react-day-picker";
@@ -70,6 +72,32 @@ export function KoledarRoka({
 
     const [odprto, setOdprto] =
         useState(false);
+    const koledarRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!odprto) return;
+
+        function zapriObKlikaZunaj(dogodek: PointerEvent) {
+            if (
+                dogodek.target instanceof Node &&
+                !koledarRef.current?.contains(dogodek.target)
+            ) {
+                setOdprto(false);
+            }
+        }
+
+        function zapriObEscape(dogodek: KeyboardEvent) {
+            if (dogodek.key === "Escape") setOdprto(false);
+        }
+
+        document.addEventListener("pointerdown", zapriObKlikaZunaj);
+        document.addEventListener("keydown", zapriObEscape);
+
+        return () => {
+            document.removeEventListener("pointerdown", zapriObKlikaZunaj);
+            document.removeEventListener("keydown", zapriObEscape);
+        };
+    }, [odprto]);
 
     const datumZaBazo = izbraniDatum
         ? format(izbraniDatum, "yyyy-MM-dd")
@@ -83,12 +111,12 @@ export function KoledarRoka({
         trenutnoStevilo + steviloSlikNarocila;
 
     return (
-        <div className="relative">
+        <div ref={koledarRef} className="relative">
             <button
                 type="button"
-                onClick={() => {
-                    setOdprto((trenutno) => !trenutno);
-                }}
+                aria-expanded={odprto}
+                aria-label={odprto ? "Zapri koledar" : "Izberi datum roka izdelave"}
+                onClick={() => setOdprto((trenutno) => !trenutno)}
                 className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 hover:bg-slate-50"
             >
                 {izbraniDatum

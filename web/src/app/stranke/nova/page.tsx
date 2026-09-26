@@ -105,12 +105,18 @@ export default async function NovaStrankaPage({
                   Telefonska številka
                 </label>
                 <input
-                  id="telefonskaStevilka"
+                  id="telefonNoveStranke"
                   name="telefonskaStevilka"
                   type="tel"
                   required
-                  maxLength={50}
+                  maxLength={11}
+                  inputMode="numeric"
                   autoComplete="tel"
+                  placeholder="031 361 043"
+                  onInput={(event) => {
+                    const stevilke = event.currentTarget.value.replace(/\D/g, "").slice(0, 9);
+                    event.currentTarget.value = stevilke.replace(/(\d{3})(?=\d)/g, "$1 ");
+                  }}
                   className={inputClassName}
                 />
               </div>

@@ -7,7 +7,6 @@ import type { Database } from "@/types/database.types";
 import {
   spremeniPlacano,
   spremeniPopust,
-  spremeniStatusDokumenta,
   spremeniStranko,
   ustvariInNastaviStranko,
   spremeniSalonPrevzema,
@@ -15,7 +14,6 @@ import {
 } from "./actions";
 
 import { PlaciloInPopust } from "./placano-checkbox";
-import { GumbiStatusa } from "./gumbi-statusa";
 import { izbrisiPostavko } from "./brisanje-postavke";
 import { GumbIzbrisiPostavko } from "./gumb-izbrisi-postavko";
 
@@ -24,6 +22,7 @@ import NovaPostavkaPage from "./postavke/nova/page";
 import { UrejanjeStranke } from "./urejanje-stranke";
 
 import { KoledarRoka } from "./koledar-roka";
+import { GumbNatisniNeposredno } from "./natisni/gumb-natisni-neposredno";
 
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
@@ -90,7 +89,6 @@ export default async function DokumentPage({
   }
 
   const jePartner = uporabniskaVloga === "partner";
-  const jeAdministrator = uporabniskaVloga === "administrator";
 
   const { data: dokument, error: napakaDokumenta } = await supabase
     .from("narocilo")
@@ -178,17 +176,6 @@ export default async function DokumentPage({
     .eq("narocilo_id", dokumentId)
     .order("vrstni_red");
 
-  const zgodovinaStatusov = jeAdministrator
-    ? (
-      await supabase
-        .from("zgodovina_statusa_narocila")
-        .select(
-          "id, prejsnji_status, novi_status, ustvarjeno_at",
-        )
-        .eq("narocilo_id", dokumentId)
-        .order("ustvarjeno_at", { ascending: false })
-    ).data
-    : [];
   const { data: stranke } = !jePartner
     ? await supabase
       .from("stranka")
@@ -262,12 +249,7 @@ export default async function DokumentPage({
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href={`/dokumenti/${dokument.id}/natisni`}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-700"
-            >
-              Natisni dokument
-            </Link>
+            <GumbNatisniNeposredno dokumentId={dokument.id}></GumbNatisniNeposredno>
 
             <Link
               href={
@@ -411,82 +393,6 @@ export default async function DokumentPage({
             )}
           </article>
         </div>
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">
-                Potek dokumenta
-              </h2>
-
-              <p className="mt-1 text-sm text-slate-600">
-                Vrsta dokumenta:{" "}
-                <span className="font-semibold text-slate-900">
-                  {dokument.vrsta === "ponudba"
-                    ? "Ponudba"
-                    : "Naročilo"}
-                </span>
-              </p>
-
-              {dokument.vrsta === "ponudba" && (
-                <p className="mt-1 text-sm text-slate-500">
-                  Ob potrditvi se ponudba samodejno spremeni v naročilo.
-                </p>
-              )}
-            </div>
-            {!jePartner && (
-              <GumbiStatusa
-                status={dokument.status}
-                vrsta={dokument.vrsta}
-                jePartner={jePartner}
-                action={spremeniStatusDokumenta.bind(
-                  null,
-                  dokument.id,
-                )}
-              />
-            )}
-          </div>
-        </section>
-
-        {jeAdministrator && (
-          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-slate-900">
-              Zgodovina statusov
-            </h2>
-
-            {!zgodovinaStatusov ||
-              zgodovinaStatusov.length === 0 ? (
-              <p className="mt-4 text-sm text-slate-500">
-                Status dokumenta še ni bil spremenjen.
-              </p>
-            ) : (
-              <div className="mt-5 space-y-4">
-                {zgodovinaStatusov.map((zapis) => (
-                  <div
-                    key={zapis.id}
-                    className="flex flex-col justify-between gap-2 border-b border-slate-100 pb-4 last:border-0 last:pb-0 sm:flex-row sm:items-center"
-                  >
-                    <p className="text-sm text-slate-700">
-                      {zapis.prejsnji_status
-                        ? naziviStatusov[zapis.prejsnji_status]
-                        : "Začetek"}
-                      {" → "}
-                      <span className="font-semibold text-slate-900">
-                        {naziviStatusov[zapis.novi_status]}
-                      </span>
-                    </p>
-
-                    <time className="text-xs text-slate-500">
-                      {new Intl.DateTimeFormat("sl-SI", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      }).format(new Date(zapis.ustvarjeno_at))}
-                    </time>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        )}
 
         {lahkoUrejaPostavke && (
           <section

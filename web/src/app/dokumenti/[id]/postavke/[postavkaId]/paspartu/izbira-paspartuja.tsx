@@ -68,11 +68,13 @@ export function IzbiraPaspartuja({
       (paspartu) => paspartu.id === izbraniPaspartuId,
     ) ?? null;
 
+  const povrsina = dolzina * sirina;
+  const faktor = povrsina <= 1200 ? 0.277777778
+    : povrsina <= 2400 ? 0.388888889
+      : povrsina <= 4800 ? 0.666666667
+        : povrsina <= 9600 ? 1 : 1.388889;
   const izracunajCeno = (prodajnaCena: number) =>
-    (dolzina / 100) *
-    (sirina / 100) *
-    prodajnaCena *
-    kolicina;
+    Math.round((prodajnaCena * faktor * kolicina + Number.EPSILON) * 100) / 100;
 
   return (
     <div className="space-y-5">
@@ -119,11 +121,10 @@ export function IzbiraPaspartuja({
                 key={paspartu.id}
                 type="button"
                 onClick={() => setIzbraniPaspartuId(paspartu.id)}
-                className={`w-full rounded-lg border p-4 text-left transition ${
-                  jeIzbran
+                className={`w-full rounded-lg border p-4 text-left transition ${jeIzbran
                     ? "border-slate-900 bg-slate-100 ring-2 ring-slate-200"
                     : "border-slate-200 bg-white hover:border-slate-400"
-                }`}
+                  }`}
               >
                 <div className="flex flex-col justify-between gap-2 sm:flex-row">
                   <div>
@@ -145,7 +146,7 @@ export function IzbiraPaspartuja({
                     </p>
 
                     <p className="text-slate-600">
-                      {oblikujZnesek(paspartu.prodajna_cena)} / m²
+                      Osnovna cena: {oblikujZnesek(paspartu.prodajna_cena)}
                     </p>
                   </div>
                 </div>
