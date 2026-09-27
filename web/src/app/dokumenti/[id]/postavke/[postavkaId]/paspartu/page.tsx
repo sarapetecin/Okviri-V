@@ -73,7 +73,6 @@ export default async function IzbiraPaspartujaPage({
           id,
           oznaka,
           naziv,
-          barva,
           dodatni_opis,
           prodajna_cena,
           dobavitelj!paspartu_dobavitelj_id_fkey(naziv)

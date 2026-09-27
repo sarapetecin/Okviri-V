@@ -14,21 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      barva: {
-        Row: {
-          id: number
-          naziv: string
-        }
-        Insert: {
-          id?: number
-          naziv: string
-        }
-        Update: {
-          id?: number
-          naziv?: string
-        }
-        Relationships: []
-      }
       dobavitelj: {
         Row: {
           email: string | null
@@ -246,7 +231,6 @@ export type Database = {
       }
       okvir: {
         Row: {
-          barva_id: number | null
           dobavitelj_id: number | null
           id: number
           na_prodaj: boolean
@@ -258,7 +242,6 @@ export type Database = {
           vzorec: string
         }
         Insert: {
-          barva_id?: number | null
           dobavitelj_id?: number | null
           id?: number
           na_prodaj?: boolean
@@ -270,7 +253,6 @@ export type Database = {
           vzorec: string
         }
         Update: {
-          barva_id?: number | null
           dobavitelj_id?: number | null
           id?: number
           na_prodaj?: boolean
@@ -283,13 +265,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "okvir_barva_id_fkey"
-            columns: ["barva_id"]
-            isOneToOne: false
-            referencedRelation: "barva"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "okvir_dobavitelj_id_fkey"
             columns: ["dobavitelj_id"]
             isOneToOne: false
@@ -300,7 +275,6 @@ export type Database = {
       }
       paspartu: {
         Row: {
-          barva: string | null
           dobavitelj_id: number | null
           dodatni_opis: string | null
           id: number
@@ -312,7 +286,6 @@ export type Database = {
           ustvarjeno_at: string
         }
         Insert: {
-          barva?: string | null
           dobavitelj_id?: number | null
           dodatni_opis?: string | null
           id?: number
@@ -324,7 +297,6 @@ export type Database = {
           ustvarjeno_at?: string
         }
         Update: {
-          barva?: string | null
           dobavitelj_id?: number | null
           dodatni_opis?: string | null
           id?: number
@@ -464,7 +436,6 @@ export type Database = {
       }
       postavka_okvir: {
         Row: {
-          barva: string | null
           cena_okvirja: number
           id: number
           okvir_id: number | null
@@ -474,7 +445,6 @@ export type Database = {
           vzorec: string
         }
         Insert: {
-          barva?: string | null
           cena_okvirja?: number
           id?: number
           okvir_id?: number | null
@@ -484,7 +454,6 @@ export type Database = {
           vzorec: string
         }
         Update: {
-          barva?: string | null
           cena_okvirja?: number
           id?: number
           okvir_id?: number | null
@@ -519,7 +488,6 @@ export type Database = {
       }
       postavka_paspartu: {
         Row: {
-          barva: string | null
           cena_paspartuja: number
           dodatni_opis: string | null
           id: number
@@ -531,7 +499,6 @@ export type Database = {
           vrstni_red: number
         }
         Insert: {
-          barva?: string | null
           cena_paspartuja?: number
           dodatni_opis?: string | null
           id?: number
@@ -543,7 +510,6 @@ export type Database = {
           vrstni_red?: number
         }
         Update: {
-          barva?: string | null
           cena_paspartuja?: number
           dodatni_opis?: string | null
           id?: number
@@ -840,8 +806,8 @@ export type Database = {
           novi_status: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           opomba: string | null
           prejsnji_status:
-            | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
-            | null
+          | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
+          | null
           spremenil_uporabnik_id: number | null
           ustvarjeno_at: string
         }
@@ -851,8 +817,8 @@ export type Database = {
           novi_status: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           opomba?: string | null
           prejsnji_status?:
-            | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
-            | null
+          | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
+          | null
           spremenil_uporabnik_id?: number | null
           ustvarjeno_at?: string
         }
@@ -862,8 +828,8 @@ export type Database = {
           novi_status?: Database["public"]["Enums"]["status_prodajnega_dokumenta"]
           opomba?: string | null
           prejsnji_status?:
-            | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
-            | null
+          | Database["public"]["Enums"]["status_prodajnega_dokumenta"]
+          | null
           spremenil_uporabnik_id?: number | null
           ustvarjeno_at?: string
         }
@@ -912,7 +878,6 @@ export type Database = {
       }
       partner_katalog_okvirjev: {
         Row: {
-          barva: string | null
           id: number | null
           oznaka: string | null
           prodajna_cena: number | null
@@ -923,7 +888,6 @@ export type Database = {
       }
       partner_katalog_paspartujev: {
         Row: {
-          barva: string | null
           dodatni_opis: string | null
           id: number | null
           naziv: string | null
@@ -931,7 +895,6 @@ export type Database = {
           prodajna_cena: number | null
         }
         Insert: {
-          barva?: string | null
           dodatni_opis?: string | null
           id?: number | null
           naziv?: string | null
@@ -939,7 +902,6 @@ export type Database = {
           prodajna_cena?: number | null
         }
         Update: {
-          barva?: string | null
           dodatni_opis?: string | null
           id?: number | null
           naziv?: string | null
@@ -1102,77 +1064,77 @@ export type Database = {
         Returns: undefined
       }
       partner_uredi_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_postavka_id: number
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_postavka_id: number
+          p_sirina: number
+          p_steklo_id?: number
+          p_vrsta_podokvirja: string
+        }
+        Returns: number
+      }
       partner_ustvari_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_narocilo_id: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_narocilo_id: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_sirina: number
+          p_steklo_id?: number
+          p_vrsta_podokvirja: string
+        }
+        Returns: number
+      }
       spremeni_status_dokumenta: {
         Args: {
           p_narocilo_id: number
@@ -1183,89 +1145,89 @@ export type Database = {
       trenutna_uporabniska_vloga: { Args: never; Returns: string }
       trenutni_uporabnik_id: { Args: never; Returns: number }
       uredi_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_postavka_id: number
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_postavka_id: number
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_postavka_id: number
+          p_sirina: number
+          p_steklo_id?: number
+          p_vrsta_podokvirja: string
+        }
+        Returns: number
+      }
       ustvari_celotno_postavko:
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-            }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_dodaj_podokvir?: boolean
-              p_dodatno_delo_ids?: number[]
-              p_dolzina: number
-              p_kolicina: number
-              p_narocilo_id: number
-              p_ogledalo?: boolean
-              p_okvir_ids?: number[]
-              p_opis_slike?: string
-              p_opombe?: string
-              p_paspartu_ids?: number[]
-              p_sirina: number
-              p_steklo_id?: number
-              p_vrsta_podokvirja: string
-            }
-            Returns: number
-          }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_narocilo_id: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_sirina: number
+          p_steklo_id?: number
+        }
+        Returns: number
+      }
+      | {
+        Args: {
+          p_dodaj_podokvir?: boolean
+          p_dodatno_delo_ids?: number[]
+          p_dolzina: number
+          p_kolicina: number
+          p_narocilo_id: number
+          p_ogledalo?: boolean
+          p_okvir_ids?: number[]
+          p_opis_slike?: string
+          p_opombe?: string
+          p_paspartu_ids?: number[]
+          p_sirina: number
+          p_steklo_id?: number
+          p_vrsta_podokvirja: string
+        }
+        Returns: number
+      }
       zakljuci_prvo_spremembo_gesla: { Args: never; Returns: undefined }
     }
     Enums: {
       status_prodajnega_dokumenta:
-        | "osnutek"
-        | "poslano_v_pregled"
-        | "zavrnjeno"
-        | "potrjeno"
-        | "v_izdelavi"
-        | "dokoncano"
-        | "rocno_zaprto"
-        | "preklicano"
+      | "osnutek"
+      | "poslano_v_pregled"
+      | "zavrnjeno"
+      | "potrjeno"
+      | "v_izdelavi"
+      | "dokoncano"
+      | "rocno_zaprto"
+      | "preklicano"
       status_sms_sporocila: "v_cakanju" | "poslano" | "napaka" | "preklicano"
       uporabniska_pravica: "administrator" | "zaposleni" | "partner"
       vrsta_prodajnega_dokumenta: "ponudba" | "narocilo"
@@ -1282,37 +1244,37 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-    ? R
-    : never
+  ? R
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -1322,22 +1284,22 @@ export type TablesInsert<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
+    Insert: infer I
+  }
+  ? I
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -1347,22 +1309,22 @@ export type TablesUpdate<
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
+    Update: infer U
+  }
+  ? U
+  : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -1373,13 +1335,13 @@ export type Enums<
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -1390,8 +1352,8 @@ export type CompositeTypes<
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
 
 export const Constants = {
   public: {

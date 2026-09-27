@@ -23,9 +23,7 @@ export default async function NovOkvirPage({
         redirect("/prijava");
     }
 
-    const [rezultatBarv, rezultatDobaviteljev] = await Promise.all([
-        supabase.from("barva").select("id, naziv").order("naziv"),
-
+    const [rezultatDobaviteljev] = await Promise.all([
         supabase
             .from("dobavitelj")
             .select("id, naziv")
@@ -91,12 +89,12 @@ export default async function NovOkvirPage({
                         </div>
                     )}
 
-                    {(rezultatBarv.error || rezultatDobaviteljev.error) && (
+                    {(rezultatDobaviteljev.error) && (
                         <div
                             role="alert"
                             className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
                         >
-                            Barv ali dobaviteljev ni bilo mogoče v celoti naložiti.
+                            Dobaviteljev ni bilo mogoče v celoti naložiti.
                         </div>
                     )}
 
@@ -134,30 +132,6 @@ export default async function NovOkvirPage({
                                 placeholder="Na primer: 148/192"
                                 className={inputClassName}
                             />
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="barvaId"
-                                className="mb-2 block text-sm font-medium text-slate-700"
-                            >
-                                Barva
-                            </label>
-
-                            <select
-                                id="barvaId"
-                                name="barvaId"
-                                defaultValue=""
-                                className={inputClassName}
-                            >
-                                <option value="">Brez izbrane barve</option>
-
-                                {(rezultatBarv.data ?? []).map((barva) => (
-                                    <option key={barva.id} value={barva.id}>
-                                        {barva.naziv}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
 
                         <div>

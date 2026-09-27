@@ -279,19 +279,6 @@ export default async function ZacetnaStran() {
                   Kontakti dobaviteljev.
                 </p>
               </Link>
-
-              <Link
-                href="/materiali/barve"
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <h3 className="font-bold text-slate-900">
-                  Barve
-                </h3>
-
-                <p className="mt-1 text-sm text-slate-600">
-                  Barve za katalog okvirjev.
-                </p>
-              </Link>
             </div>
 
             <Link

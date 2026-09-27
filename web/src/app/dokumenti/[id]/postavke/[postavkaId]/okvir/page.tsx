@@ -74,7 +74,6 @@ export default async function IzbiraOkvirjaPage({
         vzorec,
         sirina,
         prodajna_cena,
-        barva!okvir_barva_id_fkey(naziv),
         dobavitelj!okvir_dobavitelj_id_fkey(naziv)
       `,
     )

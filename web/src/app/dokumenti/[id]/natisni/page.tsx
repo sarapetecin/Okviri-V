@@ -80,13 +80,11 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
         postavka_okvir (
           id,
           vzorec,
-          barva,
           vrstni_red
         ),
         postavka_paspartu (
           id,
           oznaka,
-          barva,
           dodatni_opis,
           nacin_paspartu,
           vrstni_red
@@ -349,7 +347,6 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                         {okvirji.map((okvir) => (
                                                             <p key={okvir.id}>
                                                                 {okvir.vzorec}
-                                                                {okvir.barva ? ` ${okvir.barva}` : ""}
                                                             </p>
                                                         ))}
                                                     </div>
@@ -382,7 +379,6 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                                 </span>
                                                                 {[
                                                                     paspartu.oznaka,
-                                                                    paspartu.barva,
                                                                 ]
                                                                     .filter(Boolean)
                                                                     .join(" – ")}

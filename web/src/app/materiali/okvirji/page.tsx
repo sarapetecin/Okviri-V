@@ -71,9 +71,6 @@ export default async function OkvirjiPage({
         prodajna_cena,
         nabavna_cena,
         na_prodaj,
-        barva:barva_id (
-          naziv
-        ),
         dobavitelj:dobavitelj_id (
           naziv
         )
@@ -183,7 +180,7 @@ export default async function OkvirjiPage({
                         name="iskanje"
                         type="search"
                         defaultValue={iskanje}
-                        placeholder="Poišči po vzorcu, oznaki ali barvi"
+                        placeholder="Poišči po vzorcu ali oznaki"
                         className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200"
                     />
 
@@ -228,9 +225,6 @@ export default async function OkvirjiPage({
                                                 Vzorec
                                             </th>
                                             <th className="px-4 py-3 text-sm font-semibold text-slate-700">
-                                                Barva
-                                            </th>
-                                            <th className="px-4 py-3 text-sm font-semibold text-slate-700">
                                                 Širina
                                             </th>
                                             <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">
@@ -264,10 +258,6 @@ export default async function OkvirjiPage({
                                                             {okvir.oznaka}
                                                         </p>
                                                     )}
-                                                </td>
-
-                                                <td className="px-4 py-3 text-sm text-slate-700">
-                                                    {okvir.barva?.naziv ?? "—"}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-sm text-slate-700">

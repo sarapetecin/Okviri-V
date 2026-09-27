@@ -37,7 +37,6 @@ export default async function UrediOkvirPage({
 
     const [
         rezultatOkvirja,
-        rezultatBarv,
         rezultatDobaviteljev,
     ] = await Promise.all([
         supabase
@@ -47,7 +46,6 @@ export default async function UrediOkvirPage({
           id,
           vzorec,
           oznaka,
-          barva_id,
           dobavitelj_id,
           sirina,
           prodajna_cena,
@@ -57,8 +55,6 @@ export default async function UrediOkvirPage({
             )
             .eq("id", okvirId)
             .maybeSingle(),
-
-        supabase.from("barva").select("id, naziv").order("naziv"),
 
         supabase
             .from("dobavitelj")
@@ -132,15 +128,6 @@ export default async function UrediOkvirPage({
                         </div>
                     )}
 
-                    {(rezultatBarv.error || rezultatDobaviteljev.error) && (
-                        <div
-                            role="alert"
-                            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
-                        >
-                            Barv ali dobaviteljev ni bilo mogoče v celoti naložiti.
-                        </div>
-                    )}
-
                     <div className="grid gap-6 sm:grid-cols-2">
                         <div className="sm:col-span-2">
                             <label
@@ -177,30 +164,6 @@ export default async function UrediOkvirPage({
                                 className={inputClassName}
                                 defaultValue={okvir.oznaka ?? ""}
                             />
-                        </div>
-
-                        <div>
-                            <label
-                                htmlFor="barvaId"
-                                className="mb-2 block text-sm font-medium text-slate-700"
-                            >
-                                Barva
-                            </label>
-
-                            <select
-                                id="barvaId"
-                                name="barvaId"
-                                defaultValue={okvir.barva_id ?? ""}
-                                className={inputClassName}
-                            >
-                                <option value="">Brez izbrane barve</option>
-
-                                {(rezultatBarv.data ?? []).map((barva) => (
-                                    <option key={barva.id} value={barva.id}>
-                                        {barva.naziv}
-                                    </option>
-                                ))}
-                            </select>
                         </div>
 
                         <div>

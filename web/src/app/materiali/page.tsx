@@ -7,13 +7,13 @@ const kategorije = [
   {
     kljuc: "okvirji",
     naziv: "Okvirji",
-    opis: "Vzorec, barva, širina, cene in dobavitelj.",
+    opis: "Vzorec, širina, cene in dobavitelj.",
     href: "/materiali/okvirji",
   },
   {
     kljuc: "paspartuji",
     naziv: "Paspartuji",
-    opis: "Oznaka, naziv, barva, opis in cena na m².",
+    opis: "Oznaka, naziv, opis in cena na m².",
     href: "/materiali/paspartuji",
   },
   {
@@ -40,12 +40,6 @@ const kategorije = [
     opis: "Kontakti in podatki dobaviteljev.",
     href: "/materiali/dobavitelji",
   },
-  {
-    kljuc: "barve",
-    naziv: "Barve",
-    opis: "Seznam barv za okvirje.",
-    href: "/materiali/barve",
-  },
 ] as const;
 
 export default async function MaterialiPage() {
@@ -65,7 +59,6 @@ export default async function MaterialiPage() {
     rezultatPodokvirjev,
     rezultatDodatnihDel,
     rezultatDobaviteljev,
-    rezultatBarv,
   ] = await Promise.all([
     supabase
       .from("okvir")
@@ -90,10 +83,6 @@ export default async function MaterialiPage() {
     supabase
       .from("dobavitelj")
       .select("*", { count: "exact", head: true }),
-
-    supabase
-      .from("barva")
-      .select("*", { count: "exact", head: true }),
   ]);
 
   const stevila: Record<(typeof kategorije)[number]["kljuc"], number> = {
@@ -103,7 +92,6 @@ export default async function MaterialiPage() {
     podokvirji: rezultatPodokvirjev.count ?? 0,
     dodatnaDela: rezultatDodatnihDel.count ?? 0,
     dobavitelji: rezultatDobaviteljev.count ?? 0,
-    barve: rezultatBarv.count ?? 0,
   };
 
   const napaka =
@@ -112,8 +100,7 @@ export default async function MaterialiPage() {
     rezultatStekel.error ||
     rezultatPodokvirjev.error ||
     rezultatDodatnihDel.error ||
-    rezultatDobaviteljev.error ||
-    rezultatBarv.error;
+    rezultatDobaviteljev.error;
 
   return (
     <main className="min-h-screen bg-slate-100">

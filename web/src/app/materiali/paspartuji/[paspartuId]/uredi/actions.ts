@@ -13,7 +13,6 @@ const urediPaspartuSchema = z.object({
     paspartuId: z.coerce.number().int().positive(),
     naziv: z.string().trim().min(1, "Naziv je obvezen.").max(200),
     oznaka: z.string().trim().max(100).transform((v) => v || null),
-    barva: z.string().trim().max(100).transform((v) => v || null),
     dodatniOpis: z.string().trim().max(500).transform((v) => v || null),
 
     dobaviteljId: z.preprocess(
@@ -47,7 +46,6 @@ export async function urediPaspartu(
         paspartuId,
         naziv: formData.get("naziv"),
         oznaka: formData.get("oznaka"),
-        barva: formData.get("barva"),
         dodatniOpis: formData.get("dodatniOpis"),
         dobaviteljId: formData.get("dobaviteljId"),
         prodajnaCena: formData.get("prodajnaCena"),
@@ -66,7 +64,6 @@ export async function urediPaspartu(
         .update({
             naziv: rezultat.data.naziv,
             oznaka: rezultat.data.oznaka,
-            barva: rezultat.data.barva,
             dodatni_opis: rezultat.data.dodatniOpis,
             dobavitelj_id: rezultat.data.dobaviteljId,
             prodajna_cena: rezultat.data.prodajnaCena,

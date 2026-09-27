@@ -130,7 +130,6 @@ export default async function DokumentPage({
     postavka_okvir (
       id,
       vzorec,
-      barva,
       sirina_okvirja,
       cena_okvirja,
       vrstni_red
@@ -144,7 +143,6 @@ export default async function DokumentPage({
     postavka_paspartu (
       id,
       oznaka,
-      barva,
       dodatni_opis,
       cena_paspartuja,
       nacin_paspartu,
@@ -556,9 +554,6 @@ export default async function DokumentPage({
                               {okvirji.map((okvir) => (
                                 <p key={okvir.id}>
                                   {okvir.vzorec}
-                                  {okvir.barva
-                                    ? ` – ${okvir.barva}`
-                                    : ""}
                                 </p>
                               ))}
 
@@ -597,7 +592,6 @@ export default async function DokumentPage({
 
                                   {[
                                     paspartu.oznaka,
-                                    paspartu.barva,
                                   ]
                                     .filter(Boolean)
                                     .join(" – ")}

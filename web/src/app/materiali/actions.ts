@@ -13,7 +13,6 @@ const vrstaMaterialaSchema = z.enum([
     "podokvir",
     "dodatno_delo",
     "dobavitelj",
-    "barva",
 ]);
 
 export type VrstaMateriala = z.infer<
@@ -27,7 +26,6 @@ const potiKatalogov: Record<VrstaMateriala, string> = {
     podokvir: "/materiali/podokvirji",
     dodatno_delo: "/materiali/dodatna-dela",
     dobavitelj: "/materiali/dobavitelji",
-    barva: "/materiali/barve",
 };
 
 export async function izbrisiMaterial(

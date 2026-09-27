@@ -31,7 +31,6 @@ const urediOkvirSchema = z.object({
     okvirId: z.number().int().positive(),
     vzorec: z.string().trim().min(1),
     oznaka: opcijskoBesedilo,
-    barvaId: opcijskiId,
     dobaviteljId: opcijskiId,
 
     sirina: z.preprocess(
@@ -64,7 +63,6 @@ export async function urediOkvir(
         okvirId,
         vzorec: formData.get("vzorec"),
         oznaka: formData.get("oznaka"),
-        barvaId: formData.get("barvaId"),
         dobaviteljId: formData.get("dobaviteljId"),
         sirina: formData.get("sirina"),
         prodajnaCena: formData.get("prodajnaCena"),
@@ -98,7 +96,6 @@ export async function urediOkvir(
         .update({
             vzorec: rezultat.data.vzorec,
             oznaka: rezultat.data.oznaka,
-            barva_id: rezultat.data.barvaId,
             dobavitelj_id: rezultat.data.dobaviteljId,
             sirina: rezultat.data.sirina,
             prodajna_cena: rezultat.data.prodajnaCena,

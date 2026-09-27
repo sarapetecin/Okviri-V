@@ -47,7 +47,6 @@ export default async function UrediPaspartuPage({
           id,
           naziv,
           oznaka,
-          barva,
           dodatni_opis,
           dobavitelj_id,
           prodajna_cena,
@@ -142,19 +141,6 @@ export default async function UrediPaspartuPage({
                                 name="oznaka"
                                 maxLength={100}
                                 defaultValue={paspartu.oznaka ?? ""}
-                                className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
-                            />
-                        </label>
-
-                        <label className="block">
-                            <span className="text-sm font-semibold text-slate-700">
-                                Barva
-                            </span>
-
-                            <input
-                                name="barva"
-                                maxLength={100}
-                                defaultValue={paspartu.barva ?? ""}
                                 className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
                             />
                         </label>

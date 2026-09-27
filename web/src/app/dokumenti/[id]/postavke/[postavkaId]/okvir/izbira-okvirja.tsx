@@ -8,9 +8,6 @@ type Okvir = {
   vzorec: string;
   sirina: number | null;
   prodajna_cena: number;
-  barva: {
-    naziv: string;
-  } | null;
   dobavitelj: {
     naziv: string;
   } | null;
@@ -46,7 +43,6 @@ export function IzbiraOkvirja({
         const besedilo = [
           okvir.oznaka,
           okvir.vzorec,
-          okvir.barva?.naziv,
           okvir.dobavitelj?.naziv,
         ]
           .filter(Boolean)
@@ -82,7 +78,7 @@ export function IzbiraOkvirja({
           type="search"
           value={iskanje}
           onChange={(event) => setIskanje(event.target.value)}
-          placeholder="Išči po oznaki, vzorcu, barvi ali dobavitelju"
+          placeholder="Išči po oznaki, vzorcu ali dobavitelju"
           className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none transition focus:border-slate-700 focus:ring-2 focus:ring-slate-200"
         />
 
@@ -105,11 +101,10 @@ export function IzbiraOkvirja({
                 key={okvir.id}
                 type="button"
                 onClick={() => setIzbraniOkvirId(okvir.id)}
-                className={`w-full rounded-lg border p-4 text-left transition ${
-                  jeIzbran
+                className={`w-full rounded-lg border p-4 text-left transition ${jeIzbran
                     ? "border-slate-900 bg-slate-100 ring-2 ring-slate-200"
                     : "border-slate-200 bg-white hover:border-slate-400"
-                }`}
+                  }`}
               >
                 <div className="flex flex-col justify-between gap-2 sm:flex-row">
                   <div>
@@ -118,8 +113,6 @@ export function IzbiraOkvirja({
                     </p>
 
                     <p className="mt-1 text-sm text-slate-600">
-                      {okvir.barva?.naziv ?? "Brez barve"}
-                      {" · "}
                       {okvir.dobavitelj?.naziv ?? "Brez dobavitelja"}
                     </p>
                   </div>

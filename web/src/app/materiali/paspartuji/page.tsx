@@ -49,7 +49,6 @@ export default async function PaspartujiPage({
             id,
             oznaka,
             naziv,
-            barva,
             dodatni_opis,
             prodajna_cena,
             nabavna_cena,
@@ -63,7 +62,7 @@ export default async function PaspartujiPage({
     if (iskaniNiz) {
         const varnoIskanje = iskaniNiz.replaceAll(",", " ");
         poizvedba = poizvedba.or(
-            `oznaka.ilike.%${varnoIskanje}%,naziv.ilike.%${varnoIskanje}%,barva.ilike.%${varnoIskanje}%`,
+            `oznaka.ilike.%${varnoIskanje}%,naziv.ilike.%${varnoIskanje}%`,
         );
     }
 
@@ -123,7 +122,7 @@ export default async function PaspartujiPage({
                 )}
 
                 <form className="mb-6 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">
-                    <input name="iskanje" type="search" defaultValue={iskaniNiz} placeholder="Poišči po oznaki, nazivu ali barvi" className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200" />
+                    <input name="iskanje" type="search" defaultValue={iskaniNiz} placeholder="Poišči po oznaki ali nazivu" className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-slate-700 focus:ring-2 focus:ring-slate-200" />
                     <button type="submit" className="rounded-lg bg-slate-900 px-5 py-2.5 font-semibold text-white">
                         Poišči
                     </button>
@@ -151,7 +150,6 @@ export default async function PaspartujiPage({
                                 <thead className="border-b border-slate-200 bg-slate-50">
                                     <tr>
                                         <th className="px-4 py-3 text-sm font-semibold text-slate-700">Oznaka in naziv</th>
-                                        <th className="px-4 py-3 text-sm font-semibold text-slate-700">Barva</th>
                                         <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Prodajna cena</th>
                                         <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Nabavna cena</th>
                                         <th className="px-4 py-3 text-sm font-semibold text-slate-700">Dobavitelj</th>
@@ -166,7 +164,6 @@ export default async function PaspartujiPage({
                                                 <p className="font-medium text-slate-900">{paspartu.oznaka ?? "Brez oznake"}</p>
                                                 <p className="mt-1 text-xs text-slate-500">{paspartu.naziv}</p>
                                             </td>
-                                            <td className="px-4 py-3 text-sm text-slate-700">{paspartu.barva ?? "—"}</td>
                                             <td className="px-4 py-3 text-right text-sm font-medium text-slate-900">{oblikujCeno(paspartu.prodajna_cena)}/m²</td>
                                             <td className="px-4 py-3 text-right text-sm text-slate-600">{oblikujCeno(paspartu.nabavna_cena)}</td>
                                             <td className="px-4 py-3 text-sm text-slate-700">{paspartu.dobavitelj?.naziv ?? "—"}</td>

@@ -75,25 +75,12 @@ export default async function NovaPostavkaPage({
     jePartner
       ? supabase
         .from("partner_katalog_okvirjev")
-        .select(
-          "id, vzorec, oznaka, sirina, prodajna_cena, barva",
-        )
+        .select("id, vzorec, oznaka, sirina, prodajna_cena")
         .order("vzorec")
         .range(od, doVkljucno)
       : supabase
         .from("okvir")
-        .select(
-          `
-            id,
-            vzorec,
-            oznaka,
-            sirina,
-            prodajna_cena,
-            barva:barva_id (
-              naziv
-            )
-          `,
-        )
+        .select("id, vzorec, oznaka, sirina, prodajna_cena")
         .eq("na_prodaj", true)
         .order("vzorec")
         .range(od, doVkljucno);
@@ -125,13 +112,13 @@ export default async function NovaPostavkaPage({
       ? supabase
         .from("partner_katalog_paspartujev")
         .select(
-          "id, oznaka, naziv, barva, dodatni_opis, prodajna_cena",
+          "id, oznaka, naziv, dodatni_opis, prodajna_cena",
         )
         .order("oznaka")
       : supabase
         .from("paspartu")
         .select(
-          "id, oznaka, naziv, barva, dodatni_opis, prodajna_cena",
+          "id, oznaka, naziv, dodatni_opis, prodajna_cena",
         )
         .eq("na_prodaj", true)
         .order("oznaka"),
