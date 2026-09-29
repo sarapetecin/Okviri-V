@@ -1,19 +1,22 @@
 "use client";
 
 import { sl } from "date-fns/locale";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfWeek, addDays } from "date-fns";
 import {
+    useCallback,
     useEffect,
     useRef,
     useState,
     type CSSProperties,
-} from "react"; import { DayPicker } from "react-day-picker";
+} from "react";
+import { DayPicker } from "react-day-picker";
 import { useFormStatus } from "react-dom";
 
 import "react-day-picker/style.css";
 
 type KoledarRokaProps = {
     trenutniRok: string | null;
+    datumSprejema: string;
     zasedenost: Record<string, number>;
     steviloSlikNarocila: number;
     action: (
@@ -59,6 +62,7 @@ function razredZasedenosti(stevilo: number) {
 
 export function KoledarRoka({
     trenutniRok,
+    datumSprejema,
     zasedenost,
     steviloSlikNarocila,
     action,
@@ -72,6 +76,7 @@ export function KoledarRoka({
 
     const [odprto, setOdprto] =
         useState(false);
+        
     const koledarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -103,8 +108,20 @@ export function KoledarRoka({
         ? format(izbraniDatum, "yyyy-MM-dd")
         : "";
 
-    const trenutnoStevilo = datumZaBazo
-        ? zasedenost[datumZaBazo] ?? 0
+    const kljucIzbranegaTedna = izbraniDatum
+        ? format(
+            addDays(
+                startOfWeek(izbraniDatum, {
+                    weekStartsOn: 1,
+                }),
+                3,
+            ),
+            "yyyy-MM-dd",
+        )
+        : "";
+
+    const trenutnoStevilo = kljucIzbranegaTedna
+        ? zasedenost[kljucIzbranegaTedna] ?? 0
         : 0;
 
     const skupnoPoShranitvi =
@@ -140,6 +157,9 @@ export function KoledarRoka({
                         selected={izbraniDatum}
                         onSelect={setIzbraniDatum}
                         weekStartsOn={1}
+                        disabled={{
+                            before: parseISO(datumSprejema),
+                        }}
                         modifiers={{
                             danes: new Date(),
                             cetrtek: (datum) =>
@@ -241,20 +261,18 @@ export function KoledarRoka({
                             }
 
                             if (skupnoPoShranitvi > 80) {
-                                const potrjeno =
-                                    window.confirm(
-                                        `Za ta datum je načrtovanih ${trenutnoStevilo} slik. ` +
-                                        `S tem naročilom jih bo ${skupnoPoShranitvi}. ` +
-                                        "Ali si prepričana, da želiš določiti ta rok?",
-                                    );
+                                const potrjeno = window.confirm(
+                                    `Za ta teden je načrtovanih ${trenutnoStevilo} slik. ` +
+                                    `S tem naročilom jih bo ${skupnoPoShranitvi}. ` +
+                                    "Ali si prepričana, da želiš določiti ta rok?",
+                                );
 
                                 if (!potrjeno) {
                                     dogodek.preventDefault();
                                     return;
                                 }
 
-                                const obrazec =
-                                    dogodek.currentTarget;
+                                const obrazec = dogodek.currentTarget;
 
                                 const potrditev =
                                     obrazec.elements.namedItem(
@@ -262,12 +280,15 @@ export function KoledarRoka({
                                     );
 
                                 if (
-                                    potrditev instanceof
-                                    HTMLInputElement
+                                    potrditev instanceof HTMLInputElement
                                 ) {
                                     potrditev.value = "da";
                                 }
                             }
+
+                            setTimeout(() => {
+                                setOdprto(false);
+                            }, 0);
                         }}
                     >
                         <input

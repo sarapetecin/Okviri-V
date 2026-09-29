@@ -192,81 +192,88 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                     </div>
                 )}
                 <section className="mt-2 grid grid-cols-[1fr_0.9fr_1fr] gap-3">
-                    <div>
-                        <p className="text-[12px] font-semibold uppercase tracking-wider text-slate-500">
-                            {nazivDokumenta === "PONUDBA" ? "ponudba" : "naročilo"} ŠT. {dokument.id}
-                        </p>
-                        <h1 className="mt-1 text-lg font-bold">
+                    <div className="min-w-0">
+                        <h1 className="text-lg font-bold leading-tight text-slate-900">
                             {dokument.stranka_naziv}
+                            {dokument.stranka_davcna_stevilka && (
+                                <span className="ml-2 text-sm font-medium text-slate-500">
+                                    DŠ: {dokument.stranka_davcna_stevilka}
+                                </span>
+                            )}
                         </h1>
+
                         {dokument.stranka_hisni_naslov && (
-                            <p className="mt-1 text-slate-600">
+                            <p className="mt-1 text-sm text-slate-600">
                                 {dokument.stranka_hisni_naslov}
                             </p>
                         )}
-                        <dl className="mt-2 grid max-w-sm grid-cols-[70px_1fr]">
-                            <dt className="mt-px bg-slate-100 px-1 py-1 font-bold">
-                                Tel. št.
-                            </dt>
-                            <dd className="mt-px px-3 py-2">
-                                {dokument.stranka_telefonska_stevilka ?? "—"}
-                            </dd>
-                        </dl>
+
+                        {(dokument.stranka_telefonska_stevilka ||
+                            dokument.stranka_email) && (
+                                <p className="mt-1 text-sm text-slate-600">
+                                    {dokument.stranka_telefonska_stevilka}
+
+                                    {dokument.stranka_telefonska_stevilka &&
+                                        dokument.stranka_email && (
+                                            <span className="mx-2 text-slate-300">•</span>
+                                        )}
+
+                                    {dokument.stranka_email}
+                                </p>
+                            )}
+
+                        <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                            {nazivDokumenta === "PONUDBA"
+                                ? "Ponudba"
+                                : "Naročilo"}{" "}
+                            št. {dokument.id}
+                        </p>
                     </div>
                     <div>
-                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1">
-                            <p className="bg-slate-100 px-1 py-1 text-lg font-bold">
+                        <div className="flex items-baseline gap-8">
+                            <p className="text-sm font-bold">
                                 Cena
                             </p>
-                            <p className="whitespace-nowrap px-1 text-[14px] font-bold">
+                            <p className="whitespace-nowrap text-sm font-bold">
                                 {oblikujZnesek(dokument.skupni_znesek)}
                             </p>
-                            <p className="mt-px bg-slate-100 px-1 py-1 font-bold">
+                        </div>
+
+                        <div className="flex items-baseline gap-8">
+                            <p className="text-xs text-slate-600">
                                 Vsi kosi
                             </p>
-                            <p className="mt-px px-3 py-2">{steviloKosov}</p>
-                            {dokument.stranka_davcna_stevilka && (
-                                <>
-                                    <p className="mt-px bg-slate-100 px-1 py-1 font-bold">
-                                        Davčna številka
-                                    </p>
-                                    <p className="mt-px px-3 py-2">
-                                        {dokument.stranka_davcna_stevilka}
-                                    </p>
-                                </>
-                            )}
-                            {dokument.popust > 0 && (
-                                <>
-                                    <p className="mt-px bg-slate-100 px-1 py-1 font-bold">
-                                        Popust
-                                    </p>
-                                    <p className="mt-px px-3 py-2">{dokument.popust} %</p>
-                                </>
-                            )}
-                            {dokument.stranka_email && (
-                                <>
-                                    <dt className="mt-px bg-slate-100 px-1 py-1 font-bold">
-                                        E-pošta
-                                    </dt>
-                                    <dd className="mt-px px-3 py-2">
-                                        {dokument.stranka_email}
-                                    </dd>
-                                </>
-                            )}
+                            <p className="whitespace-nowrap text-xs font-medium">
+                                {steviloKosov}
+                            </p>
                         </div>
+
+                        {dokument.popust > 0 && (
+                            <div className="flex items-baseline gap-8">
+                                <p className="text-xs text-slate-600">
+                                    Popust
+                                </p>
+                                <p className="whitespace-nowrap text-xs font-medium">
+                                    {dokument.popust} %
+                                </p>
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-1">
-                            <p className="bg-slate-100 px-1 py-1 text-[14px] font-bold">
+                    <div className="min-w-[160px]">
+                        <div className="flex items-baseline justify-between gap-6">
+                            <p className="text-sm font-bold">
                                 Rok izdelave
                             </p>
-                            <p className="whitespace-nowrap px-1 text-[14px] font-bold">
+                            <p className="whitespace-nowrap text-sm font-bold">
                                 {oblikujDatum(dokument.rok_izdelave)}
                             </p>
-                            <p className="mt-px bg-slate-100 px-1 py-1 font-bold">
+                        </div>
+
+                        <div className="mt-2 flex items-center justify-between gap-6">
+                            <p className="text-xs text-slate-600">
                                 Datum sprejema
                             </p>
-                            <p className="mt-px px-1 py-1">
+                            <p className="whitespace-nowrap text-xs font-medium">
                                 {oblikujDatum(dokument.datum_sprejema)}
                             </p>
                         </div>

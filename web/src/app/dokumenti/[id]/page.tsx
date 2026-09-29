@@ -24,6 +24,8 @@ import { UrejanjeStranke } from "./urejanje-stranke";
 import { KoledarRoka } from "./koledar-roka";
 import { GumbNatisniNeposredno } from "./natisni/gumb-natisni-neposredno";
 
+import { format, parseISO, startOfWeek, addDays } from "date-fns";
+
 type StatusDokumenta =
   Database["public"]["Enums"]["status_prodajnega_dokumenta"];
 
@@ -209,7 +211,7 @@ export default async function DokumentPage({
       )
     `)
       .eq("vrsta", "narocilo")
-      .neq("status", "preklicano")
+      .eq("status", "v_izdelavi")
       .not("rok_izdelave", "is", null)
       .neq("id", dokument.id);
 
@@ -220,6 +222,19 @@ export default async function DokumentPage({
       continue;
     }
 
+    const datumRoka = parseISO(narocilo.rok_izdelave);
+
+    const ponedeljek = startOfWeek(datumRoka, {
+      weekStartsOn: 1,
+    });
+
+    const cetrtek = addDays(ponedeljek, 3);
+
+    const kljucTedna = format(
+      cetrtek,
+      "yyyy-MM-dd",
+    );
+
     const steviloSlik =
       narocilo.narocilo_postavka.reduce(
         (vsota, postavka) =>
@@ -227,9 +242,9 @@ export default async function DokumentPage({
         0,
       );
 
-    zasedenost[narocilo.rok_izdelave] =
-      (zasedenost[narocilo.rok_izdelave] ??
-        0) + steviloSlik;
+    zasedenost[kljucTedna] =
+      (zasedenost[kljucTedna] ?? 0) +
+      steviloSlik;
   }
 
   return (
@@ -301,6 +316,7 @@ export default async function DokumentPage({
                   {!jePartner ? (
                     <KoledarRoka
                       trenutniRok={dokument.rok_izdelave}
+                      datumSprejema={dokument.datum_sprejema}
                       zasedenost={zasedenost}
                       steviloSlikNarocila={steviloSlikNarocila}
                       action={spremeniRokIzdelave.bind(
