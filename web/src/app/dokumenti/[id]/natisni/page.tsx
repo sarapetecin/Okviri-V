@@ -85,6 +85,7 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
         postavka_paspartu (
           id,
           oznaka,
+          barva,
           dodatni_opis,
           nacin_paspartu,
           vrstni_red
@@ -346,7 +347,7 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                 {oblikujMero(postavka.dolzina)}
                                             </td>
                                             <td className="border border-slate-300 px-1 py-1 align-top">
-                                                {oblikujMero(postavka.dolzina)}
+                                                {oblikujMero(postavka.sirina)}
                                             </td>
                                             {prikaziOkvir && <td className="border border-slate-300 px-1 py-1 align-top">
                                                 {okvirji.length > 0 ? (
@@ -386,6 +387,7 @@ export default async function NatisniPage({ params }: NatisniPageProps) {
                                                                 </span>
                                                                 {[
                                                                     paspartu.oznaka,
+                                                                    paspartu.barva,
                                                                 ]
                                                                     .filter(Boolean)
                                                                     .join(" – ")}

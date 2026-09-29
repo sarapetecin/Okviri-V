@@ -145,6 +145,7 @@ export default async function DokumentPage({
     postavka_paspartu (
       id,
       oznaka,
+      barva,
       dodatni_opis,
       cena_paspartuja,
       nacin_paspartu,
@@ -237,8 +238,10 @@ export default async function DokumentPage({
 
     const steviloSlik =
       narocilo.narocilo_postavka.reduce(
-        (vsota, postavka) =>
-          vsota + postavka.kolicina,
+        (
+          vsota: number,
+          postavka: { kolicina: number },
+        ) => vsota + postavka.kolicina,
         0,
       );
 
@@ -608,6 +611,7 @@ export default async function DokumentPage({
 
                                   {[
                                     paspartu.oznaka,
+                                    paspartu.barva,
                                   ]
                                     .filter(Boolean)
                                     .join(" – ")}

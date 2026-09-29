@@ -3,7 +3,6 @@
 import { sl } from "date-fns/locale";
 import { format, parseISO, startOfWeek, addDays } from "date-fns";
 import {
-    useCallback,
     useEffect,
     useRef,
     useState,
@@ -76,7 +75,7 @@ export function KoledarRoka({
 
     const [odprto, setOdprto] =
         useState(false);
-        
+
     const koledarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
