@@ -18,18 +18,34 @@ const praznoStevilo = (vrednost: unknown) => {
     return vrednost;
 };
 
-const novoStekloSchema = z.object({
-    oznaka: z
-        .string()
-        .trim()
-        .min(1, "Oznaka je obvezna.")
-        .max(100),
+const prazenNiz = (vrednost: unknown) => {
+    if (
+        vrednost === "" ||
+        vrednost === null ||
+        vrednost === undefined
+    ) {
+        return null;
+    }
 
+    return vrednost;
+};
+
+const novPaspartuSchema = z.object({
     naziv: z
         .string()
         .trim()
         .min(1, "Naziv je obvezen.")
         .max(200),
+
+    barva: z.preprocess(
+        prazenNiz,
+        z.string().trim().max(100).nullable(),
+    ),
+
+    dodatniOpis: z.preprocess(
+        prazenNiz,
+        z.string().trim().max(500).nullable(),
+    ),
 
     prodajnaCena: z.coerce
         .number()
@@ -51,7 +67,7 @@ const novoStekloSchema = z.object({
     naProdaj: z.boolean(),
 });
 
-export async function ustvariSteklo(formData: FormData) {
+export async function ustvariPaspartu(formData: FormData) {
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -61,9 +77,10 @@ export async function ustvariSteklo(formData: FormData) {
         redirect("/prijava");
     }
 
-    const rezultat = novoStekloSchema.safeParse({
-        oznaka: formData.get("oznaka"),
+    const rezultat = novPaspartuSchema.safeParse({
         naziv: formData.get("naziv"),
+        barva: formData.get("barva"),
+        dodatniOpis: formData.get("dodatniOpis"),
         prodajnaCena: formData.get("prodajnaCena"),
         nabavnaCena: formData.get("nabavnaCena"),
         dobaviteljId: formData.get("dobaviteljId"),
@@ -72,18 +89,19 @@ export async function ustvariSteklo(formData: FormData) {
 
     if (!rezultat.success) {
         console.error(
-            "Neveljavni podatki stekla:",
+            "Neveljavni podatki paspartuja:",
             rezultat.error.flatten(),
         );
 
         redirect(
-            "/materiali/stekla/novo?napaka=neveljavni-podatki",
+            "/materiali/paspartuji/novo?napaka=neveljavni-podatki",
         );
     }
 
-    const { error } = await supabase.from("steklo").insert({
-        oznaka: rezultat.data.oznaka,
+    const { error } = await supabase.from("paspartu").insert({
         naziv: rezultat.data.naziv,
+        barva: rezultat.data.barva,
+        dodatni_opis: rezultat.data.dodatniOpis,
         prodajna_cena: rezultat.data.prodajnaCena,
         nabavna_cena: rezultat.data.nabavnaCena,
         dobavitelj_id: rezultat.data.dobaviteljId,
@@ -91,15 +109,18 @@ export async function ustvariSteklo(formData: FormData) {
     });
 
     if (error) {
-        console.error("Napaka pri ustvarjanju stekla:", error);
+        console.error(
+            "Napaka pri ustvarjanju paspartuja:",
+            error,
+        );
 
         redirect(
-            "/materiali/stekla/novo?napaka=shranjevanje",
+            "/materiali/paspartuji/novo?napaka=shranjevanje",
         );
     }
 
     revalidatePath("/materiali");
-    revalidatePath("/materiali/stekla");
+    revalidatePath("/materiali/paspartuji");
 
-    redirect("/materiali/stekla");
-}  
+    redirect("/materiali/paspartuji");
+}

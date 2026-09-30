@@ -3,17 +3,17 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { ustvariSteklo } from "./actions";
+import { ustvariPaspartu } from "./actions";
 
-type NovoStekloPageProps = {
+type NovPaspartuPageProps = {
     searchParams: Promise<{
         napaka?: string;
     }>;
 };
 
-export default async function NovoStekloPage({
+export default async function NovPaspartuPage({
     searchParams,
-}: NovoStekloPageProps) {
+}: NovPaspartuPageProps) {
     const supabase = await createClient();
 
     const { data: podatkiZetona, error: napakaZetona } =
@@ -33,9 +33,9 @@ export default async function NovoStekloPage({
 
     const sporociloNapake =
         napaka === "neveljavni-podatki"
-            ? "Preveri oznako, naziv in vnesene cene."
+            ? "Preveri naziv, barvo in vnesene cene."
             : napaka === "shranjevanje"
-                ? "Stekla ni bilo mogoče shraniti."
+                ? "Paspartuja ni bilo mogoče shraniti."
                 : null;
 
     const inputClassName =
@@ -47,16 +47,16 @@ export default async function NovoStekloPage({
                 <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-wider text-slate-500">
-                            Materiali · Stekla
+                            Materiali · Paspartuji
                         </p>
 
                         <h1 className="text-xl font-bold text-slate-900">
-                            Novo steklo
+                            Nov paspartu
                         </h1>
                     </div>
 
                     <Link
-                        href="/materiali/stekla"
+                        href="/materiali/paspartuji"
                         className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                     >
                         Prekliči
@@ -66,16 +66,16 @@ export default async function NovoStekloPage({
 
             <section className="mx-auto max-w-4xl px-6 py-10">
                 <form
-                    action={ustvariSteklo}
+                    action={ustvariPaspartu}
                     className="rounded-2xl border border-slate-200 bg-white p-7 shadow-sm"
                 >
                     <div className="mb-7">
                         <h2 className="text-2xl font-bold text-slate-900">
-                            Podatki stekla
+                            Podatki paspartuja
                         </h2>
 
                         <p className="mt-2 text-sm text-slate-600">
-                            Prodajna cena je cena na kvadratni meter.
+                            Vnesi podatke novega paspartuja.
                         </p>
                     </div>
 
@@ -100,26 +100,6 @@ export default async function NovoStekloPage({
                     <div className="grid gap-6 sm:grid-cols-2">
                         <div>
                             <label
-                                htmlFor="oznaka"
-                                className="mb-2 block text-sm font-medium text-slate-700"
-                            >
-                                Oznaka *
-                            </label>
-
-                            <input
-                                id="oznaka"
-                                name="oznaka"
-                                type="text"
-                                required
-                                maxLength={100}
-                                placeholder="Na primer: CC-UV80"
-                                autoFocus
-                                className={inputClassName}
-                            />
-                        </div>
-
-                        <div>
-                            <label
                                 htmlFor="naziv"
                                 className="mb-2 block text-sm font-medium text-slate-700"
                             >
@@ -132,7 +112,44 @@ export default async function NovoStekloPage({
                                 type="text"
                                 required
                                 maxLength={200}
-                                placeholder="Naziv stekla"
+                                placeholder="Naziv paspartuja"
+                                autoFocus
+                                className={inputClassName}
+                            />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="barva"
+                                className="mb-2 block text-sm font-medium text-slate-700"
+                            >
+                                Barva
+                            </label>
+
+                            <input
+                                id="barva"
+                                name="barva"
+                                type="text"
+                                maxLength={100}
+                                placeholder="Na primer: bela"
+                                className={inputClassName}
+                            />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label
+                                htmlFor="dodatniOpis"
+                                className="mb-2 block text-sm font-medium text-slate-700"
+                            >
+                                Dodatni opis
+                            </label>
+
+                            <textarea
+                                id="dodatniOpis"
+                                name="dodatniOpis"
+                                rows={3}
+                                maxLength={500}
+                                placeholder="Dodatni opis paspartuja"
                                 className={inputClassName}
                             />
                         </div>
@@ -142,7 +159,7 @@ export default async function NovoStekloPage({
                                 htmlFor="prodajnaCena"
                                 className="mb-2 block text-sm font-medium text-slate-700"
                             >
-                                Prodajna cena na m² (€) *
+                                Prodajna cena (€) *
                             </label>
 
                             <input
@@ -211,11 +228,11 @@ export default async function NovoStekloPage({
 
                             <span>
                                 <span className="block text-sm font-semibold text-slate-900">
-                                    Steklo je na prodaj
+                                    Paspartu je na prodaj
                                 </span>
 
                                 <span className="mt-1 block text-sm text-slate-600">
-                                    Aktivno steklo bo na voljo pri sestavi postavke.
+                                    Aktivni paspartu bo na voljo pri sestavi postavke.
                                 </span>
                             </span>
                         </label>
@@ -223,7 +240,7 @@ export default async function NovoStekloPage({
 
                     <div className="mt-8 flex justify-end gap-3 border-t border-slate-200 pt-6">
                         <Link
-                            href="/materiali/stekla"
+                            href="/materiali/paspartuji"
                             className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 font-medium text-slate-700 hover:bg-slate-50"
                         >
                             Prekliči
@@ -233,7 +250,7 @@ export default async function NovoStekloPage({
                             type="submit"
                             className="rounded-lg bg-slate-900 px-5 py-2.5 font-semibold text-white hover:bg-slate-700"
                         >
-                            Shrani steklo
+                            Shrani paspartu
                         </button>
                     </div>
                 </form>
