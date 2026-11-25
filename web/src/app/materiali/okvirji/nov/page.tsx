@@ -119,19 +119,29 @@ export default async function NovOkvirPage({
 
                         <div>
                             <label
-                                htmlFor="oznaka"
+                                htmlFor="serijskaStevilka"
                                 className="mb-2 block text-sm font-medium text-slate-700"
                             >
-                                Oznaka
+                                Serijska številka
                             </label>
 
                             <input
-                                id="oznaka"
-                                name="oznaka"
+                                id="serijskaStevilka"
+                                name="serijskaStevilka"
                                 type="text"
-                                placeholder="Na primer: 148/192"
+                                placeholder="Serijska številka okvirja"
                                 className={inputClassName}
                             />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="nazivBarve"
+                                className="mb-2 block text-sm font-medium text-slate-700"
+                            >
+                                Naziv barve
+                            </label>
+                            <input id="nazivBarve" name="nazivBarve" type="text" className={inputClassName} />
                         </div>
 
                         <div>
