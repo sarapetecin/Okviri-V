@@ -114,7 +114,7 @@ export default async function NovaPostavkaPage({
         .select(
           "id, oznaka, naziv, prodajna_cena",
         )
-        .order("oznaka")
+        .order("naziv")
       : supabase
         .from("paspartu")
         .select(
