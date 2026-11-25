@@ -70,7 +70,7 @@ export default async function IzbiraOkvirjaPage({
     .select(
       `
         id,
-        oznaka,
+        oznaka:serijska_stevilka,
         vzorec,
         sirina,
         prodajna_cena,
