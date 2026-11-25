@@ -80,7 +80,7 @@ export default async function NovaPostavkaPage({
         .range(od, doVkljucno)
       : supabase
         .from("okvir")
-        .select("id, vzorec, oznaka, sirina, prodajna_cena")
+        .select("id, vzorec, oznaka:serijska_stevilka, sirina, prodajna_cena")
         .eq("na_prodaj", true)
         .order("vzorec")
         .range(od, doVkljucno);
@@ -121,7 +121,7 @@ export default async function NovaPostavkaPage({
           "id, oznaka:barva, naziv, prodajna_cena",
         )
         .eq("na_prodaj", true)
-        .order("oznaka"),
+        .order("naziv"),
 
     jePartner
       ? supabase
