@@ -29,7 +29,8 @@ const opcijskiId = z.preprocess(
 
 const novOkvirSchema = z.object({
   vzorec: z.string().trim().min(1, "Vzorec je obvezen."),
-  oznaka: opcijskoBesedilo,
+  serijskaStevilka: opcijskoBesedilo,
+  nazivBarve: opcijskoBesedilo,
   dobaviteljId: opcijskiId,
 
   sirina: z.preprocess(
@@ -57,7 +58,8 @@ export async function ustvariOkvir(formData: FormData) {
 
   const rezultat = novOkvirSchema.safeParse({
     vzorec: formData.get("vzorec"),
-    oznaka: formData.get("oznaka"),
+    serijskaStevilka: formData.get("serijskaStevilka"),
+    nazivBarve: formData.get("nazivBarve"),
     dobaviteljId: formData.get("dobaviteljId"),
     sirina: formData.get("sirina"),
     prodajnaCena: formData.get("prodajnaCena"),
@@ -78,7 +80,8 @@ export async function ustvariOkvir(formData: FormData) {
 
   const { error } = await supabase.from("okvir").insert({
     vzorec: rezultat.data.vzorec,
-    oznaka: rezultat.data.oznaka,
+    serijska_stevilka: rezultat.data.serijskaStevilka,
+    naziv_barve: rezultat.data.nazivBarve,
     dobavitelj_id: rezultat.data.dobaviteljId,
     sirina: rezultat.data.sirina,
     prodajna_cena: rezultat.data.prodajnaCena,
