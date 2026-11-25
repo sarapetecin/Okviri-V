@@ -78,7 +78,7 @@ export default async function IzbiraPaspartujaPage({
         `,
       )
       .eq("na_prodaj", true)
-      .order("oznaka");
+      .order("naziv");
 
   const { napaka } = await searchParams;
 
