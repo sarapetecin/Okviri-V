@@ -66,7 +66,8 @@ export default async function OkvirjiPage({
             `
         id,
         vzorec,
-        oznaka,
+        serijska_stevilka,
+        naziv_barve,
         sirina,
         prodajna_cena,
         nabavna_cena,
@@ -253,9 +254,9 @@ export default async function OkvirjiPage({
                                                         {okvir.vzorec}
                                                     </p>
 
-                                                    {okvir.oznaka && (
+                                                    {(okvir.serijska_stevilka || okvir.naziv_barve) && (
                                                         <p className="mt-1 text-xs text-slate-500">
-                                                            {okvir.oznaka}
+                                                            {[okvir.serijska_stevilka, okvir.naziv_barve].filter(Boolean).join(" · ")}
                                                         </p>
                                                     )}
                                                 </td>

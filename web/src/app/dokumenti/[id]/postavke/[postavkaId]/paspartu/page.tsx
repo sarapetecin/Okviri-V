@@ -71,15 +71,14 @@ export default async function IzbiraPaspartujaPage({
       .select(
         `
           id,
-          oznaka,
+          oznaka:barva,
           naziv,
-          dodatni_opis,
           prodajna_cena,
           dobavitelj!paspartu_dobavitelj_id_fkey(naziv)
         `,
       )
       .eq("na_prodaj", true)
-      .order("oznaka");
+      .order("naziv");
 
   const { napaka } = await searchParams;
 

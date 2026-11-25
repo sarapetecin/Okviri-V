@@ -47,9 +47,10 @@ export default async function PaspartujiPage({
         .from("paspartu")
         .select(`
             id,
-            oznaka,
             naziv,
-            dodatni_opis,
+            barva,
+            sirina,
+            dolzina,
             prodajna_cena,
             nabavna_cena,
             na_prodaj,
@@ -57,12 +58,12 @@ export default async function PaspartujiPage({
                 naziv
             )
         `)
-        .order("oznaka");
+        .order("naziv");
 
     if (iskaniNiz) {
         const varnoIskanje = iskaniNiz.replaceAll(",", " ");
         poizvedba = poizvedba.or(
-            `oznaka.ilike.%${varnoIskanje}%,naziv.ilike.%${varnoIskanje}%`,
+            `naziv.ilike.%${varnoIskanje}%,barva.ilike.%${varnoIskanje}%`,
         );
     }
 
@@ -149,7 +150,7 @@ export default async function PaspartujiPage({
                             <table className="w-full text-left">
                                 <thead className="border-b border-slate-200 bg-slate-50">
                                     <tr>
-                                        <th className="px-4 py-3 text-sm font-semibold text-slate-700">Oznaka in naziv</th>
+                                        <th className="px-4 py-3 text-sm font-semibold text-slate-700">Naziv / barva</th>
                                         <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Prodajna cena</th>
                                         <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700">Nabavna cena</th>
                                         <th className="px-4 py-3 text-sm font-semibold text-slate-700">Dobavitelj</th>
@@ -161,8 +162,8 @@ export default async function PaspartujiPage({
                                     {(paspartuji ?? []).map((paspartu) => (
                                         <tr key={paspartu.id} className="hover:bg-slate-50">
                                             <td className="px-4 py-3">
-                                                <p className="font-medium text-slate-900">{paspartu.oznaka ?? "Brez oznake"}</p>
-                                                <p className="mt-1 text-xs text-slate-500">{paspartu.naziv}</p>
+                                                <p className="font-medium text-slate-900">{paspartu.naziv}</p>
+                                                <p className="mt-1 text-xs text-slate-500">{paspartu.barva ?? "Brez navedene barve"}{paspartu.sirina ? ` · ${paspartu.sirina} cm` : ""}{paspartu.dolzina ? ` × ${paspartu.dolzina} cm` : ""}</p>
                                             </td>
                                             <td className="px-4 py-3 text-right text-sm font-medium text-slate-900">{oblikujCeno(paspartu.prodajna_cena)}/m²</td>
                                             <td className="px-4 py-3 text-right text-sm text-slate-600">{oblikujCeno(paspartu.nabavna_cena)}</td>
@@ -177,7 +178,7 @@ export default async function PaspartujiPage({
                                                     <Link href={`/materiali/paspartuji/${paspartu.id}/uredi`} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                                                         Uredi
                                                     </Link>
-                                                    <GumbIzbrisiMaterial naziv={paspartu.oznaka ?? paspartu.naziv} action={izbrisiMaterial.bind(null, "paspartu", paspartu.id)} />
+                                                    <GumbIzbrisiMaterial naziv={paspartu.naziv} action={izbrisiMaterial.bind(null, "paspartu", paspartu.id)} />
                                                 </div>
                                             </td>
                                         </tr>

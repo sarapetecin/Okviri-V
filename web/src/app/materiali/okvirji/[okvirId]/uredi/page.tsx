@@ -45,7 +45,8 @@ export default async function UrediOkvirPage({
                 `
           id,
           vzorec,
-          oznaka,
+          serijska_stevilka,
+          naziv_barve,
           dobavitelj_id,
           sirina,
           prodajna_cena,
@@ -150,20 +151,30 @@ export default async function UrediOkvirPage({
 
                         <div>
                             <label
-                                htmlFor="oznaka"
+                                htmlFor="serijskaStevilka"
                                 className="mb-2 block text-sm font-medium text-slate-700"
                             >
-                                Oznaka
+                                Serijska številka
                             </label>
 
                             <input
-                                id="oznaka"
-                                name="oznaka"
+                                id="serijskaStevilka"
+                                name="serijskaStevilka"
                                 type="text"
                                 placeholder="Na primer: 148/192"
                                 className={inputClassName}
-                                defaultValue={okvir.oznaka ?? ""}
+                                defaultValue={okvir.serijska_stevilka ?? ""}
                             />
+                        </div>
+
+                        <div>
+                            <label
+                                htmlFor="nazivBarve"
+                                className="mb-2 block text-sm font-medium text-slate-700"
+                            >
+                                Naziv barve
+                            </label>
+                            <input id="nazivBarve" name="nazivBarve" type="text" defaultValue={okvir.naziv_barve ?? ""} className={inputClassName} />
                         </div>
 
                         <div>

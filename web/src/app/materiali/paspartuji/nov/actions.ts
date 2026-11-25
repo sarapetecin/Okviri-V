@@ -42,10 +42,8 @@ const novPaspartuSchema = z.object({
         z.string().trim().max(100).nullable(),
     ),
 
-    dodatniOpis: z.preprocess(
-        prazenNiz,
-        z.string().trim().max(500).nullable(),
-    ),
+    sirina: z.preprocess(praznoStevilo, z.coerce.number().positive().nullable()),
+    dolzina: z.preprocess(praznoStevilo, z.coerce.number().positive().nullable()),
 
     prodajnaCena: z.coerce
         .number()
@@ -80,7 +78,8 @@ export async function ustvariPaspartu(formData: FormData) {
     const rezultat = novPaspartuSchema.safeParse({
         naziv: formData.get("naziv"),
         barva: formData.get("barva"),
-        dodatniOpis: formData.get("dodatniOpis"),
+        sirina: formData.get("sirina"),
+        dolzina: formData.get("dolzina"),
         prodajnaCena: formData.get("prodajnaCena"),
         nabavnaCena: formData.get("nabavnaCena"),
         dobaviteljId: formData.get("dobaviteljId"),
@@ -101,7 +100,8 @@ export async function ustvariPaspartu(formData: FormData) {
     const { error } = await supabase.from("paspartu").insert({
         naziv: rezultat.data.naziv,
         barva: rezultat.data.barva,
-        dodatni_opis: rezultat.data.dodatniOpis,
+        sirina: rezultat.data.sirina,
+        dolzina: rezultat.data.dolzina,
         prodajna_cena: rezultat.data.prodajnaCena,
         nabavna_cena: rezultat.data.nabavnaCena,
         dobavitelj_id: rezultat.data.dobaviteljId,

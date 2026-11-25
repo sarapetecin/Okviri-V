@@ -12,8 +12,9 @@ const praznoVNull = (vrednost: unknown) =>
 const urediPaspartuSchema = z.object({
     paspartuId: z.coerce.number().int().positive(),
     naziv: z.string().trim().min(1, "Naziv je obvezen.").max(200),
-    oznaka: z.string().trim().max(100).transform((v) => v || null),
-    dodatniOpis: z.string().trim().max(500).transform((v) => v || null),
+    barva: z.string().trim().transform((v) => v || null),
+    sirina: z.preprocess(praznoVNull, z.coerce.number().positive().nullable()),
+    dolzina: z.preprocess(praznoVNull, z.coerce.number().positive().nullable()),
 
     dobaviteljId: z.preprocess(
         praznoVNull,
@@ -45,8 +46,9 @@ export async function urediPaspartu(
     const rezultat = urediPaspartuSchema.safeParse({
         paspartuId,
         naziv: formData.get("naziv"),
-        oznaka: formData.get("oznaka"),
-        dodatniOpis: formData.get("dodatniOpis"),
+        barva: formData.get("barva"),
+        sirina: formData.get("sirina"),
+        dolzina: formData.get("dolzina"),
         dobaviteljId: formData.get("dobaviteljId"),
         prodajnaCena: formData.get("prodajnaCena"),
         nabavnaCena: formData.get("nabavnaCena"),
@@ -63,8 +65,9 @@ export async function urediPaspartu(
         .from("paspartu")
         .update({
             naziv: rezultat.data.naziv,
-            oznaka: rezultat.data.oznaka,
-            dodatni_opis: rezultat.data.dodatniOpis,
+            barva: rezultat.data.barva,
+            sirina: rezultat.data.sirina,
+            dolzina: rezultat.data.dolzina,
             dobavitelj_id: rezultat.data.dobaviteljId,
             prodajna_cena: rezultat.data.prodajnaCena,
             nabavna_cena: rezultat.data.nabavnaCena,

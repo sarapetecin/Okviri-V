@@ -80,7 +80,7 @@ export default async function NovaPostavkaPage({
         .range(od, doVkljucno)
       : supabase
         .from("okvir")
-        .select("id, vzorec, oznaka, sirina, prodajna_cena")
+        .select("id, vzorec, oznaka:serijska_stevilka, sirina, prodajna_cena")
         .eq("na_prodaj", true)
         .order("vzorec")
         .range(od, doVkljucno);
@@ -112,16 +112,16 @@ export default async function NovaPostavkaPage({
       ? supabase
         .from("partner_katalog_paspartujev")
         .select(
-          "id, oznaka, naziv, dodatni_opis, prodajna_cena",
+          "id, oznaka, naziv, prodajna_cena",
         )
-        .order("oznaka")
+        .order("naziv")
       : supabase
         .from("paspartu")
         .select(
-          "id, oznaka, naziv, dodatni_opis, prodajna_cena",
+          "id, oznaka:barva, naziv, prodajna_cena",
         )
         .eq("na_prodaj", true)
-        .order("oznaka"),
+        .order("naziv"),
 
     jePartner
       ? supabase
@@ -211,7 +211,7 @@ export default async function NovaPostavkaPage({
         id: paspartu.id,
         naziv: paspartu.naziv,
         opis: [
-          paspartu.dodatni_opis,
+          paspartu.oznaka,
           `${oblikujCeno(paspartu.prodajna_cena)}/m²`,
         ]
           .filter(Boolean)
