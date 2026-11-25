@@ -235,8 +235,9 @@ export type Database = {
           id: number
           na_prodaj: boolean
           nabavna_cena: number | null
-          oznaka: string | null
+          naziv_barve: string | null
           prodajna_cena: number
+          serijska_stevilka: string | null
           sirina: number | null
           ustvarjeno_at: string
           vzorec: string
@@ -246,8 +247,9 @@ export type Database = {
           id?: number
           na_prodaj?: boolean
           nabavna_cena?: number | null
-          oznaka?: string | null
+          naziv_barve?: string | null
           prodajna_cena: number
+          serijska_stevilka?: string | null
           sirina?: number | null
           ustvarjeno_at?: string
           vzorec: string
@@ -257,8 +259,9 @@ export type Database = {
           id?: number
           na_prodaj?: boolean
           nabavna_cena?: number | null
-          oznaka?: string | null
+          naziv_barve?: string | null
           prodajna_cena?: number
+          serijska_stevilka?: string | null
           sirina?: number | null
           ustvarjeno_at?: string
           vzorec?: string
@@ -277,37 +280,37 @@ export type Database = {
         Row: {
           barva: string | null
           dobavitelj_id: number | null
-          dodatni_opis: string | null
+          dolzina: number | null
           id: number
           na_prodaj: boolean
           nabavna_cena: number | null
           naziv: string
-          oznaka: string | null
           prodajna_cena: number
+          sirina: number | null
           ustvarjeno_at: string
         }
         Insert: {
           barva?: string | null
           dobavitelj_id?: number | null
-          dodatni_opis?: string | null
+          dolzina?: number | null
           id?: number
           na_prodaj?: boolean
           nabavna_cena?: number | null
           naziv: string
-          oznaka?: string | null
           prodajna_cena: number
+          sirina?: number | null
           ustvarjeno_at?: string
         }
         Update: {
           barva?: string | null
           dobavitelj_id?: number | null
-          dodatni_opis?: string | null
+          dolzina?: number | null
           id?: number
           na_prodaj?: boolean
           nabavna_cena?: number | null
           naziv?: string
-          oznaka?: string | null
           prodajna_cena?: number
+          sirina?: number | null
           ustvarjeno_at?: string
         }
         Relationships: [
