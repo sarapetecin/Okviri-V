@@ -135,7 +135,7 @@ export default async function UrediPaspartuPage({
 
                         <label className="block">
                             <span className="text-sm font-semibold text-slate-700">Barva</span>
-                            <input name="barva" defaultValue={paspartu.barva ?? ""} disabled className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" />
+                            <input name="barva" defaultValue={paspartu.barva ?? ""} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" />
                         </label>
                         <label className="block">
                             <span className="text-sm font-semibold text-slate-700">Širina</span>
