@@ -78,7 +78,7 @@ export default async function IzbiraOkvirjaPage({
       `,
     )
     .eq("na_prodaj", true)
-    .order("oznaka");
+    .order("vzorec");
 
   const { napaka } = await searchParams;
 
