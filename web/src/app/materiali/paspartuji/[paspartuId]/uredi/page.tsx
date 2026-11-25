@@ -46,8 +46,9 @@ export default async function UrediPaspartuPage({
                 `
           id,
           naziv,
-          oznaka,
-          dodatni_opis,
+          barva,
+          sirina,
+          dolzina,
           dobavitelj_id,
           prodajna_cena,
           nabavna_cena,
@@ -133,16 +134,16 @@ export default async function UrediPaspartuPage({
                         </label>
 
                         <label className="block">
-                            <span className="text-sm font-semibold text-slate-700">
-                                Oznaka
-                            </span>
-
-                            <input
-                                name="oznaka"
-                                maxLength={100}
-                                defaultValue={paspartu.oznaka ?? ""}
-                                className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
-                            />
+                            <span className="text-sm font-semibold text-slate-700">Barva</span>
+                            <input name="barva" defaultValue={paspartu.barva ?? ""} disabled className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" />
+                        </label>
+                        <label className="block">
+                            <span className="text-sm font-semibold text-slate-700">Širina</span>
+                            <input name="sirina" type="number" min="0.01" step="0.01" defaultValue={paspartu.sirina ?? ""} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" />
+                        </label>
+                        <label className="block">
+                            <span className="text-sm font-semibold text-slate-700">Dolžina</span>
+                            <input name="dolzina" type="number" min="0.01" step="0.01" defaultValue={paspartu.dolzina ?? ""} className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900" />
                         </label>
 
                         <label className="block">
@@ -199,19 +200,7 @@ export default async function UrediPaspartuPage({
                             />
                         </label>
 
-                        <label className="block sm:col-span-2">
-                            <span className="text-sm font-semibold text-slate-700">
-                                Dodatni opis
-                            </span>
 
-                            <textarea
-                                name="dodatniOpis"
-                                rows={4}
-                                maxLength={500}
-                                defaultValue={paspartu.dodatni_opis ?? ""}
-                                className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900"
-                            />
-                        </label>
                     </div>
 
                     <label className="mt-6 flex items-center gap-3">
