@@ -71,9 +71,8 @@ export default async function IzbiraPaspartujaPage({
       .select(
         `
           id,
-          oznaka,
+          oznaka:barva,
           naziv,
-          dodatni_opis,
           prodajna_cena,
           dobavitelj!paspartu_dobavitelj_id_fkey(naziv)
         `,
