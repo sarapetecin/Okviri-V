@@ -136,7 +136,17 @@ export default async function NovPaspartuPage({
                             />
                         </div>
 
-                        <div className="sm:col-span-2">
+                        <div>
+                            <label htmlFor="sirina" className="mb-2 block text-sm font-medium text-slate-700">Širina</label>
+                            <input id="sirina" name="sirina" type="number" min="0.01" step="0.01" className={inputClassName} />
+                        </div>
+                        <div>
+                            <label htmlFor="dolzina" className="mb-2 block text-sm font-medium text-slate-700">Dolžina</label>
+                            <input id="dolzina" name="dolzina" type="number" min="0.01" step="0.01" className={inputClassName} />
+                        </div>
+
+                        {/* dodatni_opis v tabeli paspartu ne obstaja */}
+                        {false && <div className="sm:col-span-2">
                             <label
                                 htmlFor="dodatniOpis"
                                 className="mb-2 block text-sm font-medium text-slate-700"
@@ -152,7 +162,7 @@ export default async function NovPaspartuPage({
                                 placeholder="Dodatni opis paspartuja"
                                 className={inputClassName}
                             />
-                        </div>
+                        </div>}
 
                         <div>
                             <label
