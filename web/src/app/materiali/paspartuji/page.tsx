@@ -178,7 +178,7 @@ export default async function PaspartujiPage({
                                                     <Link href={`/materiali/paspartuji/${paspartu.id}/uredi`} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                                                         Uredi
                                                     </Link>
-                                                    <GumbIzbrisiMaterial naziv={paspartu.oznaka ?? paspartu.naziv} action={izbrisiMaterial.bind(null, "paspartu", paspartu.id)} />
+                                                    <GumbIzbrisiMaterial naziv={paspartu.naziv} action={izbrisiMaterial.bind(null, "paspartu", paspartu.id)} />
                                                 </div>
                                             </td>
                                         </tr>
