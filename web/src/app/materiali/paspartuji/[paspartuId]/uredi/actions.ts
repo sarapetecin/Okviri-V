@@ -12,6 +12,7 @@ const praznoVNull = (vrednost: unknown) =>
 const urediPaspartuSchema = z.object({
     paspartuId: z.coerce.number().int().positive(),
     naziv: z.string().trim().min(1, "Naziv je obvezen.").max(200),
+    barva: z.string().trim().transform((v) => v || null),
     sirina: z.preprocess(praznoVNull, z.coerce.number().positive().nullable()),
     dolzina: z.preprocess(praznoVNull, z.coerce.number().positive().nullable()),
 
@@ -45,6 +46,7 @@ export async function urediPaspartu(
     const rezultat = urediPaspartuSchema.safeParse({
         paspartuId,
         naziv: formData.get("naziv"),
+        barva: formData.get("barva"),
         sirina: formData.get("sirina"),
         dolzina: formData.get("dolzina"),
         dobaviteljId: formData.get("dobaviteljId"),
@@ -63,6 +65,7 @@ export async function urediPaspartu(
         .from("paspartu")
         .update({
             naziv: rezultat.data.naziv,
+            barva: rezultat.data.barva,
             sirina: rezultat.data.sirina,
             dolzina: rezultat.data.dolzina,
             dobavitelj_id: rezultat.data.dobaviteljId,
